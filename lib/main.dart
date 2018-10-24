@@ -32,13 +32,13 @@ class _PuzzleHome extends StatefulWidget {
 
 class _PuzzleHomeState extends State<_PuzzleHome>
     with TickerProviderStateMixin {
-  static const _textScaleFactor = 2.0;
+  static const _textScaleFactor = 1.0;
   final Puzzle _puzzle;
   final PuzzleAnimator _puzzleAnimator;
 
   Ticker _ticker;
   Duration _lastElapsed;
-  Duration _delta = const Duration(milliseconds: 17);
+  Duration _delta;
 
   _PuzzleHomeState(this._puzzle) : _puzzleAnimator = PuzzleAnimator(_puzzle);
 
@@ -53,11 +53,10 @@ class _PuzzleHomeState extends State<_PuzzleHome>
     if (elapsed == Duration.zero) {
       elapsed = const Duration(milliseconds: 17);
     }
-    if (_lastElapsed != null) {
-      assert(elapsed >= _lastElapsed, [elapsed, _lastElapsed].toString());
-      if (elapsed > _lastElapsed) {
-        _delta = elapsed - _lastElapsed;
-      }
+    if (_lastElapsed != null && elapsed > _lastElapsed) {
+      _delta = elapsed - _lastElapsed;
+    } else {
+      _delta = const Duration(milliseconds: 17);
     }
     _lastElapsed = elapsed;
 
@@ -109,7 +108,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(6),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
@@ -162,7 +161,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                         }
 
                         return Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(6),
                           child: child,
                         );
                       }))),
