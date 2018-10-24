@@ -1,8 +1,3 @@
-# npuzzle
+A slide (15) puzzle implemented in Dart and Flutter.
 
-A new Flutter project.
-
-## Getting Started
-
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+![GitHub Logo](docs/screen_shot.png)
