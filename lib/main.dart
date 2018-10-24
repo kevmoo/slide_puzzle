@@ -32,7 +32,7 @@ class _PuzzleHome extends StatefulWidget {
 
 class _PuzzleHomeState extends State<_PuzzleHome>
     with TickerProviderStateMixin {
-  static const _textScaleFactor = 1.0;
+  static const _textScaleFactor = 2.0;
   final Puzzle _puzzle;
   final PuzzleAnimator _puzzleAnimator;
 
@@ -141,7 +141,12 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                       children: List<Widget>.generate(_puzzle.length, (i) {
                         Widget child;
                         if (i == 0) {
-                          child = const FlutterLogo();
+                          child = const Center(
+                              child: Text(
+                            '🦋',
+                            style: TextStyle(),
+                            textScaleFactor: _textScaleFactor * 4.0,
+                          ));
                         } else {
                           final correctPosition = _puzzle.correctPosition(i);
                           child = RaisedButton(
