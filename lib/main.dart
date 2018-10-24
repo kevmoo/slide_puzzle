@@ -200,5 +200,5 @@ class _PuzzleDelegate extends FlowDelegate {
   }
 
   @override
-  bool shouldRepaint(_PuzzleDelegate oldDelegate) => true;
+  bool shouldRepaint(covariant _PuzzleDelegate oldDelegate) => true;
 }
