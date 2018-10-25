@@ -75,9 +75,6 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   }
 
   void _click(int value) {
-    if (!_ticker.isTicking) {
-      _ticker.start();
-    }
     final coordinates = _puzzle.coordinatesOf(value);
     if (_puzzle.click(coordinates.x, coordinates.y)) {
       setState(() {
@@ -87,10 +84,15 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   }
 
   void _reset() {
+    setState(_puzzle.reset);
+  }
+
+  @override
+  void setState(fn) {
     if (!_ticker.isTicking) {
       _ticker.start();
     }
-    setState(_puzzle.reset);
+    super.setState(fn);
   }
 
   @override
