@@ -144,7 +144,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                           textScaleFactor: _textScaleFactor * 2.5,
                         ));
                       } else {
-                        final correctPosition = _puzzle.correctPosition(i);
+                        final correctPosition = _puzzle.isCorrectPosition(i);
                         child = RaisedButton(
                             child: Text(
                               i.toString(),

@@ -34,7 +34,7 @@ class Puzzle {
 
   int get length => _array.length;
 
-  bool correctPosition(int cellValue) {
+  bool isCorrectPosition(int cellValue) {
     return cellValue == _array[cellValue - 1];
   }
 
@@ -46,7 +46,7 @@ class Puzzle {
   int get incorrectTiles {
     var count = _array.length - 1;
     for (var i = 1; i < _array.length; i++) {
-      if (correctPosition(i)) {
+      if (isCorrectPosition(i)) {
         count--;
       }
     }
