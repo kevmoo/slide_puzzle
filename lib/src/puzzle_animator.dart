@@ -19,9 +19,11 @@ class PuzzleAnimator {
 
   bool get stable => _stable;
 
-  Point<double> _target(int item) {
-    final target = puzzle.coordinatesOf(item);
-    return Point(target.x.toDouble(), target.y.toDouble());
+  void shake(int tileValue) {
+    final delta = puzzle.coordinatesOf(0) - puzzle.coordinatesOf(tileValue);
+    final deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
+
+    _locations[tileValue].move(deltaDouble * (0.5 / deltaDouble.magnitude));
   }
 
   void update(Duration timeDelta) {
@@ -50,5 +52,10 @@ class PuzzleAnimator {
 
       maxVelocity = max(maxVelocity, body.velocity.magnitude);
     }
+  }
+
+  Point<double> _target(int item) {
+    final target = puzzle.coordinatesOf(item);
+    return Point(target.x.toDouble(), target.y.toDouble());
   }
 }

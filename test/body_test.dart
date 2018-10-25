@@ -1,4 +1,4 @@
-import 'dart:math' show Point, max;
+import 'dart:math' show Point;
 
 import 'package:slide_puzzle/src/body.dart';
 import 'package:test/test.dart';

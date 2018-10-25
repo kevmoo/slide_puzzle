@@ -75,12 +75,13 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   }
 
   void _click(int value) {
-    final coordinates = _puzzle.coordinatesOf(value);
-    if (_puzzle.click(coordinates.x, coordinates.y)) {
-      setState(() {
-        // noop
-      });
+    final validClick = _puzzle.clickValue(value);
+    if (!validClick) {
+      _puzzleAnimator.shake(value);
     }
+    setState(() {
+      // noop
+    });
   }
 
   void _reset() {
