@@ -1,5 +1,3 @@
-
-
 void requireArgument(bool truth, String argName, [String message]) {
   if (!truth) {
     if (message == null || message.isEmpty) {
