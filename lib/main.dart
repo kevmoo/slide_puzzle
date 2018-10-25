@@ -96,8 +96,6 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: const Text('15 Puzzle'),
       ),
       body: MediaQuery(
@@ -105,8 +103,6 @@ class _PuzzleHomeState extends State<_PuzzleHome>
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: Column(
-            //mainAxisAlignment: MainAxisAlignment.center,
-            //mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(6),
@@ -145,7 +141,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                             child: Text(
                           '🦋',
                           style: TextStyle(),
-                          textScaleFactor: _textScaleFactor * 4.0,
+                          textScaleFactor: _textScaleFactor * 2.5,
                         ));
                       } else {
                         final correctPosition = _puzzle.correctPosition(i);
