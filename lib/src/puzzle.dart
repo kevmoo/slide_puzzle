@@ -34,9 +34,9 @@ class Puzzle {
 
   int get length => _array.length;
 
-  bool isCorrectPosition(int cellValue) {
-    return cellValue == _array[cellValue - 1];
-  }
+  int get tileCount => _array.length - 1;
+
+  bool isCorrectPosition(int cellValue) => cellValue == _array[cellValue - 1];
 
   void reset() {
     _randomizeList(_array);
@@ -51,6 +51,32 @@ class Puzzle {
       }
     }
     return count;
+  }
+
+  /// A measure of how close the puzzle is to being solved.
+  ///
+  /// The sum of all of the distances (x + y) each tile has to move to be in
+  /// the correct position.
+  ///
+  /// `0` - you've won!
+  int get fitness {
+    var value = 0;
+    for (var i = 1; i < length; i++) {
+      if (!isCorrectPosition(i)) {
+        final correctColumn = (i - 1) % width;
+        final correctRow = (i - 1) ~/ width;
+        final currentLocation = coordinatesOf(i);
+
+        value += ((correctColumn - currentLocation.x).abs() +
+            (correctRow - currentLocation.y).abs());
+      }
+    }
+    return value;
+  }
+
+  bool clickValue(int value) {
+    final point = coordinatesOf(value);
+    return click(point.x, point.y);
   }
 
   bool click(int x, int y) {

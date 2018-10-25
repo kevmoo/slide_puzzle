@@ -193,25 +193,68 @@ void main() {
     for (var i = 0; i < 100; i++) {
       final puzzle = Puzzle(4, 4);
       expect(puzzle.incorrectTiles, 15);
+      expect(puzzle.fitness, greaterThanOrEqualTo(15));
     }
   });
 
   test('reset', () {
-    final width = 4, height = 4;
-    final tileCount = (width * height) - 1;
-    final puzzle = Puzzle(width, height);
-    expect(puzzle.incorrectTiles, tileCount);
+    final puzzle = Puzzle(4, 4);
+    expect(puzzle.incorrectTiles, puzzle.tileCount);
+    expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
 
     do {
+      // click around until one tile is in the right location
       puzzle.click(_rnd.nextInt(puzzle.width), _rnd.nextInt(puzzle.height));
-    } while (puzzle.incorrectTiles == tileCount);
+    } while (puzzle.incorrectTiles == puzzle.tileCount);
 
-    expect(puzzle.incorrectTiles, lessThan(tileCount));
+    expect(puzzle.incorrectTiles, lessThan(puzzle.tileCount));
     expect(puzzle.clickCount, greaterThan(0));
 
     puzzle.reset();
 
-    expect(puzzle.incorrectTiles, tileCount);
+    expect(puzzle.incorrectTiles, puzzle.tileCount);
+    expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
     expect(puzzle.clickCount, 0);
+  });
+
+  test('fitness', () {
+    final puzzle = Puzzle.raw(3, [1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    expect(puzzle.incorrectTiles, 0);
+    expect(puzzle.fitness, 0);
+    expect(puzzle.toString(), '''
+1 2 3
+4 5 6
+7 8 0''');
+
+    expect(puzzle.clickValue(8), isTrue);
+    expect(puzzle.incorrectTiles, 1);
+    expect(puzzle.fitness, 1);
+    expect(puzzle.toString(), '''
+1 2 3
+4 5 6
+7 0 8''');
+
+    expect(puzzle.clickValue(7), isTrue);
+    expect(puzzle.clickValue(4), isTrue);
+    expect(puzzle.clickValue(5), isTrue);
+    expect(puzzle.clickValue(7), isTrue);
+    expect(puzzle.toString(), '''
+1 2 3
+5 7 6
+4 0 8''');
+    expect(puzzle.incorrectTiles, 4);
+    expect(puzzle.fitness, 5);
+
+    final puzzle2 = Puzzle.raw(3, [0, 2, 3, 4, 5, 6, 7, 8, 1]);
+    expect(puzzle2.incorrectTiles, 1);
+    expect(puzzle2.toString(), '''
+0 2 3
+4 5 6
+7 8 1''');
+    expect(puzzle2.fitness, 4);
+
+    final puzzle3 = Puzzle.raw(3, [4, 1, 2, 5, 6, 3, 8, 7, 0]);
+    expect(puzzle3.incorrectTiles, 8);
+    expect(puzzle3.fitness, 8);
   });
 }
