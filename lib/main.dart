@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -100,12 +102,11 @@ class _PuzzleHomeState extends State<_PuzzleHome>
       ),
       body: MediaQuery(
         data: const MediaQueryData(textScaleFactor: _textScaleFactor),
-        child: Center(
-            child: Padding(
+        child: Padding(
           padding: const EdgeInsets.all(6),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+            //mainAxisAlignment: MainAxisAlignment.center,
+            //mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(6),
@@ -134,45 +135,45 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                   ],
                 ),
               ),
-              AspectRatio(
-                  aspectRatio: _puzzle.width / _puzzle.height,
-                  child: Flow(
-                      delegate: _PuzzleDelegate(_puzzleAnimator),
-                      children: List<Widget>.generate(_puzzle.length, (i) {
-                        Widget child;
-                        if (i == 0) {
-                          child = const Center(
-                              child: Text(
-                            '🦋',
-                            style: TextStyle(),
-                            textScaleFactor: _textScaleFactor * 4.0,
-                          ));
-                        } else {
-                          final correctPosition = _puzzle.correctPosition(i);
-                          child = RaisedButton(
-                              child: Text(
-                                i.toString(),
-                                textScaleFactor: _textScaleFactor *
-                                    (correctPosition ? 1.5 : 1),
-                                style: TextStyle(
-                                    color: correctPosition
-                                        ? Colors.blue
-                                        : Colors.black,
-                                    fontWeight: correctPosition
-                                        ? FontWeight.bold
-                                        : FontWeight.normal),
-                              ),
-                              onPressed: () => _click(i));
-                        }
+              Expanded(
+                child: Flow(
+                    delegate: _PuzzleDelegate(_puzzleAnimator),
+                    children: List<Widget>.generate(_puzzle.length, (i) {
+                      Widget child;
+                      if (i == 0) {
+                        child = const Center(
+                            child: Text(
+                          '🦋',
+                          style: TextStyle(),
+                          textScaleFactor: _textScaleFactor * 4.0,
+                        ));
+                      } else {
+                        final correctPosition = _puzzle.correctPosition(i);
+                        child = RaisedButton(
+                            child: Text(
+                              i.toString(),
+                              textScaleFactor: _textScaleFactor *
+                                  (correctPosition ? 1.5 : 1),
+                              style: TextStyle(
+                                  color: correctPosition
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: correctPosition
+                                      ? FontWeight.bold
+                                      : FontWeight.normal),
+                            ),
+                            onPressed: () => _click(i));
+                      }
 
-                        return Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: child,
-                        );
-                      }))),
+                      return Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: child,
+                      );
+                    })),
+              ),
             ],
           ),
-        )),
+        ),
       ));
 }
 
@@ -184,22 +185,38 @@ class _PuzzleDelegate extends FlowDelegate {
   _PuzzleDelegate(this._puzzleAnimator);
 
   @override
-  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) =>
-      BoxConstraints.tightFor(
-          width: constraints.maxWidth / _puzzle.width,
-          height: constraints.maxHeight / _puzzle.height);
+  Size getSize(BoxConstraints constraints) {
+    final minSquareSize = math.min(constraints.maxWidth / _puzzle.width,
+        constraints.maxHeight / _puzzle.height);
+
+    return Size(minSquareSize * _puzzle.width, minSquareSize * _puzzle.height);
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
+    final minSquareSize = math.min(constraints.maxWidth / _puzzle.width,
+        constraints.maxHeight / _puzzle.height);
+
+    return BoxConstraints.tightFor(width: minSquareSize, height: minSquareSize);
+  }
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    final tileOffset = Size(context.size.width / _puzzle.width,
+    final minSquareSize = math.min(context.size.width / _puzzle.width,
         context.size.height / _puzzle.height);
 
+    final delta = ((context.size -
+            Offset(minSquareSize * _puzzle.width,
+                minSquareSize * _puzzle.height)) as Size) *
+        0.5;
+
+    final tileSize = context.getChildSize(0);
     for (var i = 0; i < _puzzle.length; i++) {
       final tileLocation = _puzzleAnimator.location(i);
       context.paintChild(i,
           transform: Matrix4.translationValues(
-              tileLocation.x * tileOffset.width,
-              tileLocation.y * tileOffset.height,
+              tileLocation.x * tileSize.width + delta.width,
+              tileLocation.y * tileSize.height + delta.height,
               i.toDouble()));
     }
   }
