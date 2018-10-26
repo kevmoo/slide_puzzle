@@ -33,7 +33,7 @@ class _PuzzleHome extends StatefulWidget {
 }
 
 class _PuzzleHomeState extends State<_PuzzleHome>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   static const _textScaleFactor = 2.0;
   final Puzzle _puzzle;
   final PuzzleAnimator _puzzleAnimator;
