@@ -99,7 +99,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
-        title: const Text('15 Puzzle'),
+        title: Text('${_puzzle.tileCount} Puzzle'),
       ),
       body: MediaQuery(
         data: const MediaQueryData(textScaleFactor: _textScaleFactor),
