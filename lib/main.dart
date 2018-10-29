@@ -135,40 +135,43 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                 ),
               ),
               Expanded(
-                child: Flow(
-                    delegate: _PuzzleDelegate(_puzzleAnimator),
-                    children: List<Widget>.generate(_puzzle.length, (i) {
-                      Widget child;
-                      if (i == 0) {
-                        child = const Center(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Flow(
+                      delegate: _PuzzleDelegate(_puzzleAnimator),
+                      children: List<Widget>.generate(_puzzle.length, (i) {
+                        Widget child;
+                        if (i == 0) {
+                          child = const Center(
+                              child: Text(
+                            '🦋',
+                            style: TextStyle(),
+                            textScaleFactor: _textScaleFactor * 2.5,
+                          ));
+                        } else {
+                          final correctPosition = _puzzle.isCorrectPosition(i);
+                          child = FlatButton(
                             child: Text(
-                          '🦋',
-                          style: TextStyle(),
-                          textScaleFactor: _textScaleFactor * 2.5,
-                        ));
-                      } else {
-                        final correctPosition = _puzzle.isCorrectPosition(i);
-                        child = FlatButton(
-                          child: Text(
-                            i.toString(),
-                            style: TextStyle(
-                                fontWeight: correctPosition
-                                    ? FontWeight.bold
-                                    : FontWeight.normal),
-                          ),
-                          onPressed: () => _click(i),
-                          color: (i % 2 == 0) ? Colors.white : Colors.red,
-                          shape: RoundedRectangleBorder(
-                              side: const BorderSide(width: 1),
-                              borderRadius: BorderRadius.circular(10)),
-                        );
-                      }
+                              i.toString(),
+                              style: TextStyle(
+                                  fontWeight: correctPosition
+                                      ? FontWeight.bold
+                                      : FontWeight.normal),
+                            ),
+                            onPressed: () => _click(i),
+                            color: (i % 2 == 0) ? Colors.white : Colors.red,
+                            shape: RoundedRectangleBorder(
+                                side: const BorderSide(width: 1),
+                                borderRadius: BorderRadius.circular(10)),
+                          );
+                        }
 
-                      return Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: child,
-                      );
-                    })),
+                        return Padding(
+                          padding: const EdgeInsets.all(3),
+                          child: child,
+                        );
+                      })),
+                ),
               ),
             ],
           ),
@@ -190,19 +193,13 @@ class _PuzzleDelegate extends FlowDelegate {
   _PuzzleDelegate(this._puzzleAnimator);
 
   @override
-  Size getSize(BoxConstraints constraints) {
-    final minSquareSize = math.min(constraints.maxWidth / _puzzle.width,
-        constraints.maxHeight / _puzzle.height);
-
-    return Size(minSquareSize * _puzzle.width, minSquareSize * _puzzle.height);
-  }
+  Size getSize(BoxConstraints constraints) => const Size(260, 260);
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
-    final minSquareSize = math.min(constraints.maxWidth / _puzzle.width,
-        constraints.maxHeight / _puzzle.height);
+    final minSquareSize = math.min(260 / _puzzle.width, 260 / _puzzle.height);
 
-    return BoxConstraints.tightFor(width: minSquareSize, height: minSquareSize);
+    return BoxConstraints.tight(Size(minSquareSize, minSquareSize));
   }
 
   @override
