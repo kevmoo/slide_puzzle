@@ -1,7 +1,9 @@
-import 'dart:math' show Point;
+import 'dart:math' show Point, Random;
 
 import 'array_2d.dart';
 import 'util.dart';
+
+final _rnd = Random();
 
 class Puzzle {
   final Array2d<int> _array;
@@ -53,6 +55,8 @@ class Puzzle {
     return count;
   }
 
+  Puzzle clone() => Puzzle.raw(width, _array.toList());
+
   /// A measure of how close the puzzle is to being solved.
   ///
   /// The sum of all of the distances (x + y) each tile has to move to be in
@@ -77,6 +81,20 @@ class Puzzle {
   bool clickValue(int value) {
     final point = coordinatesOf(value);
     return click(point.x, point.y);
+  }
+
+  List<int> clickRandom(int count) {
+    assert(count > 0);
+    final clicks = <int>[];
+    int lastTarget;
+    while (clicks.length < count) {
+      final randomTarget = _rnd.nextInt(tileCount) + 1;
+      if (randomTarget != lastTarget && clickValue(randomTarget)) {
+        clicks.add(randomTarget);
+        lastTarget = randomTarget;
+      }
+    }
+    return clicks;
   }
 
   bool click(int x, int y) {
@@ -138,7 +156,7 @@ List<int> _randomList(int length) =>
 
 List<int> _randomizeList(List<int> result) {
   do {
-    result.shuffle();
+    result.shuffle(_rnd);
   } while (result.any((v) => result[(v - 1) % result.length] == v));
   return result;
 }

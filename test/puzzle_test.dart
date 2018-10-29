@@ -257,4 +257,27 @@ void main() {
     expect(puzzle3.incorrectTiles, 8);
     expect(puzzle3.fitness, 8);
   });
+
+  test('click random', () {
+    final puzzle = Puzzle(4, 4);
+    final moves = puzzle.clickRandom(5);
+    expect(moves.length, 5);
+    expect(puzzle.clickCount, 5);
+  });
+
+  test('clone', () {
+    final puzzle = Puzzle(4, 4);
+    expect(puzzle.clickRandom(5), hasLength(5));
+    expect(puzzle.clickCount, 5);
+    final clone = puzzle.clone();
+    expect(clone, isNot(same(puzzle)));
+    expect(clone.toString(), puzzle.toString());
+    expect(clone.incorrectTiles, puzzle.incorrectTiles);
+    expect(clone.clickCount, 0);
+
+    expect(puzzle.clickRandom(1), hasLength(1));
+    expect(clone.toString(), isNot(puzzle.toString()));
+    expect(puzzle.clickCount, 6);
+    expect(clone.clickCount, 0);
+  });
 }
