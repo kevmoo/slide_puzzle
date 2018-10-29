@@ -59,8 +59,8 @@ class Puzzle {
 
   /// A measure of how close the puzzle is to being solved.
   ///
-  /// The sum of all of the distances (x + y) each tile has to move to be in
-  /// the correct position.
+  /// The sum of all of the distances squared `(x + y)^2 ` each tile has to move
+  /// to be in the correct position.
   ///
   /// `0` - you've won!
   int get fitness {
@@ -70,9 +70,10 @@ class Puzzle {
         final correctColumn = (i - 1) % width;
         final correctRow = (i - 1) ~/ width;
         final currentLocation = coordinatesOf(i);
+        final delta = (correctColumn - currentLocation.x).abs() +
+            (correctRow - currentLocation.y).abs();
 
-        value += ((correctColumn - currentLocation.x).abs() +
-            (correctRow - currentLocation.y).abs());
+        value += delta * delta;
       }
     }
     return value;

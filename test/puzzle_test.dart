@@ -243,7 +243,7 @@ void main() {
 5 7 6
 4 0 8''');
     expect(puzzle.incorrectTiles, 4);
-    expect(puzzle.fitness, 5);
+    expect(puzzle.fitness, 7);
 
     final puzzle2 = Puzzle.raw(3, [0, 2, 3, 4, 5, 6, 7, 8, 1]);
     expect(puzzle2.incorrectTiles, 1);
@@ -251,7 +251,7 @@ void main() {
 0 2 3
 4 5 6
 7 8 1''');
-    expect(puzzle2.fitness, 4);
+    expect(puzzle2.fitness, 16);
 
     final puzzle3 = Puzzle.raw(3, [4, 1, 2, 5, 6, 3, 8, 7, 0]);
     expect(puzzle3.incorrectTiles, 8);
