@@ -174,6 +174,12 @@ class _PuzzleHomeState extends State<_PuzzleHome>
           ),
         ),
       ));
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
 }
 
 class _PuzzleDelegate extends FlowDelegate {
