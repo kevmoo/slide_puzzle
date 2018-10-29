@@ -34,7 +34,7 @@ class _PuzzleHome extends StatefulWidget {
 
 class _PuzzleHomeState extends State<_PuzzleHome>
     with SingleTickerProviderStateMixin {
-  static const _textScaleFactor = 2.0;
+  static const _textScaleFactor = 1.2;
   final Puzzle _puzzle;
   final PuzzleAnimator _puzzleAnimator;
 
@@ -148,24 +148,24 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                         ));
                       } else {
                         final correctPosition = _puzzle.isCorrectPosition(i);
-                        child = RaisedButton(
-                            child: Text(
-                              i.toString(),
-                              textScaleFactor: _textScaleFactor *
-                                  (correctPosition ? 1.5 : 1),
-                              style: TextStyle(
-                                  color: correctPosition
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: correctPosition
-                                      ? FontWeight.bold
-                                      : FontWeight.normal),
-                            ),
-                            onPressed: () => _click(i));
+                        child = FlatButton(
+                          child: Text(
+                            i.toString(),
+                            style: TextStyle(
+                                fontWeight: correctPosition
+                                    ? FontWeight.bold
+                                    : FontWeight.normal),
+                          ),
+                          onPressed: () => _click(i),
+                          color: (i % 2 == 0) ? Colors.white : Colors.red,
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(width: 1),
+                              borderRadius: BorderRadius.circular(10)),
+                        );
                       }
 
                       return Padding(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(3),
                         child: child,
                       );
                     })),
