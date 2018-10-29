@@ -280,4 +280,29 @@ void main() {
     expect(puzzle.clickCount, 6);
     expect(clone.clickCount, 0);
   });
+
+  test('bad self play', () {
+    int _score(Puzzle p) => p.incorrectTiles + p.fitness;
+    final puzzle = Puzzle(4, 4);
+
+    while (puzzle.incorrectTiles > 0) {
+      print(['*', puzzle.incorrectTiles, puzzle.fitness, _score(puzzle)]);
+      final options = Iterable.generate(puzzle.tileCount * 10, (i) {
+        final p = puzzle.clone();
+        return MapEntry(p, p.clickRandom(puzzle.tileCount));
+      }).toList();
+
+      options.sort((a, b) {
+        return _score(a.key).compareTo(_score(b.key));
+      });
+
+      //if (_score(options.first.key) <= _score(puzzle)) {
+      options.first.value.forEach(puzzle.clickValue);
+      expect(options.first.key.toString(), puzzle.toString());
+      print('using! - now with ${puzzle.incorrectTiles} - ${_score(puzzle)}');
+      //} else {
+      print(puzzle);
+    }
+    print(puzzle.clickCount);
+  }, skip: true);
 }
