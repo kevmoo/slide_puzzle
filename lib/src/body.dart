@@ -31,6 +31,8 @@ class Body {
     _velocity = zeroPoint;
   }
 
+  /// [drag] must be greater than or equal to zero. It defines the percent of
+  /// the previous velocity that is lost every second.
   bool animate(double seconds,
       {Point<double> force = zeroPoint, double drag = 0, double maxVelocity}) {
     assert(seconds.isFinite && seconds > 0,
@@ -40,8 +42,7 @@ class Body {
     assert(force.x.isFinite && force.y.isFinite, 'force must be finite');
 
     drag ??= 0;
-    assert(drag >= 0, 'drag must be >= 0');
-    assert(drag < 1, 'drag must be less than 1');
+    assert(drag.isFinite && drag >= 0, 'drag must be finiate and >= 0');
 
     maxVelocity ??= double.infinity;
     assert(maxVelocity > 0, 'maxVelocity must be null or > 0');

@@ -1,4 +1,4 @@
-import 'dart:math' show Point;
+import 'dart:math' show Point, sqrt1_2;
 
 import 'package:slide_puzzle/src/body.dart';
 import 'package:test/test.dart';
@@ -72,38 +72,72 @@ void main() {
       }
     });
 
-    test('drag', () {
-      final body = Body();
-      expect(body.animate(1), isFalse);
-      expect(body, Body());
+    group('drag', () {
+      test('directios', () {
+        final bodies = [
+          Body(velocity: _point(0, 1)),
+          Body(velocity: _point(1, 0)),
+          Body(velocity: _point(0, -1)),
+          Body(velocity: _point(-1, 0)),
+          Body(velocity: _point(sqrt1_2, sqrt1_2)),
+          Body(velocity: _point(sqrt1_2, -sqrt1_2)),
+          Body(velocity: _point(-sqrt1_2, sqrt1_2)),
+          Body(velocity: _point(-sqrt1_2, -sqrt1_2)),
+        ];
 
-      expect(body.animate(1, force: _point(1, 0)), isTrue);
-      expect(body, Body.raw(1, 0, 1, 0));
+        for (var b in bodies) {
+          expect(b.location.magnitude, 0);
+        }
 
-      // if we animate again, with no force - velocity remains unchanged,
-      // but we've moved!
-      expect(body.animate(1), isTrue);
-      expect(body, Body.raw(2, 0, 1, 0));
+        for (var b in bodies) {
+          b.animate(1);
+          expect(b.location.magnitude, 1);
+        }
 
-      // if we animate again
-      expect(body.animate(1, drag: 0.1), isTrue);
-      expect(body, Body.raw(2.9, 0, 0.9, 0));
+        for (var b in bodies) {
+          b.animate(1, drag: 0.5);
+          expect(b.location.magnitude, closeTo(1.5, 0.0000001));
+        }
 
-      // if we animate again, with drag at 0.1, velocity should cut in half!
-      expect(body.animate(1, drag: 0.1), isTrue);
-      expect(body, Body.raw(3.71, 0, 0.81, 0));
+        for (var b in bodies) {
+          b.animate(1, drag: 1);
+          expect(b.location.magnitude, closeTo(1.5, 0.0000001));
+        }
+      });
 
-      var lastLocation = body.location, lastVelocity = body.velocity;
-      var loopCount = 0;
-      while (body.animate(1, drag: 0.5)) {
-        expect(++loopCount, lessThan(20),
-            reason: 'drag + epsilon should stop things pretty quickly');
-        expect(body.location.magnitude, greaterThan(lastLocation.magnitude));
-        expect(body.velocity.magnitude, lessThan(lastVelocity.magnitude));
-        lastLocation = body.location;
-        lastVelocity = body.velocity;
-      }
-      expect(body.velocity, zeroPoint);
+      test('integration', () {
+        final body = Body();
+        expect(body.animate(1), isFalse);
+        expect(body, Body());
+
+        expect(body.animate(1, force: _point(1, 0)), isTrue);
+        expect(body, Body.raw(1, 0, 1, 0));
+
+        // if we animate again, with no force - velocity remains unchanged,
+        // but we've moved!
+        expect(body.animate(1), isTrue);
+        expect(body, Body.raw(2, 0, 1, 0));
+
+        // if we animate again
+        expect(body.animate(1, drag: 0.1), isTrue);
+        expect(body, Body.raw(2.9, 0, 0.9, 0));
+
+        // if we animate again, with drag at 0.1, velocity should cut in half!
+        expect(body.animate(1, drag: 0.1), isTrue);
+        expect(body, Body.raw(3.71, 0, 0.81, 0));
+
+        var lastLocation = body.location, lastVelocity = body.velocity;
+        var loopCount = 0;
+        while (body.animate(1, drag: 0.5)) {
+          expect(++loopCount, lessThan(20),
+              reason: 'drag + epsilon should stop things pretty quickly');
+          expect(body.location.magnitude, greaterThan(lastLocation.magnitude));
+          expect(body.velocity.magnitude, lessThan(lastVelocity.magnitude));
+          lastLocation = body.location;
+          lastVelocity = body.velocity;
+        }
+        expect(body.velocity, zeroPoint);
+      });
     });
 
     test('terminalVelocity', () {
