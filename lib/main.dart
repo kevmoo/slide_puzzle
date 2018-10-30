@@ -35,14 +35,15 @@ class _PuzzleHome extends StatefulWidget {
 class _PuzzleHomeState extends State<_PuzzleHome>
     with SingleTickerProviderStateMixin {
   static const _textScaleFactor = 1.2;
-  final Puzzle _puzzle;
   final PuzzleAnimator _puzzleAnimator;
+
+  Puzzle get _puzzle => _puzzleAnimator.puzzle;
 
   Ticker _ticker;
   Duration _lastElapsed;
   Duration _delta;
 
-  _PuzzleHomeState(this._puzzle) : _puzzleAnimator = PuzzleAnimator(_puzzle);
+  _PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle);
 
   @override
   void initState() {
@@ -75,12 +76,8 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   }
 
   void _click(int value) {
-    final validClick = _puzzle.clickValue(value);
-    if (!validClick) {
-      _puzzleAnimator.shake(value);
-    }
     setState(() {
-      // noop
+      _puzzleAnimator.clickOrShake(value);
     });
   }
 

@@ -19,7 +19,13 @@ class PuzzleAnimator {
 
   bool get stable => _stable;
 
-  void shake(int tileValue) {
+  void clickOrShake(int tileValue) {
+    if (!puzzle.clickValue(tileValue)) {
+      _shake(tileValue);
+    }
+  }
+
+  void _shake(int tileValue) {
     final delta = puzzle.coordinatesOf(0) - puzzle.coordinatesOf(tileValue);
     final deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
 
