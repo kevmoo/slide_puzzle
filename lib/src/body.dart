@@ -34,7 +34,10 @@ class Body {
   /// [drag] must be greater than or equal to zero. It defines the percent of
   /// the previous velocity that is lost every second.
   bool animate(double seconds,
-      {Point<double> force = zeroPoint, double drag = 0, double maxVelocity}) {
+      {Point<double> force = zeroPoint,
+      double drag = 0,
+      double maxVelocity,
+      Point<double> snapTo}) {
     assert(seconds.isFinite && seconds > 0,
         'milliseconds must be finite and > 0 (was $seconds)');
 
@@ -72,6 +75,9 @@ class Body {
       _location += locationDelta;
       return true;
     } else {
+      if (snapTo != null && (_location.distanceTo(snapTo) < _epsilon * 2)) {
+        _location = snapTo;
+      }
       _velocity = zeroPoint;
       return false;
     }

@@ -166,13 +166,18 @@ void main() {
       Point<double> force() => target - body.location;
 
       var count = 0;
-      while (body.animate(0.1, force: force(), drag: 0.5, maxVelocity: 2)) {
+      while (body.animate(0.1,
+          force: force(), drag: 0.5, maxVelocity: 2, snapTo: target)) {
         count++;
         expect(body.velocity.magnitude, lessThanOrEqualTo(2.0));
-        expect(count, lessThan(400), reason: 'The system should settle down');
+        expect(count, lessThan(350),
+            reason: 'The system should settle down at ~341 iterations');
       }
-      expect(body.location.x, closeTo(10, 0.001));
-      expect(body.location.y, closeTo(1, 0.001));
+
+      expect(body.location, target,
+          reason: 'should snap to this exact location');
+      expect(body.velocity.magnitude, 0,
+          reason: 'velociy should "snap" to zero, too');
     });
   });
 }
