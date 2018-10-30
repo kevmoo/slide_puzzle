@@ -23,7 +23,7 @@ class PuzzleAnimator {
     final delta = puzzle.coordinatesOf(0) - puzzle.coordinatesOf(tileValue);
     final deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
 
-    _locations[tileValue].move(deltaDouble * (0.5 / deltaDouble.magnitude));
+    _locations[tileValue].move(deltaDouble * (0.2 / deltaDouble.magnitude));
   }
 
   void update(Duration timeDelta) {
@@ -36,8 +36,6 @@ class PuzzleAnimator {
     }
     assert(animationSeconds > 0);
 
-    var maxVelocity = 0.0;
-
     _stable = true;
     for (var i = 0; i < puzzle.length; i++) {
       final target = _target(i);
@@ -47,10 +45,8 @@ class PuzzleAnimator {
       final force = delta;
 
       _stable = !body.animate(animationSeconds,
-              force: force, drag: 0.8, maxVelocity: 1.0) &&
+              force: force, drag: .99, maxVelocity: 1.0, snapTo: target) &&
           _stable;
-
-      maxVelocity = max(maxVelocity, body.velocity.magnitude);
     }
   }
 
