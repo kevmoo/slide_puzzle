@@ -136,44 +136,44 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                   fit: BoxFit.contain,
                   child: Flow(
                       delegate: _PuzzleDelegate(_puzzleAnimator),
-                      children: List<Widget>.generate(_puzzle.length, (i) {
-                        Widget child;
-                        if (i == 0) {
-                          child = const Center(
-                              child: Text(
-                            '🦋',
-                            style: TextStyle(),
-                            textScaleFactor: _textScaleFactor * 2.5,
-                          ));
-                        } else {
-                          final correctPosition = _puzzle.isCorrectPosition(i);
-                          child = FlatButton(
-                            child: Text(
-                              i.toString(),
-                              style: TextStyle(
-                                  fontWeight: correctPosition
-                                      ? FontWeight.bold
-                                      : FontWeight.normal),
-                            ),
-                            onPressed: () => _click(i),
-                            color: (i % 2 == 0) ? Colors.white : Colors.red,
-                            shape: RoundedRectangleBorder(
-                                side: const BorderSide(width: 1),
-                                borderRadius: BorderRadius.circular(10)),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.all(3),
-                          child: child,
-                        );
-                      })),
+                      children: List<Widget>.generate(
+                          _puzzle.length, _widgetForTile)),
                 ),
               ),
             ],
           ),
         ),
       ));
+
+  Widget _widgetForTile(int i) {
+    if (i == 0) {
+      return const Center(
+          child: Text(
+        '🦋',
+        style: TextStyle(),
+        textScaleFactor: _textScaleFactor * 2.5,
+      ));
+    }
+
+    final correctPosition = _puzzle.isCorrectPosition(i);
+    final child = FlatButton(
+      child: Text(
+        i.toString(),
+        style: TextStyle(
+            fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal),
+      ),
+      onPressed: () => _click(i),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+          side: const BorderSide(width: 1),
+          borderRadius: BorderRadius.circular(10)),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(3),
+      child: child,
+    );
+  }
 
   @override
   void dispose() {
