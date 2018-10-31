@@ -29,7 +29,7 @@ class PuzzleAnimator {
     final delta = puzzle.coordinatesOf(0) - puzzle.coordinatesOf(tileValue);
     final deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
 
-    _locations[tileValue].move(deltaDouble * (0.2 / deltaDouble.magnitude));
+    _locations[tileValue].kick(deltaDouble * (0.5 / deltaDouble.magnitude));
   }
 
   void update(Duration timeDelta) {

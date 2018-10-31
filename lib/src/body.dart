@@ -24,11 +24,10 @@ class Body {
 
   Body clone() => Body(location: _location, velocity: _velocity);
 
-  /// Moves `this` by the value in [delta], clearing out the velocity.
-  void move(Point<double> delta) {
+  /// Add the velocity specified in [delta] to `this`.
+  void kick(Point<double> delta) {
     assert(delta.magnitude.isFinite);
-    _location += delta;
-    _velocity = zeroPoint;
+    _velocity = delta;
   }
 
   /// [drag] must be greater than or equal to zero. It defines the percent of
