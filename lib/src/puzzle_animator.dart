@@ -47,11 +47,11 @@ class PuzzleAnimator {
       final target = _target(i);
       final body = _locations[i];
 
-      final delta = (target - body.location);
-      final force = delta;
-
       _stable = !body.animate(animationSeconds,
-              force: force, drag: .99, maxVelocity: 1.0, snapTo: target) &&
+              force: target - body.location,
+              drag: .99,
+              maxVelocity: 1.0,
+              snapTo: target) &&
           _stable;
     }
   }
