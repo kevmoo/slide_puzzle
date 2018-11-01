@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'src/decoration_image_plus.dart';
 import 'src/puzzle.dart';
 import 'src/puzzle_animator.dart';
 import 'src/puzzle_flow_delegate.dart';
@@ -44,9 +45,18 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   Duration _lastElapsed;
   Duration _delta;
   StreamSubscription sub;
+  bool _fancy = false;
 
   _PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle) {
     sub = _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
+  }
+
+  void _fancySwitch(bool newValue) {
+    if (newValue != _fancy) {
+      setState(() {
+        _fancy = newValue;
+      });
+    }
   }
 
   @override
@@ -90,55 +100,120 @@ class _PuzzleHomeState extends State<_PuzzleHome>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-        title: Text('${_puzzle.tileCount} Puzzle'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      'Clicks: ${_puzzle.clickCount}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Tiles left: ${_puzzle.incorrectTiles}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  Expanded(
-                      child: RaisedButton(
-                    onPressed: _puzzle.reset,
-                    child: const Text(
-                      'New game...',
-                    ),
-                  ))
-                ],
-              ),
-            ),
-            Expanded(
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Flow(
-                    delegate:
-                        PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
-                    children:
-                        List<Widget>.generate(_puzzle.length, _widgetForTile)),
-              ),
-            ),
-          ],
+        appBar: AppBar(
+          title: Text('${_puzzle.tileCount} Puzzle'),
         ),
-      ));
+        body: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        'Clicks: ${_puzzle.clickCount}',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Tiles left: ${_puzzle.incorrectTiles}',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: RaisedButton(
+                        onPressed: _puzzle.reset,
+                        child: const Text(
+                          'New game...',
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 0,
+                      child: Switch.adaptive(
+                        value: _fancy,
+                        onChanged: _fancySwitch,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Flow(
+                      delegate: PuzzleFlowDelegate(
+                          _puzzleAnimator, _animationNotifier),
+                      children: List<Widget>.generate(
+                          _puzzle.length, _widgetForTile)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
   Widget _widgetForTile(int i) {
+    if (i == _puzzle.tileCount) {
+      return const Center(
+          child: Text(
+        '🦋',
+        style: TextStyle(),
+        textScaleFactor: 2.5,
+      ));
+    }
+
+    if (_fancy) {
+      return _fancyWidgetForTile(i);
+    } else {
+      return _simpleWidgetForTile(i);
+    }
+  }
+
+  Widget _fancyWidgetForTile(int i) {
+    final correctPosition = _puzzle.isCorrectPosition(i);
+    final decorationImage = DecorationImagePlus(
+        puzzleWidth: _puzzle.width,
+        puzzleHeight: _puzzle.height,
+        pieceIndex: i,
+        fit: BoxFit.cover,
+        image: const AssetImage('asset/seattle.jpg'));
+
+    final content = Ink(
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          image: decorationImage,
+        ),
+        child: Container(
+          constraints: const BoxConstraints.expand(),
+          alignment: const Alignment(0, 0),
+          child: Text(
+            (i + 1).toString(),
+            style: TextStyle(
+                fontWeight:
+                    correctPosition ? FontWeight.bold : FontWeight.normal,
+                shadows: [
+                  const Shadow(
+                      color: Colors.white,
+                      blurRadius: 5,
+                      offset: Offset(0.5, 0.5))
+                ]),
+          ),
+        ));
+
+    return FlatButton(
+      child: content,
+      padding: const EdgeInsets.symmetric(),
+      onPressed: () => _puzzleAnimator.clickOrShake(i),
+      color: Colors.white,
+    );
+  }
+
+  Widget _simpleWidgetForTile(int i) {
     if (i == _puzzle.tileCount) {
       return const Center(
           child: Text(
