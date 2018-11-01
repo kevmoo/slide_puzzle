@@ -156,8 +156,9 @@ List<int> _randomList(int length) =>
     _randomizeList(List<int>.generate(length, (i) => i));
 
 List<int> _randomizeList(List<int> result) {
+  final copy = result.toList();
   do {
     result.shuffle(_rnd);
-  } while (result.any((v) => result[v % result.length] == v));
+  } while (result.any((v) => result[v] == v || result[v] == copy[v]));
   return result;
 }
