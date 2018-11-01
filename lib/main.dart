@@ -36,6 +36,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
     with SingleTickerProviderStateMixin {
   static const _textScaleFactor = 1.2;
   final PuzzleAnimator _puzzleAnimator;
+  final _animationNotifier = _AnimationNotifier();
 
   Puzzle get _puzzle => _puzzleAnimator.puzzle;
 
@@ -66,9 +67,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
     _puzzleAnimator.update(_delta);
 
     if (!_puzzleAnimator.stable) {
-      setState(() {
-        // noop – just ping the engine!
-      });
+      _animationNotifier.animate();
     } else {
       _ticker.stop();
       _lastElapsed = null;
@@ -135,7 +134,8 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                 child: FittedBox(
                   fit: BoxFit.contain,
                   child: Flow(
-                      delegate: _PuzzleDelegate(_puzzleAnimator),
+                      delegate:
+                          _PuzzleDelegate(_puzzleAnimator, _animationNotifier),
                       children: List<Widget>.generate(
                           _puzzle.length, _widgetForTile)),
                 ),
@@ -177,8 +177,15 @@ class _PuzzleHomeState extends State<_PuzzleHome>
 
   @override
   void dispose() {
-    _ticker.dispose();
+    _animationNotifier.dispose();
+    _ticker?.dispose();
     super.dispose();
+  }
+}
+
+class _AnimationNotifier extends ChangeNotifier {
+  void animate() {
+    notifyListeners();
   }
 }
 
@@ -187,7 +194,8 @@ class _PuzzleDelegate extends FlowDelegate {
 
   Puzzle get _puzzle => _puzzleAnimator.puzzle;
 
-  _PuzzleDelegate(this._puzzleAnimator);
+  _PuzzleDelegate(this._puzzleAnimator, Listenable repaint)
+      : super(repaint: repaint);
 
   @override
   Size getSize(BoxConstraints constraints) => const Size(260, 260);
