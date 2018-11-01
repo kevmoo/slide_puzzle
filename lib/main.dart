@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -42,9 +43,10 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   Ticker _ticker;
   Duration _lastElapsed;
   Duration _delta;
+  StreamSubscription sub;
 
   _PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle) {
-    _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
+    sub = _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
   }
 
   @override
@@ -170,6 +172,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   void dispose() {
     _animationNotifier.dispose();
     _ticker?.dispose();
+    sub.cancel();
     super.dispose();
   }
 }
