@@ -50,7 +50,7 @@ class PuzzleAnimator {
 
       _stable = !body.animate(animationSeconds,
               force: target - body.location,
-              drag: .99,
+              drag: .9,
               maxVelocity: 1.0,
               snapTo: target) &&
           _stable;
