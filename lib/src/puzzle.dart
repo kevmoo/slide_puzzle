@@ -38,7 +38,7 @@ class Puzzle {
 
   int get tileCount => _array.length - 1;
 
-  bool isCorrectPosition(int cellValue) => cellValue == _array[cellValue - 1];
+  bool isCorrectPosition(int cellValue) => cellValue == _array[cellValue];
 
   void reset() {
     _randomizeList(_array);
@@ -46,8 +46,8 @@ class Puzzle {
   }
 
   int get incorrectTiles {
-    var count = _array.length - 1;
-    for (var i = 1; i < _array.length; i++) {
+    var count = tileCount;
+    for (var i = 0; i < tileCount; i++) {
       if (isCorrectPosition(i)) {
         count--;
       }
@@ -65,10 +65,10 @@ class Puzzle {
   /// `0` - you've won!
   int get fitness {
     var value = 0;
-    for (var i = 1; i < length; i++) {
+    for (var i = 0; i < tileCount; i++) {
       if (!isCorrectPosition(i)) {
-        final correctColumn = (i - 1) % width;
-        final correctRow = (i - 1) ~/ width;
+        final correctColumn = i % width;
+        final correctRow = i ~/ width;
         final currentLocation = coordinatesOf(i);
         final delta = (correctColumn - currentLocation.x).abs() +
             (correctRow - currentLocation.y).abs();
@@ -103,14 +103,14 @@ class Puzzle {
     requireArgument(y >= 0 && y < height, 'must be >= 0 && < height');
 
     final target = Point<int>(x, y);
-    final zeroCoord = coordinatesOf(0);
+    final lastCoord = coordinatesOf(tileCount);
 
-    if (target == zeroCoord) {
-      assert(value(x, y) == 0);
+    if (target == lastCoord) {
+      assert(value(x, y) == tileCount);
       return false;
     }
 
-    if (zeroCoord.x != x && zeroCoord.y != y) {
+    if (lastCoord.x != x && lastCoord.y != y) {
       return false;
     }
 
@@ -120,15 +120,15 @@ class Puzzle {
   }
 
   void _shift(Point<int> target) {
-    final zeroCoord = coordinatesOf(0);
-    final delta = zeroCoord - target;
+    final lastCoord = coordinatesOf(tileCount);
+    final delta = lastCoord - target;
 
     if (delta.magnitude.toInt() > 1) {
       final shiftPoint = target + Point<int>(delta.x.sign, delta.y.sign);
       _shift(shiftPoint);
       _swap(target, shiftPoint);
     } else {
-      _swap(zeroCoord, target);
+      _swap(lastCoord, target);
     }
   }
 
@@ -158,6 +158,6 @@ List<int> _randomList(int length) =>
 List<int> _randomizeList(List<int> result) {
   do {
     result.shuffle(_rnd);
-  } while (result.any((v) => result[(v - 1) % result.length] == v));
+  } while (result.any((v) => result[v % result.length] == v));
   return result;
 }

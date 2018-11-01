@@ -68,7 +68,7 @@ void main() {
       return clickResult;
     }
 
-    test('click on zero is a noop', () {
+    test('click on last tile is a noop', () {
       var puzzle = _ordered(4, 4);
       expect(puzzle.value(0, 0), 0);
       expect(doClick(puzzle, 0, 0), isFalse);
@@ -80,11 +80,11 @@ void main() {
 4 5 6''');
 
       expect(puzzle.value(2, 0), 0);
-      expect(doClick(puzzle, 2, 0), isFalse);
+      expect(doClick(puzzle, 1, 0), isFalse);
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
-        final zeroLocation = puzzle.coordinatesOf(0);
+        final zeroLocation = puzzle.coordinatesOf(24);
         expect(doClick(puzzle, zeroLocation.x, zeroLocation.y), isFalse);
       }
     });
@@ -100,7 +100,7 @@ void main() {
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
-        final zeroLocation = puzzle.coordinatesOf(0);
+        final zeroLocation = puzzle.coordinatesOf(24);
 
         for (var j = 0; j < 10; j++) {
           math.Point<int> randomPoint;
@@ -116,73 +116,78 @@ void main() {
     });
 
     test('click to shift', () {
-      final puzzle = _ordered(4, 4);
+      final puzzle = _ordered(4, 4, offset: 1);
       expect(puzzle.incorrectTiles, 15);
+      expect(puzzle.toString(), '''
+15  0  1  2
+ 3  4  5  6
+ 7  8  9 10
+11 12 13 14''');
 
-      expect(puzzle.value(1, 0), 1);
+      expect(puzzle.value(1, 0), 0);
       expect(doClick(puzzle, 1, 0), isTrue);
       expect(puzzle.toString(), '''
- 1  0  2  3
- 4  5  6  7
- 8  9 10 11
-12 13 14 15''');
+ 0 15  1  2
+ 3  4  5  6
+ 7  8  9 10
+11 12 13 14''');
 
       expect(doClick(puzzle, 1, 0), isFalse);
       expect(doClick(puzzle, 0, 0), isTrue);
       expect(puzzle.toString(), '''
- 0  1  2  3
- 4  5  6  7
- 8  9 10 11
-12 13 14 15''');
+15  0  1  2
+ 3  4  5  6
+ 7  8  9 10
+11 12 13 14''');
 
       expect(doClick(puzzle, 0, 0), isFalse);
       expect(doClick(puzzle, 0, 1), isTrue);
       expect(puzzle.toString(), '''
- 4  1  2  3
- 0  5  6  7
- 8  9 10 11
-12 13 14 15''');
+ 3  0  1  2
+15  4  5  6
+ 7  8  9 10
+11 12 13 14''');
 
       expect(doClick(puzzle, 0, 1), isFalse);
       expect(doClick(puzzle, 0, 0), isTrue);
       expect(puzzle.toString(), '''
- 0  1  2  3
- 4  5  6  7
- 8  9 10 11
-12 13 14 15''');
+15  0  1  2
+ 3  4  5  6
+ 7  8  9 10
+11 12 13 14''');
 
       expect(doClick(puzzle, 0, 0), isFalse);
       expect(doClick(puzzle, 3, 0), isTrue);
       expect(puzzle.toString(), '''
- 1  2  3  0
- 4  5  6  7
- 8  9 10 11
-12 13 14 15''');
+ 0  1  2 15
+ 3  4  5  6
+ 7  8  9 10
+11 12 13 14''');
 
       expect(puzzle.incorrectTiles, 12);
       expect(doClick(puzzle, 3, 0), isFalse);
       expect(doClick(puzzle, 3, 3), isTrue);
       expect(puzzle.toString(), '''
- 1  2  3  7
- 4  5  6 11
- 8  9 10 15
-12 13 14  0''');
+ 0  1  2  6
+ 3  4  5 10
+ 7  8  9 14
+11 12 13 15''');
 
       expect(doClick(puzzle, 3, 3), isFalse);
       expect(doClick(puzzle, 0, 3), isTrue);
       expect(puzzle.toString(), '''
- 1  2  3  7
- 4  5  6 11
- 8  9 10 15
- 0 12 13 14''');
+ 0  1  2  6
+ 3  4  5 10
+ 7  8  9 14
+15 11 12 13''');
 
       expect(doClick(puzzle, 0, 3), isFalse);
       expect(doClick(puzzle, 0, 0), isTrue);
       expect(puzzle.toString(), '''
- 0  2  3  7
- 1  5  6 11
- 4  9 10 15
- 8 12 13 14''');
+15  1  2  6
+ 0  4  5 10
+ 3  8  9 14
+ 7 11 12 13''');
 
       expect(puzzle.incorrectTiles, 13);
       expect(puzzle.clickCount, 8);
@@ -218,42 +223,42 @@ void main() {
   });
 
   test('fitness', () {
-    final puzzle = Puzzle.raw(3, [1, 2, 3, 4, 5, 6, 7, 8, 0]);
+    final puzzle = Puzzle.raw(3, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
     expect(puzzle.incorrectTiles, 0);
     expect(puzzle.fitness, 0);
     expect(puzzle.toString(), '''
-1 2 3
-4 5 6
-7 8 0''');
+0 1 2
+3 4 5
+6 7 8''');
 
-    expect(puzzle.clickValue(8), isTrue);
+    expect(puzzle.clickValue(7), isTrue);
     expect(puzzle.incorrectTiles, 1);
     expect(puzzle.fitness, 1);
     expect(puzzle.toString(), '''
-1 2 3
-4 5 6
-7 0 8''');
+0 1 2
+3 4 5
+6 8 7''');
 
-    expect(puzzle.clickValue(7), isTrue);
+    expect(puzzle.clickValue(6), isTrue);
+    expect(puzzle.clickValue(3), isTrue);
     expect(puzzle.clickValue(4), isTrue);
-    expect(puzzle.clickValue(5), isTrue);
-    expect(puzzle.clickValue(7), isTrue);
+    expect(puzzle.clickValue(6), isTrue);
     expect(puzzle.toString(), '''
-1 2 3
-5 7 6
-4 0 8''');
+0 1 2
+4 6 5
+3 8 7''');
     expect(puzzle.incorrectTiles, 4);
     expect(puzzle.fitness, 7);
 
-    final puzzle2 = Puzzle.raw(3, [0, 2, 3, 4, 5, 6, 7, 8, 1]);
+    final puzzle2 = Puzzle.raw(3, [8, 1, 2, 3, 4, 5, 6, 7, 0]);
     expect(puzzle2.incorrectTiles, 1);
     expect(puzzle2.toString(), '''
-0 2 3
-4 5 6
-7 8 1''');
+8 1 2
+3 4 5
+6 7 0''');
     expect(puzzle2.fitness, 16);
 
-    final puzzle3 = Puzzle.raw(3, [4, 1, 2, 5, 6, 3, 8, 7, 0]);
+    final puzzle3 = Puzzle.raw(3, [3, 0, 1, 4, 5, 2, 7, 6, 8]);
     expect(puzzle3.incorrectTiles, 8);
     expect(puzzle3.fitness, 8);
   });
