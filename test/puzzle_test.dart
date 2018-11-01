@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:slide_puzzle/src/puzzle.dart';
@@ -18,7 +19,26 @@ void _printPuzzleOnFailure(Puzzle puzzle) {
   printOnFailure('* here is the puzzle\n$puzzle');
 }
 
+Future _micro() => Future.delayed(Duration(milliseconds: 1));
+
 void main() {
+  StreamSubscription sub;
+  final events = <PuzzleEvent>[];
+
+  void onEvents(Puzzle puzzle) {
+    sub?.cancel();
+    sub = null;
+    events.clear();
+
+    sub = puzzle.onEvent.listen(events.add);
+
+    addTearDown(() {
+      sub?.cancel();
+      sub = null;
+      events.clear();
+    });
+  }
+
   test('must be at least 3 x 3', () {
     expect(() => Puzzle.raw(3, []), throwsArgumentError);
     expect(() => Puzzle.raw(3, [0, 1, 2]), throwsArgumentError);
@@ -38,7 +58,7 @@ void main() {
 
     for (var y = 0; y < height; y++) {
       for (var x = 0; x < width; x++) {
-        expect(puzzle.value(x, y), x + y * width);
+        expect(puzzle.valueAt(x, y), x + y * width);
       }
     }
   });
@@ -54,10 +74,10 @@ void main() {
   });
 
   group('click', () {
-    bool doClick(Puzzle puzzle, int x, int y) {
+    bool doClick(Puzzle puzzle, int tileValue) {
       final startCount = puzzle.clickCount;
       final startString = puzzle.toString();
-      final clickResult = puzzle.click(x, y);
+      final clickResult = puzzle.clickValue(tileValue);
       if (clickResult) {
         expect(puzzle.clickCount, startCount + 1);
         expect(puzzle.toString(), isNot(startString));
@@ -70,8 +90,8 @@ void main() {
 
     test('click on last tile is a noop', () {
       var puzzle = _ordered(4, 4);
-      expect(puzzle.value(0, 0), 0);
-      expect(doClick(puzzle, 0, 0), isFalse);
+      expect(puzzle.valueAt(0, 0), 0);
+      expect(doClick(puzzle, 0), isFalse);
 
       puzzle = _ordered(3, 3, offset: 2);
       expect(puzzle.toString(), '''
@@ -79,27 +99,28 @@ void main() {
 1 2 3
 4 5 6''');
 
-      expect(puzzle.value(2, 0), 0);
-      expect(doClick(puzzle, 1, 0), isFalse);
+      expect(puzzle.valueAt(2, 0), 0);
+      expect(doClick(puzzle, 1), isFalse);
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
-        final zeroLocation = puzzle.coordinatesOf(24);
-        expect(doClick(puzzle, zeroLocation.x, zeroLocation.y), isFalse);
+        expect(doClick(puzzle, 24), isFalse,
+            reason: 'clicking on the sliding tile is a no-op');
       }
     });
 
-    test('click on a cell not aligned with zero is a noop', () {
+    test('click on a cell not aligned with zero is a noop', () async {
       var puzzle = _ordered(4, 4);
-      expect(puzzle.value(1, 1), 5);
-      expect(doClick(puzzle, 1, 1), isFalse);
+      expect(puzzle.valueAt(1, 1), 5);
+      expect(doClick(puzzle, 4), isFalse);
 
       puzzle = _ordered(3, 3, offset: 2);
-      expect(puzzle.value(0, 1), 1);
-      expect(doClick(puzzle, 0, 1), isFalse);
+      expect(puzzle.valueAt(0, 1), 1);
+      expect(doClick(puzzle, 3), isFalse);
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
+        onEvents(puzzle);
         final zeroLocation = puzzle.coordinatesOf(24);
 
         for (var j = 0; j < 10; j++) {
@@ -110,13 +131,18 @@ void main() {
           } while (randomPoint.x == zeroLocation.x ||
               randomPoint.y == zeroLocation.y);
 
-          expect(doClick(puzzle, randomPoint.x, randomPoint.y), isFalse);
+          expect(doClick(puzzle, puzzle.valueAt(randomPoint.x, randomPoint.y)),
+              isFalse);
         }
+
+        await _micro();
+        expect(events, hasLength(10));
       }
     });
 
-    test('click to shift', () {
+    test('click to shift', () async {
       final puzzle = _ordered(4, 4, offset: 1);
+      onEvents(puzzle);
       expect(puzzle.incorrectTiles, 15);
       expect(puzzle.toString(), '''
 15  0  1  2
@@ -124,40 +150,40 @@ void main() {
  7  8  9 10
 11 12 13 14''');
 
-      expect(puzzle.value(1, 0), 0);
-      expect(doClick(puzzle, 1, 0), isTrue);
+      expect(puzzle.valueAt(1, 0), 0);
+      expect(doClick(puzzle, 0), isTrue);
       expect(puzzle.toString(), '''
  0 15  1  2
  3  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 1, 0), isFalse);
-      expect(doClick(puzzle, 0, 0), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 0), isTrue);
       expect(puzzle.toString(), '''
 15  0  1  2
  3  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 0, 0), isFalse);
-      expect(doClick(puzzle, 0, 1), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 3), isTrue);
       expect(puzzle.toString(), '''
  3  0  1  2
 15  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 0, 1), isFalse);
-      expect(doClick(puzzle, 0, 0), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 3), isTrue);
       expect(puzzle.toString(), '''
 15  0  1  2
  3  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 0, 0), isFalse);
-      expect(doClick(puzzle, 3, 0), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 2), isTrue);
       expect(puzzle.toString(), '''
  0  1  2 15
  3  4  5  6
@@ -165,24 +191,24 @@ void main() {
 11 12 13 14''');
 
       expect(puzzle.incorrectTiles, 12);
-      expect(doClick(puzzle, 3, 0), isFalse);
-      expect(doClick(puzzle, 3, 3), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 14), isTrue);
       expect(puzzle.toString(), '''
  0  1  2  6
  3  4  5 10
  7  8  9 14
 11 12 13 15''');
 
-      expect(doClick(puzzle, 3, 3), isFalse);
-      expect(doClick(puzzle, 0, 3), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 11), isTrue);
       expect(puzzle.toString(), '''
  0  1  2  6
  3  4  5 10
  7  8  9 14
 15 11 12 13''');
 
-      expect(doClick(puzzle, 0, 3), isFalse);
-      expect(doClick(puzzle, 0, 0), isTrue);
+      expect(doClick(puzzle, 15), isFalse);
+      expect(doClick(puzzle, 0), isTrue);
       expect(puzzle.toString(), '''
 15  1  2  6
  0  4  5 10
@@ -191,6 +217,9 @@ void main() {
 
       expect(puzzle.incorrectTiles, 13);
       expect(puzzle.clickCount, 8);
+
+      await _micro();
+      expect(events, hasLength(15));
     });
   });
 
@@ -209,7 +238,7 @@ void main() {
 
     do {
       // click around until one tile is in the right location
-      puzzle.click(_rnd.nextInt(puzzle.width), _rnd.nextInt(puzzle.height));
+      puzzle.clickValue(_rnd.nextInt(puzzle.tileCount));
     } while (puzzle.incorrectTiles == puzzle.tileCount);
 
     expect(puzzle.incorrectTiles, lessThan(puzzle.tileCount));
@@ -263,11 +292,14 @@ void main() {
     expect(puzzle3.fitness, 8);
   });
 
-  test('click random', () {
+  test('click random', () async {
     final puzzle = Puzzle(4, 4);
+    onEvents(puzzle);
     final moves = puzzle.clickRandom(5);
     expect(moves.length, 5);
     expect(puzzle.clickCount, 5);
+    await _micro();
+    expect(events, hasLength(5));
   });
 
   test('clone', () {

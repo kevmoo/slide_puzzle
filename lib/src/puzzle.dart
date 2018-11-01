@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' show Point, Random;
 
 import 'array_2d.dart';
@@ -5,8 +6,11 @@ import 'util.dart';
 
 final _rnd = Random();
 
+enum PuzzleEvent { click, reset, noopClick }
+
 class Puzzle {
   final Array2d<int> _array;
+  final _controller = StreamController<PuzzleEvent>();
 
   int _clickCount = 0;
 
@@ -15,6 +19,8 @@ class Puzzle {
   int get width => _array.width;
 
   int get height => _array.height;
+
+  Stream<PuzzleEvent> get onEvent => _controller.stream;
 
   Puzzle.raw(int width, List<int> source)
       : _array = Array2d.wrap(width, source) {
@@ -32,7 +38,7 @@ class Puzzle {
 
   Puzzle(int width, int height) : this.raw(width, _randomList(width * height));
 
-  int value(int x, int y) => _array.get(x, y);
+  int valueAt(int x, int y) => _array.get(x, y);
 
   int get length => _array.length;
 
@@ -43,6 +49,7 @@ class Puzzle {
   void reset() {
     _randomizeList(_array);
     _clickCount = 0;
+    _controller.add(PuzzleEvent.reset);
   }
 
   int get incorrectTiles {
@@ -79,18 +86,15 @@ class Puzzle {
     return value;
   }
 
-  bool clickValue(int value) {
-    final point = coordinatesOf(value);
-    return click(point.x, point.y);
-  }
-
   List<int> clickRandom(int count) {
     assert(count > 0);
     final clicks = <int>[];
     int lastTarget;
     while (clicks.length < count) {
       final randomTarget = _rnd.nextInt(tileCount) + 1;
-      if (randomTarget != lastTarget && clickValue(randomTarget)) {
+      if (randomTarget != lastTarget && movable(randomTarget)) {
+        final result = clickValue(randomTarget);
+        assert(result);
         clicks.add(randomTarget);
         lastTarget = randomTarget;
       }
@@ -98,24 +102,29 @@ class Puzzle {
     return clicks;
   }
 
-  bool click(int x, int y) {
-    requireArgument(x >= 0 && x < width, 'must be >= 0 && < width');
-    requireArgument(y >= 0 && y < height, 'must be >= 0 && < height');
+  bool movable(int tileValue) {
+    if (tileValue == tileCount) {
+      return false;
+    }
 
-    final target = Point<int>(x, y);
+    final target = coordinatesOf(tileValue);
     final lastCoord = coordinatesOf(tileCount);
-
-    if (target == lastCoord) {
-      assert(value(x, y) == tileCount);
+    if (lastCoord.x != target.x && lastCoord.y != target.y) {
       return false;
     }
+    return true;
+  }
 
-    if (lastCoord.x != x && lastCoord.y != y) {
+  bool clickValue(int tileValue) {
+    if (!movable(tileValue)) {
+      _controller.add(PuzzleEvent.noopClick);
       return false;
     }
+    final target = coordinatesOf(tileValue);
 
     _shift(target);
     _clickCount++;
+    _controller.add(PuzzleEvent.click);
     return true;
   }
 

@@ -44,13 +44,26 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   Duration _lastElapsed;
   Duration _delta;
 
-  _PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle);
+  _PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle) {
+    _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
+  }
 
   @override
   void initState() {
-    assert(_ticker == null);
-    _ticker = createTicker(_onTick)..start();
+    _ticker ??= createTicker(_onTick);
+    if (!_ticker.isTicking) {
+      _ticker.start();
+    }
     super.initState();
+  }
+
+  void _onPuzzleEvent(PuzzleEvent e) {
+    if (!_ticker.isTicking) {
+      _ticker.start();
+    }
+    setState(() {
+      // noop
+    });
   }
 
   void _onTick(Duration elapsed) {
@@ -72,24 +85,6 @@ class _PuzzleHomeState extends State<_PuzzleHome>
       _ticker.stop();
       _lastElapsed = null;
     }
-  }
-
-  void _click(int value) {
-    setState(() {
-      _puzzleAnimator.clickOrShake(value);
-    });
-  }
-
-  void _reset() {
-    setState(_puzzle.reset);
-  }
-
-  @override
-  void setState(fn) {
-    if (!_ticker.isTicking) {
-      _ticker.start();
-    }
-    super.setState(fn);
   }
 
   @override
@@ -122,7 +117,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
                     ),
                     Expanded(
                         child: RaisedButton(
-                      onPressed: _reset,
+                      onPressed: _puzzle.reset,
                       child: const Text(
                         'New game...',
                       ),
@@ -162,7 +157,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
         style: TextStyle(
             fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal),
       ),
-      onPressed: () => _click(i),
+      onPressed: () => _puzzleAnimator.clickOrShake(i),
       color: Colors.white,
       shape: RoundedRectangleBorder(
           side: const BorderSide(width: 1),
