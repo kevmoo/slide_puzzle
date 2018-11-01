@@ -34,7 +34,6 @@ class _PuzzleHome extends StatefulWidget {
 
 class _PuzzleHomeState extends State<_PuzzleHome>
     with SingleTickerProviderStateMixin {
-  static const _textScaleFactor = 1.2;
   final PuzzleAnimator _puzzleAnimator;
   final _animationNotifier = _AnimationNotifier();
 
@@ -92,51 +91,48 @@ class _PuzzleHomeState extends State<_PuzzleHome>
       appBar: AppBar(
         title: Text('${_puzzle.tileCount} Puzzle'),
       ),
-      body: MediaQuery(
-        data: const MediaQueryData(textScaleFactor: _textScaleFactor),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        'Clicks: ${_puzzle.clickCount}',
-                        textAlign: TextAlign.center,
-                      ),
+      body: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Clicks: ${_puzzle.clickCount}',
+                      textAlign: TextAlign.center,
                     ),
-                    Expanded(
-                      child: Text(
-                        'Tiles left: ${_puzzle.incorrectTiles}',
-                        textAlign: TextAlign.center,
-                      ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Tiles left: ${_puzzle.incorrectTiles}',
+                      textAlign: TextAlign.center,
                     ),
-                    Expanded(
-                        child: RaisedButton(
-                      onPressed: _puzzle.reset,
-                      child: const Text(
-                        'New game...',
-                      ),
-                    ))
-                  ],
-                ),
+                  ),
+                  Expanded(
+                      child: RaisedButton(
+                    onPressed: _puzzle.reset,
+                    child: const Text(
+                      'New game...',
+                    ),
+                  ))
+                ],
               ),
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Flow(
-                      delegate:
-                          _PuzzleDelegate(_puzzleAnimator, _animationNotifier),
-                      children: List<Widget>.generate(
-                          _puzzle.length, _widgetForTile)),
-                ),
+            ),
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Flow(
+                    delegate:
+                        _PuzzleDelegate(_puzzleAnimator, _animationNotifier),
+                    children:
+                        List<Widget>.generate(_puzzle.length, _widgetForTile)),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ));
 
@@ -146,7 +142,7 @@ class _PuzzleHomeState extends State<_PuzzleHome>
           child: Text(
         '🦋',
         style: TextStyle(),
-        textScaleFactor: _textScaleFactor * 2.5,
+        textScaleFactor: 2.5,
       ));
     }
 
