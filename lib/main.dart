@@ -167,71 +167,58 @@ class _PuzzleHomeState extends State<_PuzzleHome>
       ));
     }
 
-    if (_fancy) {
-      return _fancyWidgetForTile(i);
-    } else {
-      return _simpleWidgetForTile(i);
-    }
-  }
-
-  Widget _fancyWidgetForTile(int i) {
     final correctPosition = _puzzle.isCorrectPosition(i);
-    final decorationImage = DecorationImagePlus(
-        puzzleWidth: _puzzle.width,
-        puzzleHeight: _puzzle.height,
-        pieceIndex: i,
-        fit: BoxFit.cover,
-        image: const AssetImage('asset/seattle.jpg'));
 
-    final content = Ink(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          image: decorationImage,
-        ),
-        child: Container(
-          constraints: const BoxConstraints.expand(),
-          alignment: const Alignment(0, 0),
-          child: Text(
-            (i + 1).toString(),
-            style: TextStyle(
-                fontWeight:
-                    correctPosition ? FontWeight.bold : FontWeight.normal,
-                shadows: [
-                  const Shadow(
-                      color: Colors.white,
-                      blurRadius: 5,
-                      offset: Offset(0.5, 0.5))
-                ]),
-          ),
-        ));
-
-    return FlatButton(
-      child: content,
-      padding: const EdgeInsets.symmetric(),
-      onPressed: () => _puzzleAnimator.clickOrShake(i),
-      color: Colors.white,
-    );
-  }
-
-  Widget _simpleWidgetForTile(int i) {
-    final correctPosition = _puzzle.isCorrectPosition(i);
-    final child = FlatButton(
-      child: Text(
-        (i + 1).toString(),
-        style: TextStyle(
-            fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal),
+    final text = Text(
+      (i + 1).toString(),
+      style: TextStyle(
+        fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
+        shadows: [
+          const Shadow(
+              color: Colors.white, blurRadius: 5, offset: Offset(0.5, 0.5))
+        ],
       ),
-      onPressed: () => _puzzleAnimator.clickOrShake(i),
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 1),
-          borderRadius: BorderRadius.circular(10)),
     );
 
-    return Padding(
-      padding: const EdgeInsets.all(3),
-      child: child,
-    );
+    if (_fancy) {
+      final decorationImage = DecorationImagePlus(
+          puzzleWidth: _puzzle.width,
+          puzzleHeight: _puzzle.height,
+          pieceIndex: i,
+          fit: BoxFit.cover,
+          image: const AssetImage('asset/seattle.jpg'));
+
+      final content = Ink(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            image: decorationImage,
+          ),
+          child: Container(
+              constraints: const BoxConstraints.expand(),
+              alignment: const Alignment(0, 0),
+              child: text));
+
+      return FlatButton(
+        child: content,
+        padding: const EdgeInsets.symmetric(),
+        onPressed: () => _puzzleAnimator.clickOrShake(i),
+        color: Colors.white,
+      );
+    } else {
+      final child = FlatButton(
+        child: text,
+        onPressed: () => _puzzleAnimator.clickOrShake(i),
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+            side: const BorderSide(width: 1),
+            borderRadius: BorderRadius.circular(10)),
+      );
+
+      return Padding(
+        padding: const EdgeInsets.all(3),
+        child: child,
+      );
+    }
   }
 
   @override
