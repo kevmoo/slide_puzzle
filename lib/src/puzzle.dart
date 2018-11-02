@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' show Point, Random;
 
 import 'array_2d.dart';
 import 'util.dart';
 
 final _rnd = Random();
+
+final _spacesRegexp = RegExp(' +');
 
 enum PuzzleEvent { click, reset, noopClick }
 
@@ -37,6 +40,15 @@ class Puzzle {
   }
 
   Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
+
+  factory Puzzle.parse(String input) {
+    var rows = LineSplitter.split(input).map((line) {
+      final splits = line.trim().split(_spacesRegexp);
+      return splits.map(int.parse).toList();
+    }).toList();
+
+    return Puzzle.raw(rows.first.length, rows.expand((row) => row));
+  }
 
   int valueAt(int x, int y) => _array.get(x, y);
 
