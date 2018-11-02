@@ -224,10 +224,15 @@ void main() {
   });
 
   test('new puzzles should have all tiles in incorrect positions', () {
-    for (var i = 0; i < 100; i++) {
-      final puzzle = Puzzle(4, 4);
-      expect(puzzle.incorrectTiles, 15);
-      expect(puzzle.fitness, greaterThanOrEqualTo(15));
+    for (var width = 3; width < 6; width++) {
+      for (var height = 3; height < 6; height++) {
+        for (var i = 0; i < 10; i++) {
+          final puzzle = Puzzle(width, height);
+          expect(puzzle.solvable, isTrue);
+          expect(puzzle.incorrectTiles, puzzle.tileCount);
+          expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
+        }
+      }
     }
   });
 
@@ -246,6 +251,7 @@ void main() {
 
     puzzle.reset();
 
+    expect(puzzle.solvable, isTrue);
     expect(puzzle.incorrectTiles, puzzle.tileCount);
     expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
     expect(puzzle.clickCount, 0);
@@ -318,28 +324,74 @@ void main() {
     expect(clone.clickCount, 0);
   });
 
+  test('solvable', () {
+    expect(Puzzle.raw(4, _solvable4x4).solvable, isTrue);
+    expect(Puzzle.raw(4, _solvable4x4n2).solvable, isTrue);
+    expect(Puzzle.raw(4, _unsolvable4x4).solvable, isFalse);
+  });
+
   test('bad self play', () {
-    int _score(Puzzle p) => p.incorrectTiles + p.fitness;
-    final puzzle = Puzzle(4, 4);
+    int _solvePuzzle(Puzzle puzzle) {
+      int _score(Puzzle p) => p.fitness + p.incorrectTiles;
 
-    while (puzzle.incorrectTiles > 0) {
-      print(['*', puzzle.incorrectTiles, puzzle.fitness, _score(puzzle)]);
-      final options = Iterable.generate(puzzle.tileCount * 10, (i) {
-        final p = puzzle.clone();
-        return MapEntry(p, p.clickRandom(puzzle.tileCount));
-      }).toList();
+      while (puzzle.incorrectTiles > 0) {
+        final options = Iterable.generate(puzzle.tileCount * 20, (i) {
+          final p = puzzle.clone();
+          return MapEntry(
+              p,
+              p.clickRandom(
+                  puzzle.tileCount ~/ 2 + _rnd.nextInt(puzzle.tileCount)));
+        }).toList();
 
-      options.sort((a, b) {
-        return _score(a.key).compareTo(_score(b.key));
-      });
+        options.sort((a, b) {
+          return _score(a.key).compareTo(_score(b.key));
+        });
 
-      //if (_score(options.first.key) <= _score(puzzle)) {
-      options.first.value.forEach(puzzle.clickValue);
-      expect(options.first.key.toString(), puzzle.toString());
-      print('using! - now with ${puzzle.incorrectTiles} - ${_score(puzzle)}');
-      //} else {
-      print(puzzle);
+        options.first.value.forEach(puzzle.clickValue);
+        expect(options.first.key.toString(), puzzle.toString());
+
+        if (puzzle.clickCount % 1000 == 0) {
+          print(
+              '*** - ${puzzle.clickCount} - fitness ${puzzle.fitness} - left ${puzzle.incorrectTiles}');
+          print(puzzle);
+        }
+      }
+
+      return puzzle.clickCount;
     }
-    print(puzzle.clickCount);
+
+    print(_solvePuzzle(Puzzle.raw(4, _solvable4x4)));
+    print(_solvePuzzle(Puzzle.raw(4, _solvable4x4n2)));
+
+    Puzzle puzzle;
+
+    var totalPlays = 0;
+    var totalClicksToWin = 0;
+
+    for (var height = 3; height < 6; height++) {
+      for (var width = 3; width < 6; width++) {
+        for (var i = 0; i < 10; i++) {
+          do {
+            puzzle = Puzzle(width, height);
+          } while (!puzzle.solvable);
+
+          print(['<#####', height, width, i].join('\n'));
+
+          final clicksToSolve = _solvePuzzle(puzzle);
+          print('Clicks to solve: $clicksToSolve');
+          print('####>');
+          totalPlays++;
+          totalClicksToWin += clicksToSolve;
+        }
+        print(['!!!!', totalClicksToWin / totalPlays, '!!!!!'].join('\n'));
+      }
+    }
   }, skip: true);
 }
+
+// examples from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+const _solvable4x4 = [11, 0, 9, 1, 6, 10, 3, 13, 4, 15, 8, 14, 7, 12, 5, 2];
+
+const _solvable4x4n2 = [5, 0, 9, 1, 6, 10, 3, 13, 4, 15, 8, 14, 7, 11, 12, 2];
+
+const _unsolvable4x4 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 13, 15];

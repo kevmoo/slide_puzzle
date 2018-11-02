@@ -22,8 +22,8 @@ class Puzzle {
 
   Stream<PuzzleEvent> get onEvent => _controller.stream;
 
-  Puzzle.raw(int width, List<int> source)
-      : _array = Array2d.wrap(width, source) {
+  Puzzle.raw(int width, Iterable<int> source)
+      : _array = Array2d.wrap(width, source.toList()) {
     requireArgument(width >= 3, 'width', 'Cannot be less than three.');
     requireArgument(_array.height >= 3, 'height', 'Cannot be less than three.');
 
@@ -36,7 +36,7 @@ class Puzzle {
     }
   }
 
-  Puzzle(int width, int height) : this.raw(width, _randomList(width * height));
+  Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
 
   int valueAt(int x, int y) => _array.get(x, y);
 
@@ -46,8 +46,10 @@ class Puzzle {
 
   bool isCorrectPosition(int cellValue) => cellValue == _array[cellValue];
 
+  bool get solvable => _solvable(width, _array);
+
   void reset() {
-    _randomizeList(_array);
+    _randomizeList(width, _array);
     _clickCount = 0;
     _controller.add(PuzzleEvent.reset);
   }
@@ -91,7 +93,7 @@ class Puzzle {
     final clicks = <int>[];
     int lastTarget;
     while (clicks.length < count) {
-      final randomTarget = _rnd.nextInt(tileCount) + 1;
+      final randomTarget = _rnd.nextInt(tileCount);
       if (randomTarget != lastTarget && movable(randomTarget)) {
         final result = clickValue(randomTarget);
         assert(result);
@@ -161,13 +163,52 @@ class Puzzle {
   String toString() => _array.toString();
 }
 
-List<int> _randomList(int length) =>
-    _randomizeList(List<int>.generate(length, (i) => i));
+List<int> _randomList(int width, int height) =>
+    _randomizeList(width, List<int>.generate(width * height, (i) => i));
 
-List<int> _randomizeList(List<int> result) {
+List<int> _randomizeList(int width, List<int> result) {
   final copy = result.toList();
   do {
     result.shuffle(_rnd);
-  } while (result.any((v) => result[v] == v || result[v] == copy[v]));
+  } while (!_solvable(width, result) ||
+      result.any((v) => result[v] == v || result[v] == copy[v]));
   return result;
+}
+
+// Logic from
+// https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+// Used with gratitude!
+bool _solvable(int width, List<int> list) {
+  final height = list.length ~/ width;
+  assert(width * height == list.length);
+  final inversions = _countInversions(list);
+
+  if (width.isOdd) {
+    return inversions.isEven;
+  }
+
+  final blankRow = list.indexOf(list.length - 1) ~/ width;
+
+  if ((height - blankRow).isEven) {
+    return inversions.isOdd;
+  } else {
+    return inversions.isEven;
+  }
+}
+
+int _countInversions(List<int> items) {
+  final tileCount = items.length - 1;
+  var score = 0;
+  for (var i = 0; i < items.length; i++) {
+    final value = items[i];
+    if (value == tileCount) {
+      continue;
+    }
+    score += items
+        .skip(i + 1)
+        .where((v) => v != tileCount)
+        .where((v) => v < value)
+        .length;
+  }
+  return score;
 }
