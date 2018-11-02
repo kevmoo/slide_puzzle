@@ -214,15 +214,6 @@ class _PuzzleHomeState extends State<_PuzzleHome>
   }
 
   Widget _simpleWidgetForTile(int i) {
-    if (i == _puzzle.tileCount) {
-      return const Center(
-          child: Text(
-        '🦋',
-        style: TextStyle(),
-        textScaleFactor: 2.5,
-      ));
-    }
-
     final correctPosition = _puzzle.isCorrectPosition(i);
     final child = FlatButton(
       child: Text(
