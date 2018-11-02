@@ -39,10 +39,11 @@ void main() {
     });
   }
 
-  test('must be at least 3 x 3', () {
+  test('must be at least 2 x 3', () {
     expect(() => Puzzle.raw(3, []), throwsArgumentError);
     expect(() => Puzzle.raw(3, [0, 1, 2]), throwsArgumentError);
-    expect(() => Puzzle.raw(3, [0, 1, 2, 3, 4, 5]), throwsArgumentError);
+    expect(Puzzle.raw(3, [0, 1, 2, 3, 4, 5]).incorrectTiles, 0);
+    expect(Puzzle.raw(2, [0, 1, 2, 3, 4, 5]).incorrectTiles, 0);
   });
 
   test('initial values must be correct', () {
@@ -337,10 +338,7 @@ void main() {
       while (puzzle.incorrectTiles > 0) {
         final options = Iterable.generate(puzzle.tileCount * 20, (i) {
           final p = puzzle.clone();
-          return MapEntry(
-              p,
-              p.clickRandom(
-                  puzzle.tileCount ~/ 2 + _rnd.nextInt(puzzle.tileCount)));
+          return MapEntry(p, p.clickRandom(puzzle.tileCount));
         }).toList();
 
         options.sort((a, b) {
@@ -368,8 +366,11 @@ void main() {
     var totalPlays = 0;
     var totalClicksToWin = 0;
 
-    for (var height = 3; height < 6; height++) {
-      for (var width = 3; width < 6; width++) {
+    for (var height = 2; height < 6; height++) {
+      for (var width = 2; width < 6; width++) {
+        if (height * width < 6) {
+          continue;
+        }
         for (var i = 0; i < 10; i++) {
           do {
             puzzle = Puzzle(width, height);

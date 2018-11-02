@@ -24,8 +24,8 @@ class Puzzle {
 
   Puzzle.raw(int width, Iterable<int> source)
       : _array = Array2d.wrap(width, source.toList()) {
-    requireArgument(width >= 3, 'width', 'Cannot be less than three.');
-    requireArgument(_array.height >= 3, 'height', 'Cannot be less than three.');
+    requireArgument(width >= 2, 'width', 'Must be at least 2.');
+    requireArgument(_array.length >= 6, 'source', 'Must be at least 6 items');
 
     for (var i = 0; i < _array.length; i++) {
       requireArgument(
