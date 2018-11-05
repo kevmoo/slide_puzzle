@@ -42,7 +42,7 @@ class Puzzle {
   Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
 
   factory Puzzle.parse(String input) {
-    var rows = LineSplitter.split(input).map((line) {
+    final rows = LineSplitter.split(input).map((line) {
       final splits = line.trim().split(_spacesRegexp);
       return splits.map(int.parse).toList();
     }).toList();
