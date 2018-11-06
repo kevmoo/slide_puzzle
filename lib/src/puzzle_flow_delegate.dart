@@ -6,6 +6,7 @@ import 'puzzle.dart';
 import 'puzzle_animator.dart';
 
 class PuzzleFlowDelegate extends FlowDelegate {
+  static const _boxSize = 260.0;
   final PuzzleAnimator _puzzleAnimator;
 
   Puzzle get _puzzle => _puzzleAnimator.puzzle;
@@ -14,11 +15,12 @@ class PuzzleFlowDelegate extends FlowDelegate {
       : super(repaint: repaint);
 
   @override
-  Size getSize(BoxConstraints constraints) => const Size(260, 260);
+  Size getSize(BoxConstraints constraints) => const Size(_boxSize, _boxSize);
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
-    final minSquareSize = math.min(260 / _puzzle.width, 260 / _puzzle.height);
+    final minSquareSize =
+        math.min(_boxSize / _puzzle.width, _boxSize / _puzzle.height);
 
     return BoxConstraints.tight(Size(minSquareSize, minSquareSize));
   }
