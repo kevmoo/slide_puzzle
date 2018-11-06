@@ -18,6 +18,8 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   Duration _lastElapsed;
   StreamSubscription sub;
   bool _fancy = false;
+  bool _autoPlay = false;
+  Duration _tickerTimeSinceLastEvent = Duration.zero;
 
   PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle) {
     sub = _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
@@ -31,6 +33,17 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     }
   }
 
+  void _autoPlaySwitch(bool newValue) {
+    if (newValue != _autoPlay) {
+      setState(() {
+        _autoPlay = newValue;
+        if (_autoPlay) {
+          _ensureTicking();
+        }
+      });
+    }
+  }
+
   @override
   void initState() {
     _ticker ??= createTicker(_onTick);
@@ -39,6 +52,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   }
 
   void _onPuzzleEvent(PuzzleEvent e) {
+    _tickerTimeSinceLastEvent = Duration.zero;
     _ensureTicking();
     setState(() {
       // noop
@@ -55,7 +69,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     if (elapsed == Duration.zero) {
       _lastElapsed = elapsed;
     }
-    var delta = elapsed - _lastElapsed;
+    final delta = elapsed - _lastElapsed;
     _lastElapsed = elapsed;
 
     if (delta.inMilliseconds <= 0) {
@@ -64,13 +78,21 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       return;
     }
 
+    _tickerTimeSinceLastEvent += delta;
     _puzzleAnimator.update(delta);
 
     if (!_puzzleAnimator.stable) {
       _animationNotifier.animate();
     } else {
-      _ticker.stop();
-      _lastElapsed = null;
+      if (!_autoPlay) {
+        _ticker.stop();
+        _lastElapsed = null;
+      }
+    }
+
+    if (_autoPlay &&
+        _tickerTimeSinceLastEvent > const Duration(milliseconds: 200)) {
+      _puzzleAnimator.playRandom();
     }
   }
 
@@ -104,9 +126,16 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                 ),
                 Expanded(
                   flex: 0,
-                  child: Switch.adaptive(
+                  child: Switch(
                     value: _fancy,
                     onChanged: _fancySwitch,
+                  ),
+                ),
+                Expanded(
+                  flex: 0,
+                  child: Switch(
+                    value: _autoPlay,
+                    onChanged: _autoPlaySwitch,
                   ),
                 ),
               ],

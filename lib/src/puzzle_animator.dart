@@ -9,7 +9,11 @@ class PuzzleAnimator {
 
   bool _stable;
 
+  bool get stable => _stable;
+
   Point<double> location(int index) => _locations[index].location;
+
+  List<int> _lastPlan;
 
   PuzzleAnimator(this.puzzle)
       : _locations = List.generate(puzzle.length, (i) {
@@ -17,7 +21,53 @@ class PuzzleAnimator {
               (puzzle.width - 1.0) / 2, (puzzle.height - 1.0) / 2, 0, 0);
         });
 
-  bool get stable => _stable;
+  void playRandom({Duration limit = const Duration(milliseconds: 5)}) {
+    if (puzzle.fitness == 0) {
+      return;
+    }
+
+    limit ??= const Duration(milliseconds: 5);
+
+    final watch = Stopwatch()..start();
+
+    List<int> bestClicks;
+    int bestScore;
+
+    void evaluateClone(Puzzle clone, List<int> clicks) {
+      final score = _scorePuzzle(clone);
+
+      if (clone.toString() != puzzle.toString() &&
+          (bestScore == null || bestScore > score)) {
+        bestScore = score;
+        bestClicks = clicks;
+      }
+    }
+
+    if (_lastPlan != null) {
+      // If we have an existing plan, score it
+      final clone = puzzle.clone();
+      for (var click in _lastPlan) {
+        clone.clickValue(click);
+      }
+      evaluateClone(clone, _lastPlan);
+      if (bestScore != null) {
+        // We want to give `_lastPlan` a handicap to prioritize having a
+        // more stable plan
+        bestScore -= puzzle.length;
+      }
+    }
+
+    do {
+      final clone = puzzle.clone();
+      final clicks = clone.clickRandom(puzzle.tileCount);
+      evaluateClone(clone, clicks);
+    } while (watch.elapsed < limit);
+
+    // Only playing the first option in the "plan"
+    puzzle.clickValue(bestClicks.removeAt(0));
+
+    _lastPlan = bestClicks;
+  }
 
   void clickOrShake(int tileValue) {
     if (!puzzle.clickValue(tileValue)) {
@@ -61,4 +111,16 @@ class PuzzleAnimator {
     final target = puzzle.coordinatesOf(item);
     return Point(target.x.toDouble(), target.y.toDouble());
   }
+}
+
+int _scorePuzzle(Puzzle puzzle) {
+  var score = puzzle.fitness * puzzle.incorrectTiles;
+  for (var i = 0; i < puzzle.tileCount; i++) {
+    if (puzzle.isCorrectPosition(i)) {
+      score -= puzzle.length;
+    } else {
+      break;
+    }
+  }
+  return score;
 }
