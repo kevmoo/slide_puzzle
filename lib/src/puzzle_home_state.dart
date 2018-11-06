@@ -54,14 +54,16 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
 
   void _onTick(Duration elapsed) {
     if (elapsed == Duration.zero) {
-      elapsed = const Duration(milliseconds: 17);
+      _lastElapsed = elapsed;
     }
-    if (_lastElapsed != null && elapsed > _lastElapsed) {
-      _delta = elapsed - _lastElapsed;
-    } else {
-      _delta = const Duration(milliseconds: 17);
-    }
+    _delta = elapsed - _lastElapsed;
     _lastElapsed = elapsed;
+
+    if (_delta.inMilliseconds <= 0) {
+      // `_delta` may be negative or zero if `elapsed` is zero (first tick)
+      // or during a restart. Just ignore this case.
+      return;
+    }
 
     _puzzleAnimator.update(_delta);
 
