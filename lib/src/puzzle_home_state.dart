@@ -35,19 +35,21 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   @override
   void initState() {
     _ticker ??= createTicker(_onTick);
-    if (!_ticker.isTicking) {
-      _ticker.start();
-    }
+    _ensureTicking();
     super.initState();
   }
 
   void _onPuzzleEvent(PuzzleEvent e) {
-    if (!_ticker.isTicking) {
-      _ticker.start();
-    }
+    _ensureTicking();
     setState(() {
       // noop
     });
+  }
+
+  void _ensureTicking() {
+    if (!_ticker.isTicking) {
+      _ticker.start();
+    }
   }
 
   void _onTick(Duration elapsed) {
