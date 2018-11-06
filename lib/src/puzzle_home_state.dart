@@ -16,7 +16,6 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
 
   Ticker _ticker;
   Duration _lastElapsed;
-  Duration _delta;
   StreamSubscription sub;
   bool _fancy = false;
 
@@ -56,16 +55,16 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     if (elapsed == Duration.zero) {
       _lastElapsed = elapsed;
     }
-    _delta = elapsed - _lastElapsed;
+    var delta = elapsed - _lastElapsed;
     _lastElapsed = elapsed;
 
-    if (_delta.inMilliseconds <= 0) {
+    if (delta.inMilliseconds <= 0) {
       // `_delta` may be negative or zero if `elapsed` is zero (first tick)
       // or during a restart. Just ignore this case.
       return;
     }
 
-    _puzzleAnimator.update(_delta);
+    _puzzleAnimator.update(delta);
 
     if (!_puzzleAnimator.stable) {
       _animationNotifier.animate();
