@@ -25,7 +25,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     sub = _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
   }
 
-  void _fancySwitch(bool newValue) {
+  void _setFancy(bool newValue) {
     if (newValue != _fancy) {
       setState(() {
         _fancy = newValue;
@@ -33,14 +33,16 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     }
   }
 
-  void _autoPlaySwitch(bool newValue) {
-    setState(() {
-      // Only allow enabling autoPlay if the puzzle is not solved
-      _autoPlay = newValue && !_puzzleAnimator.solved;
-      if (_autoPlay) {
-        _ensureTicking();
-      }
-    });
+  void _setAutoPlay(bool newValue) {
+    if (newValue != _autoPlay) {
+      setState(() {
+        // Only allow enabling autoPlay if the puzzle is not solved
+        _autoPlay = newValue && !_puzzleAnimator.solved;
+        if (_autoPlay) {
+          _ensureTicking();
+        }
+      });
+    }
   }
 
   @override
@@ -94,7 +96,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       _puzzleAnimator.playRandom();
 
       if (_puzzleAnimator.solved) {
-        _autoPlaySwitch(false);
+        _setAutoPlay(false);
       }
     }
   }
@@ -131,14 +133,14 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                   flex: 0,
                   child: Switch(
                     value: _fancy,
-                    onChanged: _fancySwitch,
+                    onChanged: _setFancy,
                   ),
                 ),
                 Expanded(
                   flex: 0,
                   child: Switch(
                     value: _autoPlay,
-                    onChanged: _puzzleAnimator.solved ? null : _autoPlaySwitch,
+                    onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
                   ),
                 ),
               ],
@@ -158,8 +160,12 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       );
 
   Widget _widgetForTile(int i) {
-    final tilePress =
-        _puzzleAnimator.solved ? null : () => _puzzleAnimator.clickOrShake(i);
+    final tilePress = _puzzleAnimator.solved
+        ? null
+        : () {
+            _setAutoPlay(false);
+            _puzzleAnimator.clickOrShake(i);
+          };
 
     final correctPosition = _puzzle.isCorrectPosition(i);
 
