@@ -7,7 +7,7 @@ void main() {
     final tiles = (width * height - 1);
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(PuzzleApp(width, height));
+    await tester.pumpWidget(PuzzleApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsNothing);

@@ -101,62 +101,89 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     }
   }
 
+  /// Returns the number of tiles left, but prefixed with enough whitespace
+  /// so the string doesn't change length for all valid values for this puzzle
+  String get _tilesLeftText => _puzzle.incorrectTiles
+      .toString()
+      .padLeft(_puzzle.tileCount.toString().length);
+
+  /// Returns the number of tiles left, but prefixed with enough whitespace
+  /// so the string doesn't change length for all valid values for this puzzle
+  String get _clickCount => _puzzle.clickCount
+      .toString()
+      .padLeft((_puzzle.tileCount * _puzzle.tileCount).toString().length);
+
   @override
-  Widget build(BuildContext context) => Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(6),
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Slide Puzzle'),
+        ),
+        drawer: Drawer(
+            child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              child: Text(
+                'Options',
+                textScaleFactor: 2,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.teal,
+              ),
+            ),
+            CheckboxListTile(
+              title: const Text('Auto play'),
+              value: _autoPlay,
+              onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
+            ),
+            CheckboxListTile(
+              title: const Text('Seattle'),
+              value: _fancy,
+              onChanged: _setFancy,
+            ),
+          ],
+        )),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: DefaultTextStyle(
+            style: const TextStyle(
+              fontSize: 20,
+              fontFamily: 'monospace',
+              color: Colors.black,
+            ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Clicks: ${_puzzle.clickCount}',
+                    'Clicks: $_clickCount',
                     textAlign: TextAlign.center,
                   ),
+                ),
+                FloatingActionButton(
+                  onPressed: _puzzle.reset,
+                  child: const Icon(Icons.refresh),
+                  //label: const Text('New game'),
                 ),
                 Expanded(
                   child: Text(
-                    'Tiles left: ${_puzzle.incorrectTiles}',
+                    'Tiles left: $_tilesLeftText',
                     textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  child: RaisedButton(
-                    onPressed: _puzzle.reset,
-                    child: const Text(
-                      'New game...',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 0,
-                  child: Switch(
-                    value: _fancy,
-                    onChanged: _setFancy,
-                  ),
-                ),
-                Expanded(
-                  flex: 0,
-                  child: Switch(
-                    value: _autoPlay,
-                    onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
                   ),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Flow(
-                  delegate:
-                      PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
-                  children:
-                      List<Widget>.generate(_puzzle.length, _widgetForTile)),
+        ),
+        body: SizedBox.expand(
+          child: FittedBox(
+            alignment: Alignment.center,
+            fit: BoxFit.contain,
+            child: Flow(
+              delegate: PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
+              children: List<Widget>.generate(_puzzle.length, _widgetForTile),
             ),
           ),
-        ],
+        ),
       );
 
   Widget _widgetForTile(int i) {

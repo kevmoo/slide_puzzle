@@ -3,30 +3,22 @@ import 'package:flutter/material.dart';
 import 'src/puzzle.dart';
 import 'src/puzzle_home_state.dart';
 
-void main() => runApp(PuzzleApp(4, 4));
+void main() => runApp(PuzzleApp());
 
 class PuzzleApp extends StatelessWidget {
   final int rows, columns;
 
-  String get _title => '${rows * columns - 1} Puzzle';
-
-  PuzzleApp(this.rows, this.columns);
+  PuzzleApp({int columns = 4, int rows = 4})
+      : columns = columns ?? 4,
+        rows = rows ?? 4;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: _title,
+        title: 'Slide Puzzle',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.teal,
         ),
-        home: Scaffold(
-          appBar: AppBar(
-            title: Text(_title),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(6),
-            child: _PuzzleHome(rows, columns),
-          ),
-        ),
+        home: _PuzzleHome(rows, columns),
       );
 }
 
