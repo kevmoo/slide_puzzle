@@ -1,12 +1,10 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import 'puzzle.dart';
 import 'puzzle_animator.dart';
 
 class PuzzleFlowDelegate extends FlowDelegate {
-  static const _boxSize = 260.0;
+  static const _tileSize = 65.0;
   final PuzzleAnimator _puzzleAnimator;
 
   Puzzle get _puzzle => _puzzleAnimator.puzzle;
@@ -15,34 +13,20 @@ class PuzzleFlowDelegate extends FlowDelegate {
       : super(repaint: repaint);
 
   @override
-  Size getSize(BoxConstraints constraints) => const Size(_boxSize, _boxSize);
+  Size getSize(BoxConstraints constraints) =>
+      Size(_tileSize * _puzzle.width, _tileSize * _puzzle.height);
 
   @override
-  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
-    final minSquareSize =
-        math.min(_boxSize / _puzzle.width, _boxSize / _puzzle.height);
-
-    return BoxConstraints.tight(Size(minSquareSize, minSquareSize));
-  }
+  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) =>
+      BoxConstraints.tight(const Size(_tileSize, _tileSize));
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    final minSquareSize = math.min(context.size.width / _puzzle.width,
-        context.size.height / _puzzle.height);
-
-    final delta = ((context.size -
-            Offset(minSquareSize * _puzzle.width,
-                minSquareSize * _puzzle.height)) as Size) *
-        0.5;
-
-    final tileSize = context.getChildSize(0);
     for (var i = 0; i < _puzzle.length; i++) {
       final tileLocation = _puzzleAnimator.location(i);
       context.paintChild(i,
-          transform: Matrix4.translationValues(
-              tileLocation.x * tileSize.width + delta.width,
-              tileLocation.y * tileSize.height + delta.height,
-              i.toDouble()));
+          transform: Matrix4.translationValues(tileLocation.x * _tileSize,
+              tileLocation.y * _tileSize, i.toDouble()));
     }
   }
 
