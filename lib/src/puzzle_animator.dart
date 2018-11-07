@@ -11,6 +11,8 @@ class PuzzleAnimator {
 
   bool get stable => _stable;
 
+  bool get solved => puzzle.incorrectTiles == 0;
+
   Point<double> location(int index) => _locations[index].location;
 
   List<int> _lastPlan;
