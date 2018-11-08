@@ -115,7 +115,6 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: const Color.fromARGB(255, 211, 255, 211),
         appBar: AppBar(
           title: const Text('Slide Puzzle'),
         ),

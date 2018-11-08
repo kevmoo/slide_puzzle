@@ -17,6 +17,7 @@ class PuzzleApp extends StatelessWidget {
         title: 'Slide Puzzle',
         theme: ThemeData(
           primarySwatch: Colors.teal,
+          scaffoldBackgroundColor: const Color.fromARGB(255, 211, 255, 211),
         ),
         home: _PuzzleHome(rows, columns),
       );
