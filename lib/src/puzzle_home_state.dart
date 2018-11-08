@@ -115,6 +115,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+        backgroundColor: const Color.fromARGB(255, 211, 255, 211),
         appBar: AppBar(
           title: const Text('Slide Puzzle'),
         ),
@@ -178,9 +179,17 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
           child: FittedBox(
             alignment: Alignment.center,
             fit: BoxFit.contain,
-            child: Flow(
-              delegate: PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
-              children: List<Widget>.generate(_puzzle.length, _widgetForTile),
+            child: Container(
+              margin: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 3),
+                color: Colors.white,
+              ),
+              child: Flow(
+                delegate:
+                    PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
+                children: List<Widget>.generate(_puzzle.length, _widgetForTile),
+              ),
             ),
           ),
         ),
@@ -198,11 +207,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
 
     if (_fancy) {
       if (i == _puzzle.tileCount && !_puzzleAnimator.solved) {
-        return const Center(
-            child: Text(
-          '🦋',
-          textScaleFactor: 2.5,
-        ));
+        return const Center();
       }
 
       final decorationImage = DecorationImagePlus(
@@ -239,20 +244,20 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
               ),
       );
 
-      return FlatButton(
+      return OutlineButton(
+        highlightedBorderColor: Colors.transparent,
+        highlightElevation: 0,
         child: content,
         padding: const EdgeInsets.symmetric(),
-        //shape: const Border(),
         onPressed: tilePress,
         color: Colors.grey,
       );
     } else {
       if (i == _puzzle.tileCount) {
-        return Center(
-            child: Text(
-          _puzzleAnimator.solved ? '👍' : '🦋',
-          textScaleFactor: 2.5,
-        ));
+        if (_puzzleAnimator.solved) {
+          return const Center(child: Icon(Icons.thumb_up));
+        }
+        return const Center();
       }
 
       final child = FlatButton(
