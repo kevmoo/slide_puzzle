@@ -134,13 +134,13 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                 child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
-                const DrawerHeader(
+                DrawerHeader(
                   child: Text(
                     'Options',
-                    textScaleFactor: 2,
+                    style: Theme.of(context).primaryTextTheme.display1,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.teal,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 CheckboxListTile(
