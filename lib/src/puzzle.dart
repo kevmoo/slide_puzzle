@@ -30,13 +30,7 @@ class Puzzle {
     requireArgument(width >= 2, 'width', 'Must be at least 2.');
     requireArgument(_array.length >= 6, 'source', 'Must be at least 6 items');
 
-    for (var i = 0; i < _array.length; i++) {
-      requireArgument(
-          _array.contains(i),
-          'source',
-          'Must contain each number from 0 to `length - 1` '
-          'once and only once.');
-    }
+    _validate(_array);
   }
 
   Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
@@ -60,8 +54,19 @@ class Puzzle {
 
   bool get solvable => _solvable(width, _array);
 
-  void reset() {
-    _randomizeList(width, _array);
+  void reset({List<int> source}) {
+    if (source == null) {
+      _randomizeList(width, _array);
+    } else {
+      if (source.length != _array.length) {
+        throw ArgumentError.value(source, 'source', 'Cannot change the size!');
+      }
+      _validate(source);
+      if (!_solvable(width, source)) {
+        throw ArgumentError.value(source, 'source', 'Not a solvable puzzle.');
+      }
+      _array.setAll(0, source);
+    }
     _clickCount = 0;
     _controller.add(PuzzleEvent.reset);
   }
@@ -205,6 +210,16 @@ bool _solvable(int width, List<int> list) {
     return inversions.isOdd;
   } else {
     return inversions.isEven;
+  }
+}
+
+void _validate(List<int> source) {
+  for (var i = 0; i < source.length; i++) {
+    requireArgument(
+        source.contains(i),
+        'source',
+        'Must contain each number from 0 to `length - 1` '
+        'once and only once.');
   }
 }
 

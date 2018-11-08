@@ -17,6 +17,9 @@ class PuzzleAnimator {
 
   List<int> _lastPlan;
 
+  int _lastBadClick;
+  int _badClickCount = 0;
+
   PuzzleAnimator(this.puzzle)
       : _locations = List.generate(puzzle.length, (i) {
           return Body.raw(
@@ -74,6 +77,33 @@ class PuzzleAnimator {
   void clickOrShake(int tileValue) {
     if (!puzzle.clickValue(tileValue)) {
       _shake(tileValue);
+
+      // This is logic to allow a user to skip to the end – useful for testing
+      // click on 5 un-movable tiles in a row, but not the same tile twice
+      // in a row
+      if (tileValue != _lastBadClick) {
+        _badClickCount++;
+        if (_badClickCount >= 5) {
+          // Do the reset!
+          final newValues = List.generate(puzzle.length, (i) {
+            if (i == puzzle.tileCount) {
+              return puzzle.tileCount - 1;
+            } else if (i == (puzzle.tileCount - 1)) {
+              return puzzle.tileCount;
+            }
+            return i;
+          });
+          puzzle.reset(source: newValues);
+          _lastBadClick = null;
+          _badClickCount = 0;
+        }
+      } else {
+        _badClickCount = 0;
+      }
+      _lastBadClick = tileValue;
+    } else {
+      _lastBadClick = null;
+      _badClickCount = 0;
     }
   }
 
