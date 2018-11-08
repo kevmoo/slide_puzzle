@@ -114,84 +114,94 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       .padLeft((_puzzle.tileCount * _puzzle.tileCount).toString().length);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Slide Puzzle'),
-        ),
-        drawer: Drawer(
-            child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            const DrawerHeader(
-              child: Text(
-                'Options',
-                textScaleFactor: 2,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.teal,
+  Widget build(BuildContext context) => Stack(
+        children: <Widget>[
+          const SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: Image(
+                image: AssetImage('asset/seattle.jpg'),
+                colorBlendMode: BlendMode.lighten,
+                color: Colors.white70,
               ),
             ),
-            CheckboxListTile(
-              title: const Text('Auto play'),
-              value: _autoPlay,
-              onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
+          ),
+          Scaffold(
+            appBar: AppBar(
+              title: const Text('Slide Puzzle'),
             ),
-            CheckboxListTile(
-              title: const Text('Seattle'),
-              value: _fancy,
-              onChanged: _setFancy,
-            ),
-          ],
-        )),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: DefaultTextStyle(
-            style: const TextStyle(
-              fontSize: 20,
-              fontFamily: 'monospace',
-              color: Colors.black,
-            ),
-            child: Row(
+            drawer: Drawer(
+                child: ListView(
+              padding: EdgeInsets.zero,
               children: <Widget>[
-                Expanded(
+                const DrawerHeader(
                   child: Text(
-                    'Clicks: $_clickCount',
-                    textAlign: TextAlign.center,
+                    'Options',
+                    textScaleFactor: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.teal,
                   ),
                 ),
-                FloatingActionButton(
-                  onPressed: _puzzle.reset,
-                  child: const Icon(Icons.refresh),
-                  //label: const Text('New game'),
+                CheckboxListTile(
+                  title: const Text('Auto play'),
+                  value: _autoPlay,
+                  onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
                 ),
-                Expanded(
-                  child: Text(
-                    'Tiles left: $_tilesLeftText',
-                    textAlign: TextAlign.center,
-                  ),
+                CheckboxListTile(
+                  title: const Text('Seattle'),
+                  value: _fancy,
+                  onChanged: _setFancy,
                 ),
               ],
+            )),
+            bottomNavigationBar: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Clicks: $_clickCount',
+                      textScaleFactor: 2.5,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  FloatingActionButton(
+                    onPressed: _puzzle.reset,
+                    child: const Icon(Icons.refresh),
+                    //label: const Text('New game'),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Tiles left: $_tilesLeftText',
+                      textScaleFactor: 2.5,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            body: SizedBox.expand(
+              child: FittedBox(
+                alignment: Alignment.center,
+                fit: BoxFit.contain,
+                child: Container(
+                  margin: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 3),
+                    color: Theme.of(context).primaryColorDark.withAlpha(100),
+                  ),
+                  child: Flow(
+                    delegate:
+                        PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
+                    children:
+                        List<Widget>.generate(_puzzle.length, _widgetForTile),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-        body: SizedBox.expand(
-          child: FittedBox(
-            alignment: Alignment.center,
-            fit: BoxFit.contain,
-            child: Container(
-              margin: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 3),
-                color: Colors.white,
-              ),
-              child: Flow(
-                delegate:
-                    PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
-                children: List<Widget>.generate(_puzzle.length, _widgetForTile),
-              ),
-            ),
-          ),
-        ),
+        ],
       );
 
   Widget _widgetForTile(int i) {
@@ -265,11 +275,14 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
           style: TextStyle(
             fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
           ),
+          textScaleFactor: 2.5,
         ),
         onPressed: tilePress,
         shape: RoundedRectangleBorder(
-            side: const BorderSide(width: 1),
-            borderRadius: BorderRadius.circular(10)),
+          side: const BorderSide(width: 1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: const EdgeInsets.symmetric(),
         color: Colors.white,
       );
 
