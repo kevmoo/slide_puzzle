@@ -264,7 +264,12 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     } else {
       if (i == _puzzle.tileCount) {
         if (_puzzleAnimator.solved) {
-          return const Center(child: Icon(Icons.thumb_up));
+          return const Center(
+              child: Icon(
+            Icons.thumb_up,
+            size: 36,
+            color: Colors.white,
+          ));
         }
         return const Center();
       }
@@ -284,6 +289,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
         ),
         padding: const EdgeInsets.symmetric(),
         color: Colors.white,
+        disabledColor: Colors.white,
       );
 
       return Padding(
