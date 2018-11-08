@@ -15,9 +15,6 @@ class PuzzleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Slide Puzzle',
-        theme: ThemeData(
-          scaffoldBackgroundColor: Colors.transparent,
-        ),
         home: _PuzzleHome(rows, columns),
       );
 }

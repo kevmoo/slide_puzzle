@@ -121,12 +121,11 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
               fit: BoxFit.cover,
               child: Image(
                 image: AssetImage('asset/seattle.jpg'),
-                colorBlendMode: BlendMode.lighten,
-                color: Colors.white70,
               ),
             ),
           ),
           Scaffold(
+            backgroundColor: Colors.white70,
             appBar: AppBar(
               title: const Text('Slide Puzzle'),
             ),
@@ -143,12 +142,12 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
-                CheckboxListTile(
+                SwitchListTile(
                   title: const Text('Auto play'),
                   value: _autoPlay,
                   onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
                 ),
-                CheckboxListTile(
+                SwitchListTile(
                   title: const Text('Seattle'),
                   value: _fancy,
                   onChanged: _setFancy,
