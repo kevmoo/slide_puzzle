@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'decoration_image_plus.dart';
+import 'frame_nanny.dart';
 import 'puzzle.dart';
 import 'puzzle_animator.dart';
 import 'puzzle_flow_delegate.dart';
@@ -12,7 +12,7 @@ import 'puzzle_flow_delegate.dart';
 class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   final PuzzleAnimator _puzzleAnimator;
   final _animationNotifier = _AnimationNotifier();
-  final _nanny = _FrameNanny();
+  final _nanny = FrameNanny();
 
   Puzzle get _puzzle => _puzzleAnimator.puzzle;
 
@@ -72,7 +72,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     if (elapsed == Duration.zero) {
       _lastElapsed = elapsed;
     }
-    var delta = elapsed - _lastElapsed;
+    final delta = elapsed - _lastElapsed;
     _lastElapsed = elapsed;
 
     if (delta.inMilliseconds <= 0) {
@@ -307,66 +307,6 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
     sub.cancel();
     super.dispose();
   }
-}
-
-class _FrameNanny {
-  static const _bufferSize = 200;
-  static const _maxFrameDuration = Duration(milliseconds: 34);
-  final _buffer = ListQueue<Duration>(_bufferSize);
-
-  final _watch = Stopwatch();
-
-  int _goodCount = 0;
-  int _badCount = 0;
-  Duration _badSum = const Duration();
-  Duration _goodSum = const Duration();
-
-  int get _totalCount => _goodCount + _badCount;
-
-  Duration tick(Duration source) {
-    _watch.start();
-    _buffer.add(source);
-
-    while (_buffer.length > _bufferSize) {
-      final removed = _buffer.removeFirst();
-      if (removed > _maxFrameDuration) {
-        _badCount--;
-        _badSum -= removed;
-      } else {
-        _goodCount--;
-        _goodSum -= removed;
-      }
-    }
-
-    if (source > _maxFrameDuration) {
-      _badCount++;
-      _badSum += source;
-      source = _maxFrameDuration;
-    } else {
-      _goodCount++;
-      _goodSum += source;
-    }
-
-    if (_watch.elapsed > const Duration(seconds: 1)) {
-      _watch.reset();
-      print([
-        'Nanny:',
-        '${(100 * _goodCount / _totalCount).toStringAsFixed(1)}%',
-        'bad avg:',
-        _safeDivide(_badSum, _badCount),
-        'good avg:',
-        _safeDivide(_goodSum, _goodCount),
-      ].join('  '));
-    }
-    return source;
-  }
-}
-
-int _safeDivide(Duration source, int divisor) {
-  if (divisor == 0) {
-    return null;
-  }
-  return (source ~/ divisor).inMilliseconds;
 }
 
 class _AnimationNotifier extends ChangeNotifier {
