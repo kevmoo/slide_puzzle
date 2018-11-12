@@ -144,12 +144,12 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
-                SwitchListTile(
+                CheckboxListTile(
                   title: const Text('Auto play'),
                   value: _autoPlay,
                   onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
                 ),
-                SwitchListTile(
+                CheckboxListTile(
                   title: const Text('Seattle'),
                   value: _fancy,
                   onChanged: _setFancy,
