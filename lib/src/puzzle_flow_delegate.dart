@@ -31,5 +31,6 @@ class PuzzleFlowDelegate extends FlowDelegate {
   }
 
   @override
-  bool shouldRepaint(covariant PuzzleFlowDelegate oldDelegate) => true;
+  bool shouldRepaint(covariant PuzzleFlowDelegate oldDelegate) =>
+      !identical(oldDelegate._puzzleAnimator, _puzzleAnimator);
 }
