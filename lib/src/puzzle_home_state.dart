@@ -19,7 +19,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   Ticker _ticker;
   Duration _lastElapsed;
   StreamSubscription sub;
-  bool _fancy = false;
+  bool _fancy = true;
   bool _autoPlay = false;
   Duration _tickerTimeSinceLastEvent = Duration.zero;
 
@@ -115,6 +115,8 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       .toString()
       .padLeft((_puzzle.tileCount * _puzzle.tileCount).toString().length);
 
+  final _paramScale = 1.5;
+
   @override
   Widget build(BuildContext context) => Stack(
         children: <Widget>[
@@ -126,79 +128,96 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
               ),
             ),
           ),
-          Scaffold(
-            backgroundColor: Colors.white70,
-            appBar: AppBar(
-              title: const Text('Slide Puzzle'),
-            ),
-            drawer: Drawer(
-                child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  child: Text(
-                    'Options',
-                    style: Theme.of(context).primaryTextTheme.display1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-                CheckboxListTile(
-                  title: const Text('Auto play'),
-                  value: _autoPlay,
-                  onChanged: _puzzleAnimator.solved ? null : _setAutoPlay,
-                ),
-                CheckboxListTile(
-                  title: const Text('Seattle'),
-                  value: _fancy,
-                  onChanged: _setFancy,
-                ),
-              ],
-            )),
-            bottomNavigationBar: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+          Material(
+            color: const Color.fromARGB(153, 90, 135, 170),
+            child: Padding(
+              padding: const EdgeInsets.all(30),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      'Clicks: $_clickCount',
-                      textScaleFactor: 2.5,
-                      textAlign: TextAlign.center,
+                    child: Container(
+                      margin: const EdgeInsets.all(35),
+                      padding: const EdgeInsets.all(25),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2),
+                        color: Colors.white70,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          ListTile(
+                            title: Text(
+                              'Moves',
+                              textScaleFactor: _paramScale,
+                            ),
+                            trailing: Text(
+                              _clickCount,
+                              textScaleFactor: _paramScale,
+                            ),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Tiles left',
+                              textScaleFactor: _paramScale,
+                            ),
+                            trailing: Text(
+                              _tilesLeftText,
+                              textScaleFactor: _paramScale,
+                            ),
+                          ),
+                          const Divider(),
+                          const ListTile(
+                            title: Text(
+                              'Options',
+                              textScaleFactor: 1.3,
+                            ),
+                          ),
+                          CheckboxListTile(
+                            title: const Text('Auto play'),
+                            value: _autoPlay,
+                            onChanged:
+                                _puzzleAnimator.solved ? null : _setAutoPlay,
+                          ),
+                          CheckboxListTile(
+                            title: const Text('Seattle'),
+                            value: _fancy,
+                            onChanged: _setFancy,
+                          ),
+                          FlatButton(
+                            onPressed: _puzzle.reset,
+                            child: const Text('Shuffle tiles'),
+                            //label: const Text('New game'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  FloatingActionButton(
-                    onPressed: _puzzle.reset,
-                    child: const Icon(Icons.refresh),
-                    //label: const Text('New game'),
-                  ),
                   Expanded(
-                    child: Text(
-                      'Tiles left: $_tilesLeftText',
-                      textScaleFactor: 2.5,
-                      textAlign: TextAlign.center,
+                    flex: 2,
+                    child: Container(
+                      margin: const EdgeInsets.all(35),
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2),
+                        color: Colors.white70,
+                      ),
+                      child: FittedBox(
+                        alignment: Alignment.center,
+                        fit: BoxFit.contain,
+                        child: Flow(
+                          delegate: PuzzleFlowDelegate(
+                              _puzzleAnimator, _animationNotifier),
+                          children: List<Widget>.generate(
+                              _puzzle.length, _widgetForTile),
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            body: SizedBox.expand(
-              child: FittedBox(
-                alignment: Alignment.center,
-                fit: BoxFit.contain,
-                child: Container(
-                  margin: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 3),
-                    color: Theme.of(context).primaryColorDark.withAlpha(100),
-                  ),
-                  child: Flow(
-                    delegate:
-                        PuzzleFlowDelegate(_puzzleAnimator, _animationNotifier),
-                    children:
-                        List<Widget>.generate(_puzzle.length, _widgetForTile),
-                  ),
-                ),
               ),
             ),
           ),
@@ -236,10 +255,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
             ? Container()
             : Container(
                 decoration: ShapeDecoration(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
+                  shape: const CircleBorder(
                   ),
                   color: correctPosition ? Colors.black38 : Colors.white54,
                 ),
@@ -275,18 +291,19 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
         return const Center();
       }
 
-      final child = FlatButton(
+      final child = RaisedButton(
+        elevation: 1,
         child: Text(
           (i + 1).toString(),
           style: TextStyle(
             fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
           ),
-          textScaleFactor: 2.5,
+          textScaleFactor: 1.4,
         ),
         onPressed: tilePress,
         shape: RoundedRectangleBorder(
           side: const BorderSide(width: 1),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
         ),
         padding: const EdgeInsets.symmetric(),
         color: Colors.white,
@@ -294,7 +311,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       );
 
       return Padding(
-        padding: const EdgeInsets.all(3),
+        padding: const EdgeInsets.all(2),
         child: child,
       );
     }
