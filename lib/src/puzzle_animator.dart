@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'body.dart';
 import 'puzzle.dart';
 
-export 'puzzle.dart' show PuzzleEvent;
+enum PuzzleEvent { click, reset }
 
 class PuzzleAnimator {
   final Puzzle _puzzle;
   final List<Body> _locations;
+  final _controller = StreamController<PuzzleEvent>();
 
   bool _stable;
 
@@ -27,9 +29,12 @@ class PuzzleAnimator {
 
   int get clickCount => _puzzle.clickCount;
 
-  void reset() => _puzzle.reset();
+  void reset() {
+    _puzzle.reset();
+    _controller.add(PuzzleEvent.reset);
+  }
 
-  Stream<PuzzleEvent> get onEvent => _puzzle.onEvent;
+  Stream<PuzzleEvent> get onEvent => _controller.stream;
 
   bool isCorrectPosition(int value) => _puzzle.isCorrectPosition(value);
 
@@ -91,13 +96,13 @@ class PuzzleAnimator {
     } while (watch.elapsed < limit);
 
     // Only playing the first option in the "plan"
-    _puzzle.clickValue(bestClicks.removeAt(0));
+    _clickValue(bestClicks.removeAt(0));
 
     _lastPlan = bestClicks;
   }
 
   void clickOrShake(int tileValue) {
-    if (!_puzzle.clickValue(tileValue)) {
+    if (!_clickValue(tileValue)) {
       _shake(tileValue);
 
       // This is logic to allow a user to skip to the end – useful for testing
@@ -127,6 +132,11 @@ class PuzzleAnimator {
       _lastBadClick = null;
       _badClickCount = 0;
     }
+  }
+
+  bool _clickValue(int value) {
+    _controller.add(PuzzleEvent.click);
+    return _puzzle.clickValue(value);
   }
 
   void _shake(int tileValue) {

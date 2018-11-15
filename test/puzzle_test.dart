@@ -22,23 +22,6 @@ void _printPuzzleOnFailure(Puzzle puzzle) {
 Future _micro() => Future.delayed(Duration(milliseconds: 1));
 
 void main() {
-  StreamSubscription sub;
-  final events = <PuzzleEvent>[];
-
-  void onEvents(Puzzle puzzle) {
-    sub?.cancel();
-    sub = null;
-    events.clear();
-
-    sub = puzzle.onEvent.listen(events.add);
-
-    addTearDown(() {
-      sub?.cancel();
-      sub = null;
-      events.clear();
-    });
-  }
-
   test('must be at least 2 x 3', () {
     expect(() => Puzzle.raw(3, []), throwsArgumentError);
     expect(() => Puzzle.raw(3, [0, 1, 2]), throwsArgumentError);
@@ -122,7 +105,6 @@ void main() {
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
-        onEvents(puzzle);
         final zeroLocation = puzzle.coordinatesOf(24);
 
         for (var j = 0; j < 10; j++) {
@@ -138,13 +120,11 @@ void main() {
         }
 
         await _micro();
-        expect(events, hasLength(10));
       }
     });
 
     test('click to shift', () async {
       final puzzle = _ordered(4, 4, offset: 1);
-      onEvents(puzzle);
       expect(puzzle.incorrectTiles, 15);
       expect(puzzle.toString(), '''
 15  0  1  2
@@ -221,7 +201,6 @@ void main() {
       expect(puzzle.clickCount, 8);
 
       await _micro();
-      expect(events, hasLength(15));
     });
   });
 
@@ -303,12 +282,10 @@ void main() {
 
   test('click random', () async {
     final puzzle = Puzzle(4, 4);
-    onEvents(puzzle);
     final moves = puzzle.clickRandom(5);
     expect(moves.length, 5);
     expect(puzzle.clickCount, 5);
     await _micro();
-    expect(events, hasLength(5));
   });
 
   test('clone', () {

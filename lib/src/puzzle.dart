@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math' show Point, Random;
 import 'dart:typed_data';
@@ -10,11 +9,8 @@ final _rnd = Random();
 
 final _spacesRegexp = RegExp(' +');
 
-enum PuzzleEvent { click, reset, noopClick }
-
 class Puzzle {
   final Array2d _array;
-  final _controller = StreamController<PuzzleEvent>();
 
   int _clickCount = 0;
 
@@ -23,8 +19,6 @@ class Puzzle {
   int get width => _array.width;
 
   int get height => _array.height;
-
-  Stream<PuzzleEvent> get onEvent => _controller.stream;
 
   Puzzle._raw(this._array);
 
@@ -70,7 +64,6 @@ class Puzzle {
     _array.setValues(source);
 
     _clickCount = 0;
-    _controller.add(PuzzleEvent.reset);
   }
 
   int get incorrectTiles {
@@ -138,14 +131,12 @@ class Puzzle {
 
   bool clickValue(int tileValue) {
     if (!movable(tileValue)) {
-      _controller.add(PuzzleEvent.noopClick);
       return false;
     }
     final target = coordinatesOf(tileValue);
 
     _shift(target);
     _clickCount++;
-    _controller.add(PuzzleEvent.click);
     return true;
   }
 
