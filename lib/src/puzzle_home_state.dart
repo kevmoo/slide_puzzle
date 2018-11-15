@@ -5,7 +5,6 @@ import 'package:flutter/scheduler.dart';
 
 import 'decoration_image_plus.dart';
 import 'frame_nanny.dart';
-import 'puzzle.dart';
 import 'puzzle_animator.dart';
 import 'puzzle_flow_delegate.dart';
 
@@ -14,8 +13,6 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   final _animationNotifier = _AnimationNotifier();
   final _nanny = FrameNanny();
 
-  Puzzle get _puzzle => _puzzleAnimator.puzzle;
-
   Ticker _ticker;
   Duration _lastElapsed;
   StreamSubscription sub;
@@ -23,8 +20,8 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   bool _autoPlay = false;
   Duration _tickerTimeSinceLastEvent = Duration.zero;
 
-  PuzzleHomeState(Puzzle puzzle) : _puzzleAnimator = PuzzleAnimator(puzzle) {
-    sub = _puzzleAnimator.puzzle.onEvent.listen(_onPuzzleEvent);
+  PuzzleHomeState(this._puzzleAnimator) {
+    sub = _puzzleAnimator.onEvent.listen(_onPuzzleEvent);
   }
 
   void _setFancy(bool newValue) {
@@ -105,15 +102,16 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
 
   /// Returns the number of tiles left, but prefixed with enough whitespace
   /// so the string doesn't change length for all valid values for this puzzle
-  String get _tilesLeftText => _puzzle.incorrectTiles
+  String get _tilesLeftText => _puzzleAnimator.incorrectTiles
       .toString()
-      .padLeft(_puzzle.tileCount.toString().length);
+      .padLeft(_puzzleAnimator.tileCount.toString().length);
 
   /// Returns the number of tiles left, but prefixed with enough whitespace
   /// so the string doesn't change length for all valid values for this puzzle
-  String get _clickCount => _puzzle.clickCount
-      .toString()
-      .padLeft((_puzzle.tileCount * _puzzle.tileCount).toString().length);
+  String get _clickCount => _puzzleAnimator.clickCount.toString().padLeft(
+      (_puzzleAnimator.tileCount * _puzzleAnimator.tileCount)
+          .toString()
+          .length);
 
   final _paramScale = 1.5;
 
@@ -188,7 +186,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                             onChanged: _setFancy,
                           ),
                           FlatButton(
-                            onPressed: _puzzle.reset,
+                            onPressed: _puzzleAnimator.reset,
                             child: const Text('Shuffle tiles'),
                             //label: const Text('New game'),
                           ),
@@ -212,7 +210,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
                           delegate: PuzzleFlowDelegate(
                               _puzzleAnimator, _animationNotifier),
                           children: List<Widget>.generate(
-                              _puzzle.length, _widgetForTile),
+                              _puzzleAnimator.length, _widgetForTile),
                         ),
                       ),
                     ),
@@ -232,16 +230,16 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
             _puzzleAnimator.clickOrShake(i);
           };
 
-    final correctPosition = _puzzle.isCorrectPosition(i);
+    final correctPosition = _puzzleAnimator.isCorrectPosition(i);
 
     if (_fancy) {
-      if (i == _puzzle.tileCount && !_puzzleAnimator.solved) {
+      if (i == _puzzleAnimator.tileCount && !_puzzleAnimator.solved) {
         return const Center();
       }
 
       final decorationImage = DecorationImagePlus(
-          puzzleWidth: _puzzle.width,
-          puzzleHeight: _puzzle.height,
+          puzzleWidth: _puzzleAnimator.width,
+          puzzleHeight: _puzzleAnimator.height,
           pieceIndex: i,
           fit: BoxFit.cover,
           image: const AssetImage('asset/seattle.jpg'));
@@ -278,7 +276,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
         color: Colors.grey,
       );
     } else {
-      if (i == _puzzle.tileCount) {
+      if (i == _puzzleAnimator.tileCount) {
         if (_puzzleAnimator.solved) {
           return const Center(
               child: Icon(

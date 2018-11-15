@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' show Point, Random;
+import 'dart:typed_data';
 
 import 'array_2d.dart';
 import 'util.dart';
@@ -12,7 +13,7 @@ final _spacesRegexp = RegExp(' +');
 enum PuzzleEvent { click, reset, noopClick }
 
 class Puzzle {
-  final Array2d<int> _array;
+  final Array2d _array;
   final _controller = StreamController<PuzzleEvent>();
 
   int _clickCount = 0;
@@ -25,12 +26,14 @@ class Puzzle {
 
   Stream<PuzzleEvent> get onEvent => _controller.stream;
 
-  Puzzle.raw(int width, Iterable<int> source)
-      : _array = Array2d.wrap(width, source.toList()) {
+  Puzzle._raw(this._array);
+
+  Puzzle.raw(int width, List<int> source)
+      : _array = Array2d.wrap(width, Uint8List.fromList(source)) {
     requireArgument(width >= 2, 'width', 'Must be at least 2.');
     requireArgument(_array.length >= 6, 'source', 'Must be at least 6 items');
 
-    _validate(_array);
+    _validate(_array.dataView);
   }
 
   Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
@@ -41,7 +44,7 @@ class Puzzle {
       return splits.map(int.parse).toList();
     }).toList();
 
-    return Puzzle.raw(rows.first.length, rows.expand((row) => row));
+    return Puzzle.raw(rows.first.length, rows.expand((row) => row).toList());
   }
 
   int valueAt(int x, int y) => _array.get(x, y);
@@ -52,21 +55,20 @@ class Puzzle {
 
   bool isCorrectPosition(int cellValue) => cellValue == _array[cellValue];
 
-  bool get solvable => _solvable(width, _array);
+  bool get solvable => _solvable(width, _array.dataView);
 
   void reset({List<int> source}) {
-    if (source == null) {
-      _randomizeList(width, _array);
-    } else {
-      if (source.length != _array.length) {
-        throw ArgumentError.value(source, 'source', 'Cannot change the size!');
-      }
-      _validate(source);
-      if (!_solvable(width, source)) {
-        throw ArgumentError.value(source, 'source', 'Not a solvable puzzle.');
-      }
-      _array.setAll(0, source);
+    source ??= _randomizeList(width, _array.dataView);
+
+    if (source.length != _array.length) {
+      throw ArgumentError.value(source, 'source', 'Cannot change the size!');
     }
+    _validate(source);
+    if (!_solvable(width, source)) {
+      throw ArgumentError.value(source, 'source', 'Not a solvable puzzle.');
+    }
+    _array.setValues(source);
+
     _clickCount = 0;
     _controller.add(PuzzleEvent.reset);
   }
@@ -81,7 +83,7 @@ class Puzzle {
     return count;
   }
 
-  Puzzle clone() => Puzzle.raw(width, _array.toList());
+  Puzzle clone() => Puzzle._raw(_array.clone());
 
   /// A measure of how close the puzzle is to being solved.
   ///
@@ -169,9 +171,7 @@ class Puzzle {
       assert((a.x - b.x).abs() == 1);
     }
 
-    final aValue = _array.get(a.x, a.y);
-    _array.set(a.x, a.y, _array.get(b.x, b.y));
-    _array.set(b.x, b.y, aValue);
+    _array.swap(a, b);
   }
 
   Point<int> coordinatesOf(int value) => _array.coordinatesOf(value);
@@ -180,16 +180,16 @@ class Puzzle {
   String toString() => _array.toString();
 }
 
-List<int> _randomList(int width, int height) =>
-    _randomizeList(width, List<int>.generate(width * height, (i) => i));
+List<int> _randomList(int width, int height) => _randomizeList(
+    width, List<int>.generate(width * height, (i) => i, growable: false));
 
-List<int> _randomizeList(int width, List<int> result) {
-  final copy = result.toList();
+List<int> _randomizeList(int width, List<int> existing) {
+  final copy = existing.toList(growable: false);
   do {
-    result.shuffle(_rnd);
-  } while (!_solvable(width, result) ||
-      result.any((v) => result[v] == v || result[v] == copy[v]));
-  return result;
+    copy.shuffle(_rnd);
+  } while (!_solvable(width, copy) ||
+      copy.any((v) => copy[v] == v || copy[v] == existing[v]));
+  return copy;
 }
 
 // Logic from

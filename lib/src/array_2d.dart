@@ -1,27 +1,21 @@
-import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'util.dart';
 
-class Array2d<T> extends ListBase<T> {
+class Array2d {
   final int width;
-  final int height;
-  final List<T> _source;
 
-  factory Array2d(int width, int height) {
-    requireArgument(width >= 0, 'width');
-    requireArgument(height >= 0, 'height');
-    final s = List<T>(width * height);
-    return Array2d.wrap(width, s);
-  }
+  int get height => _source.length ~/ width;
+  final Uint8List _source;
 
-  Array2d.wrap(this.width, List<T> source)
-      : _source = source,
-        height = (width != null && width > 0 && source != null)
-            ? source.length ~/ width
-            : 0 {
-    requireArgumentNotNull(width, 'width');
-    requireArgumentNotNull(source, 'source');
+  UnmodifiableUint8ListView get dataView => UnmodifiableUint8ListView(_source);
+
+  Array2d._raw(this.width, this._source);
+
+  Array2d.wrap(this.width, this._source) {
+    ArgumentError.checkNotNull(width, 'width');
+    ArgumentError.checkNotNull(_source, 'source');
     requireArgument(width >= 0, 'width', 'width must be non-zero');
 
     if (width * height == 0) {
@@ -35,48 +29,24 @@ class Array2d<T> extends ListBase<T> {
     }
   }
 
-  @override
+  Array2d clone() => Array2d._raw(width, Uint8List.fromList(_source));
+
   int get length => _source.length;
 
-  @override
-  set length(int value) {
-    throw UnsupportedError('Not supported');
-  }
+  int operator [](int index) => _source[index];
 
-  @override
-  T operator [](int index) => _source[index];
-
-  @override
-  void operator []=(int index, T value) {
-    _source[index] = value;
-  }
-
-  T get(int x, int y) {
+  int get(int x, int y) {
     final i = _getIndex(x, y);
-    return this[i];
+    return _source[i];
   }
 
-  void set(int x, int y, T value) {
-    final i = _getIndex(x, y);
-    this[i] = value;
-  }
+  void swap(math.Point<int> a, math.Point<int> b) {
+    final aIndex = _getIndex(a.x, a.y);
+    final aValue = _source[aIndex];
+    final bIndex = _getIndex(b.x, b.y);
 
-  List<T> getAdjacent(int x, int y) {
-    final m = getAdjacentIndices(x, y).map((i) => this[i]);
-    return List<T>.from(m);
-  }
-
-  List<int> getAdjacentIndices(int x, int y) {
-    final adj = <int>[];
-
-    for (var k = math.max(0, y - 1); k < math.min(height, (y + 2)); k++) {
-      for (var j = math.max(0, x - 1); j < math.min(width, (x + 2)); j++) {
-        if (j != x || k != y) {
-          adj.add(_getIndex(j, k));
-        }
-      }
-    }
-    return adj;
+    _source[aIndex] = _source[bIndex];
+    _source[bIndex] = aValue;
   }
 
   math.Point<int> getCoordinate(int index) {
@@ -86,7 +56,19 @@ class Array2d<T> extends ListBase<T> {
     return math.Point<int>(x, y);
   }
 
-  math.Point<int> coordinatesOf(T value) => getCoordinate(indexOf(value));
+  void setValues(List<int> values) {
+    assert(values.length == _source.length);
+    _source.setRange(0, _source.length, values);
+  }
+
+  int _getIndex(int x, int y) {
+    assert(x >= 0 && x < width);
+    assert(y >= 0 && y < height);
+    return x + y * width;
+  }
+
+  math.Point<int> coordinatesOf(int value) =>
+      getCoordinate(_source.indexOf(value));
 
   @override
   String toString() {
@@ -102,11 +84,5 @@ class Array2d<T> extends ListBase<T> {
     return grid
         .map((r) => r.map((v) => v.padLeft(longestLength)).join(' '))
         .join('\n');
-  }
-
-  int _getIndex(int x, int y) {
-    assert(x >= 0 && x < width);
-    assert(y >= 0 && y < height);
-    return x + y * width;
   }
 }

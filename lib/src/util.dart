@@ -6,9 +6,3 @@ void requireArgument(bool truth, String argName, [String message]) {
     throw ArgumentError('`$argName` - $message');
   }
 }
-
-void requireArgumentNotNull(argument, String argName) {
-  if (argument == null) {
-    throw ArgumentError.notNull(argName);
-  }
-}
