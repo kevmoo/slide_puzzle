@@ -255,8 +255,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
             ? Container()
             : Container(
                 decoration: ShapeDecoration(
-                  shape: const CircleBorder(
-                  ),
+                  shape: const CircleBorder(),
                   color: correctPosition ? Colors.black38 : Colors.white54,
                 ),
                 alignment: Alignment.center,
