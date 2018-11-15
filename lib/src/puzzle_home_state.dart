@@ -128,94 +128,96 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
           ),
           Material(
             color: const Color.fromARGB(153, 90, 135, 170),
-            child: Padding(
-              padding: const EdgeInsets.all(30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.all(35),
-                      padding: const EdgeInsets.all(25),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 2),
-                        color: Colors.white70,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          ListTile(
-                            title: Text(
-                              'Moves',
-                              textScaleFactor: _paramScale,
+            child: SizedBox.expand(
+              child: Padding(
+                padding: const EdgeInsets.all(30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.all(35),
+                        padding: const EdgeInsets.all(25),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          color: Colors.white70,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            ListTile(
+                              title: Text(
+                                'Moves',
+                                textScaleFactor: _paramScale,
+                              ),
+                              trailing: Text(
+                                _clickCount,
+                                textScaleFactor: _paramScale,
+                              ),
                             ),
-                            trailing: Text(
-                              _clickCount,
-                              textScaleFactor: _paramScale,
+                            ListTile(
+                              title: Text(
+                                'Tiles left',
+                                textScaleFactor: _paramScale,
+                              ),
+                              trailing: Text(
+                                _tilesLeftText,
+                                textScaleFactor: _paramScale,
+                              ),
                             ),
-                          ),
-                          ListTile(
-                            title: Text(
-                              'Tiles left',
-                              textScaleFactor: _paramScale,
+                            const Divider(),
+                            const ListTile(
+                              title: Text(
+                                'Options',
+                                textScaleFactor: 1.3,
+                              ),
                             ),
-                            trailing: Text(
-                              _tilesLeftText,
-                              textScaleFactor: _paramScale,
+                            CheckboxListTile(
+                              title: const Text('Auto play'),
+                              value: _autoPlay,
+                              onChanged:
+                                  _puzzleAnimator.solved ? null : _setAutoPlay,
                             ),
-                          ),
-                          const Divider(),
-                          const ListTile(
-                            title: Text(
-                              'Options',
-                              textScaleFactor: 1.3,
+                            CheckboxListTile(
+                              title: const Text('Seattle'),
+                              value: _fancy,
+                              onChanged: _setFancy,
                             ),
-                          ),
-                          CheckboxListTile(
-                            title: const Text('Auto play'),
-                            value: _autoPlay,
-                            onChanged:
-                                _puzzleAnimator.solved ? null : _setAutoPlay,
-                          ),
-                          CheckboxListTile(
-                            title: const Text('Seattle'),
-                            value: _fancy,
-                            onChanged: _setFancy,
-                          ),
-                          FlatButton(
-                            onPressed: _puzzleAnimator.reset,
-                            child: const Text('Shuffle tiles'),
-                            //label: const Text('New game'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      margin: const EdgeInsets.all(35),
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 2),
-                        color: Colors.white70,
-                      ),
-                      child: FittedBox(
-                        alignment: Alignment.center,
-                        fit: BoxFit.contain,
-                        child: Flow(
-                          delegate: PuzzleFlowDelegate(
-                              _puzzleAnimator, _animationNotifier),
-                          children: List<Widget>.generate(
-                              _puzzleAnimator.length, _widgetForTile),
+                            FlatButton(
+                              onPressed: _puzzleAnimator.reset,
+                              child: const Text('Shuffle tiles'),
+                              //label: const Text('New game'),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        margin: const EdgeInsets.all(35),
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 2),
+                          color: Colors.white70,
+                        ),
+                        child: FittedBox(
+                          alignment: Alignment.center,
+                          fit: BoxFit.contain,
+                          child: Flow(
+                            delegate: PuzzleFlowDelegate(
+                                _puzzleAnimator, _animationNotifier),
+                            children: List<Widget>.generate(
+                                _puzzleAnimator.length, _widgetForTile),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
