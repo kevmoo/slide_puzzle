@@ -35,7 +35,7 @@ class Array2d {
 
   int operator [](int index) => _source[index];
 
-  int get(int x, int y) {
+  int getValueAtLocation(int x, int y) {
     final i = _getIndex(x, y);
     return _source[i];
   }
@@ -49,7 +49,8 @@ class Array2d {
     _source[bIndex] = aValue;
   }
 
-  math.Point<int> getCoordinate(int index) {
+  math.Point<int> coordinatesOfValue(int value) {
+    final index = _source.indexOf(value);
     final x = index % width;
     final y = index ~/ width;
     assert(_getIndex(x, y) == index);
@@ -67,15 +68,12 @@ class Array2d {
     return x + y * width;
   }
 
-  math.Point<int> coordinatesOf(int value) =>
-      getCoordinate(_source.indexOf(value));
-
   @override
   String toString() {
     final grid = List<List<String>>.generate(
         height,
-        (row) =>
-            List<String>.generate(width, (col) => get(col, row).toString()));
+        (row) => List<String>.generate(
+            width, (col) => getValueAtLocation(col, row).toString()));
 
     final longestLength = grid
         .expand((r) => r)

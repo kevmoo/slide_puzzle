@@ -140,8 +140,7 @@ class PuzzleAnimator {
   }
 
   void _shake(int tileValue) {
-    final delta = _puzzle.coordinatesOf(_puzzle.tileCount) -
-        _puzzle.coordinatesOf(tileValue);
+    final delta = _puzzle.openPosition() - _puzzle.coordinatesOf(tileValue);
     final deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
 
     _locations[tileValue].kick(deltaDouble * (0.5 / deltaDouble.magnitude));

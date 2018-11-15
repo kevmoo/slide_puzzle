@@ -41,7 +41,7 @@ class Puzzle {
     return Puzzle.raw(rows.first.length, rows.expand((row) => row).toList());
   }
 
-  int valueAt(int x, int y) => _array.get(x, y);
+  int valueAt(int x, int y) => _array.getValueAtLocation(x, y);
 
   int get length => _array.length;
 
@@ -75,6 +75,8 @@ class Puzzle {
     }
     return count;
   }
+
+  Point<int> openPosition() => coordinatesOf(tileCount);
 
   Puzzle clone() => Puzzle._raw(_array.clone());
 
@@ -122,7 +124,7 @@ class Puzzle {
     }
 
     final target = coordinatesOf(tileValue);
-    final lastCoord = coordinatesOf(tileCount);
+    final lastCoord = openPosition();
     if (lastCoord.x != target.x && lastCoord.y != target.y) {
       return false;
     }
@@ -141,7 +143,7 @@ class Puzzle {
   }
 
   void _shift(Point<int> target) {
-    final lastCoord = coordinatesOf(tileCount);
+    final lastCoord = openPosition();
     final delta = lastCoord - target;
 
     if (delta.magnitude.toInt() > 1) {
@@ -165,7 +167,7 @@ class Puzzle {
     _array.swap(a, b);
   }
 
-  Point<int> coordinatesOf(int value) => _array.coordinatesOf(value);
+  Point<int> coordinatesOf(int value) => _array.coordinatesOfValue(value);
 
   @override
   String toString() => _array.toString();
