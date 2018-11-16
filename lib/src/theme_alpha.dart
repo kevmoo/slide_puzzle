@@ -79,11 +79,10 @@ mixin ThemeAlpha on BaseTheme {
                             CheckboxListTile(
                               title: const Text('Auto play'),
                               value: autoPlay,
-                              onChanged:
-                                  puzzleAnimator.solved ? null : setAutoPlay,
+                              onChanged: puzzle.solved ? null : setAutoPlay,
                             ),
                             FlatButton(
-                              onPressed: puzzleAnimator.reset,
+                              onPressed: puzzle.reset,
                               child: const Text('Shuffle tiles'),
                             ),
                             const ListTile(
@@ -123,10 +122,9 @@ mixin ThemeAlpha on BaseTheme {
                           alignment: Alignment.center,
                           fit: BoxFit.contain,
                           child: Flow(
-                            delegate: PuzzleFlowDelegate(
-                                puzzleAnimator, animationNotifier),
-                            children: List<Widget>.generate(
-                                puzzleAnimator.length,
+                            delegate:
+                                PuzzleFlowDelegate(puzzle, animationNotifier),
+                            children: List<Widget>.generate(puzzle.length,
                                 (index) => _widgetForTile(fancy, index)),
                           ),
                         ),
@@ -141,14 +139,14 @@ mixin ThemeAlpha on BaseTheme {
       );
 
   Widget _widgetForTile(bool fancy, int i) {
-    final tilePress = puzzleAnimator.solved
+    final tilePress = puzzle.solved
         ? null
         : () {
             setAutoPlay(false);
-            puzzleAnimator.clickOrShake(i);
+            puzzle.clickOrShake(i);
           };
 
-    final correctPosition = puzzleAnimator.isCorrectPosition(i);
+    final correctPosition = puzzle.isCorrectPosition(i);
 
     if (fancy) {
       return _tileFancy(i, correctPosition, tilePress);
@@ -158,13 +156,13 @@ mixin ThemeAlpha on BaseTheme {
   }
 
   Widget _tileFancy(int i, bool correctPosition, void Function() tilePress) {
-    if (i == puzzleAnimator.tileCount && !puzzleAnimator.solved) {
+    if (i == puzzle.tileCount && !puzzle.solved) {
       return const Center();
     }
 
     final decorationImage = DecorationImagePlus(
-        puzzleWidth: puzzleAnimator.width,
-        puzzleHeight: puzzleAnimator.height,
+        puzzleWidth: puzzle.width,
+        puzzleHeight: puzzle.height,
         pieceIndex: i,
         fit: BoxFit.cover,
         image: const AssetImage('asset/seattle.jpg'));
@@ -174,7 +172,7 @@ mixin ThemeAlpha on BaseTheme {
       decoration: BoxDecoration(
         image: decorationImage,
       ),
-      child: puzzleAnimator.solved
+      child: puzzle.solved
           ? Container()
           : Container(
               decoration: ShapeDecoration(
@@ -204,8 +202,8 @@ mixin ThemeAlpha on BaseTheme {
 
   SingleChildRenderObjectWidget _tileSimple(
       int i, bool correctPosition, void Function() tilePress) {
-    if (i == puzzleAnimator.tileCount) {
-      if (puzzleAnimator.solved) {
+    if (i == puzzle.tileCount) {
+      if (puzzle.solved) {
         return const Center(
             child: Icon(
           Icons.thumb_up,

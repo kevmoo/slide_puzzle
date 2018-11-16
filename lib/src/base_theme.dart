@@ -13,7 +13,7 @@ mixin BaseTheme {
   PuzzleThemeData createThemeData(
       String name, Widget Function(BuildContext) build);
 
-  PuzzleAnimator get puzzleAnimator;
+  PuzzleProxy get puzzle;
 
   bool get autoPlay;
 

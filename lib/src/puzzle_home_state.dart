@@ -39,7 +39,7 @@ class _PuzzleThemeImpl implements PuzzleThemeData {
 class PuzzleHomeState extends State
     with BaseTheme, ThemeAlpha, SingleTickerProviderStateMixin {
   @override
-  final PuzzleAnimator puzzleAnimator;
+  final PuzzleAnimator puzzle;
 
   @override
   final animationNotifier = AnimationNotifier();
@@ -56,8 +56,8 @@ class PuzzleHomeState extends State
   @override
   bool autoPlay = false;
 
-  PuzzleHomeState(this.puzzleAnimator) {
-    sub = puzzleAnimator.onEvent.listen(_onPuzzleEvent);
+  PuzzleHomeState(this.puzzle) {
+    sub = puzzle.onEvent.listen(_onPuzzleEvent);
     _currentTheme = themeData.first;
   }
 
@@ -83,7 +83,7 @@ class PuzzleHomeState extends State
     if (newValue != autoPlay) {
       setState(() {
         // Only allow enabling autoPlay if the puzzle is not solved
-        autoPlay = newValue && !puzzleAnimator.solved;
+        autoPlay = newValue && !puzzle.solved;
         if (autoPlay) {
           _ensureTicking();
         }
@@ -101,15 +101,16 @@ class PuzzleHomeState extends State
   /// Returns the number of tiles left, but prefixed with enough whitespace
   /// so the string doesn't change length for all valid values for this puzzle
   @override
-  String get tilesLeftText => puzzleAnimator.incorrectTiles
+  String get tilesLeftText => puzzle.incorrectTiles
       .toString()
-      .padLeft(puzzleAnimator.tileCount.toString().length);
+      .padLeft(puzzle.tileCount.toString().length);
 
   /// Returns the number of tiles left, but prefixed with enough whitespace
   /// so the string doesn't change length for all valid values for this puzzle
   @override
-  String get clickCountText => puzzleAnimator.clickCount.toString().padLeft(
-      (puzzleAnimator.tileCount * puzzleAnimator.tileCount).toString().length);
+  String get clickCountText => puzzle.clickCount
+      .toString()
+      .padLeft((puzzle.tileCount * puzzle.tileCount).toString().length);
 
   @override
   Widget build(BuildContext context) => _currentTheme.build(context);
@@ -150,9 +151,9 @@ class PuzzleHomeState extends State
     }
 
     _tickerTimeSinceLastEvent += delta;
-    puzzleAnimator.update(_nanny.tick(delta));
+    puzzle.update(_nanny.tick(delta));
 
-    if (!puzzleAnimator.stable) {
+    if (!puzzle.stable) {
       animationNotifier.animate();
     } else {
       if (!autoPlay) {
@@ -163,9 +164,9 @@ class PuzzleHomeState extends State
 
     if (autoPlay &&
         _tickerTimeSinceLastEvent > const Duration(milliseconds: 200)) {
-      puzzleAnimator.playRandom();
+      puzzle.playRandom();
 
-      if (puzzleAnimator.solved) {
+      if (puzzle.solved) {
         setAutoPlay(false);
       }
     }

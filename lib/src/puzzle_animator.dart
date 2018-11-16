@@ -6,7 +6,27 @@ import 'puzzle.dart';
 
 enum PuzzleEvent { click, reset }
 
-class PuzzleAnimator {
+abstract class PuzzleProxy {
+  int get width;
+
+  int get height;
+
+  int get length;
+
+  bool get solved;
+
+  void reset();
+
+  void clickOrShake(int tileValue);
+
+  int get tileCount;
+
+  Point<double> location(int index);
+
+  bool isCorrectPosition(int value);
+}
+
+class PuzzleAnimator implements PuzzleProxy {
   final Puzzle _puzzle;
   final List<Body> _locations;
   final _controller = StreamController<PuzzleEvent>();
@@ -15,20 +35,26 @@ class PuzzleAnimator {
 
   bool get stable => _stable;
 
+  @override
   bool get solved => _puzzle.incorrectTiles == 0;
 
+  @override
   int get width => _puzzle.width;
 
+  @override
   int get height => _puzzle.height;
 
+  @override
   int get length => _puzzle.length;
 
+  @override
   int get tileCount => _puzzle.tileCount;
 
   int get incorrectTiles => _puzzle.incorrectTiles;
 
   int get clickCount => _puzzle.clickCount;
 
+  @override
   void reset() {
     _puzzle.reset();
     _controller.add(PuzzleEvent.reset);
@@ -36,8 +62,10 @@ class PuzzleAnimator {
 
   Stream<PuzzleEvent> get onEvent => _controller.stream;
 
+  @override
   bool isCorrectPosition(int value) => _puzzle.isCorrectPosition(value);
 
+  @override
   Point<double> location(int index) => _locations[index].location;
 
   List<int> _lastPlan;
@@ -101,6 +129,7 @@ class PuzzleAnimator {
     _lastPlan = bestClicks;
   }
 
+  @override
   void clickOrShake(int tileValue) {
     if (!_clickValue(tileValue)) {
       _shake(tileValue);
