@@ -16,6 +16,8 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Color get puzzleBackgroundColor;
 
+  Duration get puzzleAnimationDuration => kThemeAnimationDuration;
+
   @override
   Widget build(BuildContext context) => Stack(
         children: <Widget>[
@@ -23,6 +25,7 @@ abstract class SharedTheme extends PuzzleTheme {
             child: FittedBox(fit: BoxFit.cover, child: backgroundChild),
           ),
           Material(
+            animationDuration: puzzleAnimationDuration,
             color: puzzleThemeBackground,
             child: SizedBox.expand(
               child: Padding(
@@ -119,6 +122,7 @@ abstract class SharedTheme extends PuzzleTheme {
                           alignment: Alignment.centerLeft,
                           fit: BoxFit.contain,
                           child: Material(
+                            animationDuration: puzzleAnimationDuration,
                             shape: puzzleBorder,
                             color: puzzleBackgroundColor,
                             child: Container(

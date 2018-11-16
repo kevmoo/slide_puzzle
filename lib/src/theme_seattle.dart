@@ -63,6 +63,7 @@ class ThemeSeattle extends SharedTheme {
     );
 
     return RaisedButton(
+      animationDuration: puzzleAnimationDuration,
       highlightElevation: 0,
       child: content,
       padding: const EdgeInsets.symmetric(),

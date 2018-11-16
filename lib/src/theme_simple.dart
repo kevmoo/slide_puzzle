@@ -34,6 +34,7 @@ class ThemeSimple extends SharedTheme {
 
     final correctPosition = puzzle.isCorrectPosition(i);
     return RaisedButton(
+      animationDuration: puzzleAnimationDuration,
       elevation: 1,
       child: Text(
         (i + 1).toString(),
