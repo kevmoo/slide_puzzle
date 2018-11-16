@@ -111,21 +111,24 @@ mixin ThemeAlpha on BaseTheme {
                     ),
                     Expanded(
                       flex: 2,
-                      child: Container(
-                        margin: const EdgeInsets.all(35),
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 2),
-                          color: Colors.white70,
-                        ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(35),
                         child: FittedBox(
-                          alignment: Alignment.center,
+                          alignment: Alignment.centerLeft,
                           fit: BoxFit.contain,
-                          child: Flow(
-                            delegate:
-                                PuzzleFlowDelegate(puzzle, animationNotifier),
-                            children: List<Widget>.generate(puzzle.length,
-                                (index) => _widgetForTile(fancy, index)),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black, width: 1),
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.white70,
+                            ),
+                            child: Flow(
+                              delegate:
+                                  PuzzleFlowDelegate(puzzle, animationNotifier),
+                              children: List<Widget>.generate(puzzle.length,
+                                  (index) => _widgetForTile(fancy, index)),
+                            ),
                           ),
                         ),
                       ),
@@ -148,11 +151,14 @@ mixin ThemeAlpha on BaseTheme {
 
     final correctPosition = puzzle.isCorrectPosition(i);
 
-    if (fancy) {
-      return _tileFancy(i, correctPosition, tilePress);
-    } else {
-      return _tileSimple(i, correctPosition, tilePress);
-    }
+    final button = fancy
+        ? _tileFancy(i, correctPosition, tilePress)
+        : _tileSimple(i, correctPosition, tilePress);
+
+    return Padding(
+      padding: const EdgeInsets.all(2),
+      child: button,
+    );
   }
 
   Widget _tileFancy(int i, bool correctPosition, void Function() tilePress) {
@@ -180,18 +186,18 @@ mixin ThemeAlpha on BaseTheme {
                 color: correctPosition ? Colors.black38 : Colors.white54,
               ),
               alignment: Alignment.center,
-              padding: const EdgeInsets.all(1),
               child: Text(
                 (i + 1).toString(),
                 style: TextStyle(
+                  fontWeight: FontWeight.normal,
                   color: correctPosition ? Colors.white : Colors.black,
                 ),
+                textScaleFactor: 1.4,
               ),
             ),
     );
 
-    return OutlineButton(
-      highlightedBorderColor: Colors.transparent,
+    return RaisedButton(
       highlightElevation: 0,
       child: content,
       padding: const EdgeInsets.symmetric(),
@@ -200,8 +206,7 @@ mixin ThemeAlpha on BaseTheme {
     );
   }
 
-  SingleChildRenderObjectWidget _tileSimple(
-      int i, bool correctPosition, void Function() tilePress) {
+  Widget _tileSimple(int i, bool correctPosition, void Function() tilePress) {
     if (i == puzzle.tileCount) {
       if (puzzle.solved) {
         return const Center(
@@ -214,7 +219,7 @@ mixin ThemeAlpha on BaseTheme {
       return const Center();
     }
 
-    final child = RaisedButton(
+    return RaisedButton(
       elevation: 1,
       child: Text(
         (i + 1).toString(),
@@ -231,11 +236,6 @@ mixin ThemeAlpha on BaseTheme {
       padding: const EdgeInsets.symmetric(),
       color: Colors.white,
       disabledColor: Colors.white,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(2),
-      child: child,
     );
   }
 }
