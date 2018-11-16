@@ -8,12 +8,16 @@ import 'frame_nanny.dart';
 import 'puzzle_animator.dart';
 import 'theme_alpha.dart';
 
-class _PuzzleThemeImpl extends PuzzleThemeData implements PuzzleThemeOption {
+class _PuzzleThemeImpl implements PuzzleThemeData {
   final PuzzleHomeState _parent;
 
-  _PuzzleThemeImpl(
-      this._parent, String name, Widget Function(BuildContext) build)
-      : super(name, build);
+  @override
+  final String name;
+
+  @override
+  final Widget Function(BuildContext) build;
+
+  _PuzzleThemeImpl(this._parent, this.name, this.build);
 
   @override
   void Function() get select {
@@ -27,7 +31,9 @@ class _PuzzleThemeImpl extends PuzzleThemeData implements PuzzleThemeOption {
   void _select() => _parent._setTheme(this);
 
   @override
-  bool get selected => _parent._currentTheme == this;
+  bool get selected {
+    return _parent._currentTheme.name == name;
+  }
 }
 
 class PuzzleHomeState extends State
@@ -40,7 +46,7 @@ class PuzzleHomeState extends State
 
   final _nanny = FrameNanny();
 
-  _PuzzleThemeImpl _currentTheme;
+  PuzzleThemeData _currentTheme;
 
   Duration _tickerTimeSinceLastEvent = Duration.zero;
   Ticker _ticker;
@@ -53,16 +59,12 @@ class PuzzleHomeState extends State
   PuzzleHomeState(this.puzzleAnimator) {
     sub = puzzleAnimator.onEvent.listen(_onPuzzleEvent);
 
-    _availableThemes =
-        themeData.map((e) => _PuzzleThemeImpl(this, e.name, e.build)).toList();
-
-    _currentTheme = availableThemes.first;
+    _currentTheme = themeData.first;
   }
 
-  List<_PuzzleThemeImpl> _availableThemes;
-
   @override
-  Iterable<_PuzzleThemeImpl> get availableThemes => _availableThemes;
+  PuzzleThemeData createThemeData(String name, build) =>
+      _PuzzleThemeImpl(this, name, build);
 
   void _setTheme(_PuzzleThemeImpl theme) {
     assert(themeData.any((ptd) => ptd.name == theme.name));

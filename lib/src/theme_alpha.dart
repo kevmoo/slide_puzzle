@@ -9,8 +9,8 @@ mixin ThemeAlpha on BaseTheme {
 
   @override
   Iterable<PuzzleThemeData> get themeData => super.themeData.followedBy([
-        PuzzleThemeData('Simple', _buildSimple),
-        PuzzleThemeData('Seattle', _buildSeattle)
+        createThemeData('Simple', _buildSimple),
+        createThemeData('Seattle', _buildSeattle)
       ]);
 
   Widget _buildSimple(BuildContext context) => _build(context, false);
@@ -93,7 +93,7 @@ mixin ThemeAlpha on BaseTheme {
                               ),
                             ),
                             Column(
-                              children: availableThemes.map((themeData) {
+                              children: themeData.map((themeData) {
                                 return FlatButton(
                                   onPressed: themeData.select,
                                   child: Text(
