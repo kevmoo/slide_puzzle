@@ -101,24 +101,27 @@ mixin ThemePlaster on BaseTheme {
                     ),
                     Expanded(
                       flex: 2,
-                      child: FittedBox(
-                        alignment: Alignment.center,
-                        fit: BoxFit.contain,
-                        child: Container(
-                          margin: const EdgeInsets.all(35),
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            border: Border.all(
+                      child: Padding(
+                        padding: const EdgeInsets.all(35),
+                        child: FittedBox(
+                          alignment: Alignment.centerLeft,
+                          fit: BoxFit.contain,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              border: Border.all(
                                 color: const Color.fromARGB(255, 103, 103, 105),
-                                width: 5),
-                            color: _yellowIsh,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Flow(
-                            delegate:
-                                PuzzleFlowDelegate(puzzle, animationNotifier),
-                            children: List<Widget>.generate(
-                                puzzle.length, _widgetForTile),
+                                width: 5,
+                              ),
+                              color: _yellowIsh,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Flow(
+                              delegate:
+                                  PuzzleFlowDelegate(puzzle, animationNotifier),
+                              children: List<Widget>.generate(
+                                  puzzle.length, _widgetForTile),
+                            ),
                           ),
                         ),
                       ),
