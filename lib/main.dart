@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'src/flutter.dart';
 
 import 'src/puzzle_animator.dart';
 import 'src/puzzle_home_state.dart';

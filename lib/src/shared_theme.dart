@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'base_theme.dart';
+import 'flutter.dart';
 import 'puzzle_flow_delegate.dart';
 
 abstract class SharedTheme extends PuzzleTheme {

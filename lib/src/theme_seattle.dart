@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
 import 'base_theme.dart';
 import 'decoration_image_plus.dart';
+import 'flutter.dart';
 import 'shared_theme.dart';
 
 class ThemeSeattle extends SharedTheme {

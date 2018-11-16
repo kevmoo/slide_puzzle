@@ -14,8 +14,8 @@ class Array2d {
   Array2d._raw(this.width, this._source);
 
   Array2d.wrap(this.width, this._source) {
-    ArgumentError.checkNotNull(width, 'width');
-    ArgumentError.checkNotNull(_source, 'source');
+    requireArgumentNotNull(width, 'width');
+    requireArgumentNotNull(_source, 'source');
     requireArgument(width >= 0, 'width', 'width must be non-zero');
 
     if (width * height == 0) {

@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
 import 'base_theme.dart';
+import 'flutter.dart';
 import 'shared_theme.dart';
 
 class ThemeSimple extends SharedTheme {

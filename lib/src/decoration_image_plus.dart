@@ -2,8 +2,7 @@
 
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart' hide paintImage;
+import 'flutter.dart';
 
 /// An image for a box decoration.
 ///

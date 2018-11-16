@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-
 import 'base_theme.dart';
+import 'flutter.dart';
 import 'frame_nanny.dart';
 import 'puzzle_animator.dart';
 import 'theme_plaster.dart';

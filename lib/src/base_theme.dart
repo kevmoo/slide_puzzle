@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'flutter.dart';
 
 import 'puzzle_animator.dart';
 
