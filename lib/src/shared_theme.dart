@@ -30,8 +30,6 @@ abstract class SharedTheme extends PuzzleTheme {
               child: Padding(
                 padding: const EdgeInsets.all(30),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(
                       child: Container(
@@ -115,17 +113,16 @@ abstract class SharedTheme extends PuzzleTheme {
                     ),
                     Expanded(
                       flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(35),
-                        child: FittedBox(
-                          alignment: Alignment.topLeft,
-                          fit: BoxFit.contain,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(35),
                           child: Material(
                             animationDuration: puzzleAnimationDuration,
                             shape: puzzleBorder,
                             color: puzzleBackgroundColor,
                             child: Container(
-                              padding: const EdgeInsets.all(12),
+                              constraints: BoxConstraints.tightForFinite(),
+                              padding: const EdgeInsets.all(10),
                               child: Flow(
                                 delegate: PuzzleFlowDelegate(
                                     puzzle, animationNotifier),

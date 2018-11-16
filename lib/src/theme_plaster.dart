@@ -57,7 +57,7 @@ class ThemePlaster extends SharedTheme {
       ),
       onPressed: tilePress(i),
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: primary ? _chocolate : _orangeIsh, width: 7),
+        side: BorderSide(color: primary ? _chocolate : _orangeIsh, width: 5),
         borderRadius: BorderRadius.circular(5),
       ),
       padding: const EdgeInsets.symmetric(),
