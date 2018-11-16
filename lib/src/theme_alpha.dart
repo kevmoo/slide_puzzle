@@ -151,84 +151,93 @@ mixin ThemeAlpha on BaseTheme {
     final correctPosition = puzzleAnimator.isCorrectPosition(i);
 
     if (fancy) {
-      if (i == puzzleAnimator.tileCount && !puzzleAnimator.solved) {
-        return const Center();
-      }
+      return _tileFancy(i, correctPosition, tilePress);
+    } else {
+      return _tileSimple(i, correctPosition, tilePress);
+    }
+  }
 
-      final decorationImage = DecorationImagePlus(
-          puzzleWidth: puzzleAnimator.width,
-          puzzleHeight: puzzleAnimator.height,
-          pieceIndex: i,
-          fit: BoxFit.cover,
-          image: const AssetImage('asset/seattle.jpg'));
+  Widget _tileFancy(int i, bool correctPosition, void Function() tilePress) {
+    if (i == puzzleAnimator.tileCount && !puzzleAnimator.solved) {
+      return const Center();
+    }
 
-      final content = Ink(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          image: decorationImage,
-        ),
-        child: puzzleAnimator.solved
-            ? Container()
-            : Container(
-                decoration: ShapeDecoration(
-                  shape: const CircleBorder(),
-                  color: correctPosition ? Colors.black38 : Colors.white54,
-                ),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(1),
-                child: Text(
-                  (i + 1).toString(),
-                  style: TextStyle(
-                    color: correctPosition ? Colors.white : Colors.black,
-                  ),
+    final decorationImage = DecorationImagePlus(
+        puzzleWidth: puzzleAnimator.width,
+        puzzleHeight: puzzleAnimator.height,
+        pieceIndex: i,
+        fit: BoxFit.cover,
+        image: const AssetImage('asset/seattle.jpg'));
+
+    final content = Ink(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        image: decorationImage,
+      ),
+      child: puzzleAnimator.solved
+          ? Container()
+          : Container(
+              decoration: ShapeDecoration(
+                shape: const CircleBorder(),
+                color: correctPosition ? Colors.black38 : Colors.white54,
+              ),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(1),
+              child: Text(
+                (i + 1).toString(),
+                style: TextStyle(
+                  color: correctPosition ? Colors.white : Colors.black,
                 ),
               ),
-      );
+            ),
+    );
 
-      return OutlineButton(
-        highlightedBorderColor: Colors.transparent,
-        highlightElevation: 0,
-        child: content,
-        padding: const EdgeInsets.symmetric(),
-        onPressed: tilePress,
-        color: Colors.grey,
-      );
-    } else {
-      if (i == puzzleAnimator.tileCount) {
-        if (puzzleAnimator.solved) {
-          return const Center(
-              child: Icon(
-            Icons.thumb_up,
-            size: 36,
-            color: Colors.white,
-          ));
-        }
-        return const Center();
+    return OutlineButton(
+      highlightedBorderColor: Colors.transparent,
+      highlightElevation: 0,
+      child: content,
+      padding: const EdgeInsets.symmetric(),
+      onPressed: tilePress,
+      color: Colors.grey,
+    );
+  }
+
+  SingleChildRenderObjectWidget _tileSimple(
+      int i, bool correctPosition, void Function() tilePress) {
+    if (i == puzzleAnimator.tileCount) {
+      if (puzzleAnimator.solved) {
+        return const Center(
+            child: Icon(
+          Icons.thumb_up,
+          size: 36,
+          color: Colors.white,
+        ));
       }
-
-      final child = RaisedButton(
-        elevation: 1,
-        child: Text(
-          (i + 1).toString(),
-          style: TextStyle(
-            fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
-          ),
-          textScaleFactor: 1.4,
-        ),
-        onPressed: tilePress,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 1),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        padding: const EdgeInsets.symmetric(),
-        color: Colors.white,
-        disabledColor: Colors.white,
-      );
-
-      return Padding(
-        padding: const EdgeInsets.all(2),
-        child: child,
-      );
+      return const Center();
     }
+
+    final child = RaisedButton(
+      elevation: 1,
+      child: Text(
+        (i + 1).toString(),
+        style: TextStyle(
+          fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
+        ),
+        textScaleFactor: 1.4,
+      ),
+      onPressed: tilePress,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(width: 1),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      padding: const EdgeInsets.symmetric(),
+      color: Colors.white,
+      disabledColor: Colors.white,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(2),
+      child: child,
+    );
   }
 }
