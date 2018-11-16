@@ -32,7 +32,7 @@ class _PuzzleThemeImpl implements PuzzleThemeData {
 
   @override
   bool get selected {
-    return _parent._currentTheme.name == name;
+    return _parent._currentTheme == this;
   }
 }
 
@@ -58,17 +58,22 @@ class PuzzleHomeState extends State
 
   PuzzleHomeState(this.puzzleAnimator) {
     sub = puzzleAnimator.onEvent.listen(_onPuzzleEvent);
-
     _currentTheme = themeData.first;
   }
+
+  List<PuzzleThemeData> _themeDataCache;
+
+  @override
+  Iterable<PuzzleThemeData> get themeData =>
+      _themeDataCache ??= super.themeData.toList(growable: false);
 
   @override
   PuzzleThemeData createThemeData(String name, build) =>
       _PuzzleThemeImpl(this, name, build);
 
-  void _setTheme(_PuzzleThemeImpl theme) {
-    assert(themeData.any((ptd) => ptd.name == theme.name));
+  void _setTheme(PuzzleThemeData theme) {
     setState(() {
+      assert(themeData.contains(theme));
       _currentTheme = theme;
     });
   }
