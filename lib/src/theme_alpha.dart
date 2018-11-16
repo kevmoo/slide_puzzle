@@ -4,12 +4,18 @@ import 'base_theme.dart';
 import 'decoration_image_plus.dart';
 import 'puzzle_flow_delegate.dart';
 
-abstract class ThemeAlpha implements BaseTheme {
+mixin ThemeAlpha on BaseTheme {
   final _paramScale = 1.5;
 
-  Widget buildSimple(BuildContext context) => _build(context, false);
+  @override
+  Iterable<PuzzleThemeData> get themeData => super.themeData.followedBy([
+        PuzzleThemeData('Simple', _buildSimple),
+        PuzzleThemeData('Seattle', _buildSeattle)
+      ]);
 
-  Widget buildSeattle(BuildContext context) => _build(context, true);
+  Widget _buildSimple(BuildContext context) => _build(context, false);
+
+  Widget _buildSeattle(BuildContext context) => _build(context, true);
 
   Widget _build(BuildContext context, bool fancy) => Stack(
         children: <Widget>[

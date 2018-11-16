@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 
 import 'puzzle_animator.dart';
 
-abstract class ThemePicker {
+abstract class PuzzleThemeOption {
   String get name;
 
-  void select();
+  void Function() get select;
 
   bool get selected;
 }
 
-abstract class BaseTheme {
+class PuzzleThemeData {
+  final String name;
+  final Widget Function(BuildContext) build;
+
+  PuzzleThemeData(this.name, this.build);
+}
+
+mixin BaseTheme {
   PuzzleAnimator get puzzleAnimator;
 
   bool get autoPlay;
@@ -23,7 +30,9 @@ abstract class BaseTheme {
 
   String get tilesLeftText;
 
-  Iterable<ThemePicker> get availableThemes;
+  Iterable<PuzzleThemeOption> get availableThemes;
+
+  Iterable<PuzzleThemeData> get themeData => List(0);
 }
 
 class AnimationNotifier extends ChangeNotifier {

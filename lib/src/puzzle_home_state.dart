@@ -8,25 +8,30 @@ import 'frame_nanny.dart';
 import 'puzzle_animator.dart';
 import 'theme_alpha.dart';
 
-class _ThemePicker implements ThemePicker {
+class _PuzzleThemeImpl extends PuzzleThemeData implements PuzzleThemeOption {
   final PuzzleHomeState _parent;
 
-  @override
-  final String name;
-
-  final Widget Function(BuildContext) build;
-
-  _ThemePicker(this._parent, this.name, this.build);
+  _PuzzleThemeImpl(
+      this._parent, String name, Widget Function(BuildContext) build)
+      : super(name, build);
 
   @override
-  void select() => _parent._setTheme(this);
+  void Function() get select {
+    if (selected) {
+      return null;
+    }
+
+    return _select;
+  }
+
+  void _select() => _parent._setTheme(this);
 
   @override
   bool get selected => _parent._currentTheme == this;
 }
 
 class PuzzleHomeState extends State
-    with ThemeAlpha, SingleTickerProviderStateMixin {
+    with BaseTheme, ThemeAlpha, SingleTickerProviderStateMixin {
   @override
   final PuzzleAnimator puzzleAnimator;
 
@@ -35,7 +40,7 @@ class PuzzleHomeState extends State
 
   final _nanny = FrameNanny();
 
-  _ThemePicker _currentTheme;
+  _PuzzleThemeImpl _currentTheme;
 
   Duration _tickerTimeSinceLastEvent = Duration.zero;
   Ticker _ticker;
@@ -45,22 +50,22 @@ class PuzzleHomeState extends State
   @override
   bool autoPlay = false;
 
-  @override
-  Iterable<_ThemePicker> availableThemes;
-
   PuzzleHomeState(this.puzzleAnimator) {
     sub = puzzleAnimator.onEvent.listen(_onPuzzleEvent);
 
-    availableThemes = [
-      _ThemePicker(this, 'Simple', buildSimple),
-      _ThemePicker(this, 'Seattle', buildSeattle)
-    ];
+    _availableThemes =
+        themeData.map((e) => _PuzzleThemeImpl(this, e.name, e.build)).toList();
 
     _currentTheme = availableThemes.first;
   }
 
-  void _setTheme(_ThemePicker theme) {
-    assert(availableThemes.contains(theme));
+  List<_PuzzleThemeImpl> _availableThemes;
+
+  @override
+  Iterable<_PuzzleThemeImpl> get availableThemes => _availableThemes;
+
+  void _setTheme(_PuzzleThemeImpl theme) {
+    assert(themeData.any((ptd) => ptd.name == theme.name));
     setState(() {
       _currentTheme = theme;
     });
