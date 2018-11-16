@@ -7,6 +7,7 @@ import 'base_theme.dart';
 import 'frame_nanny.dart';
 import 'puzzle_animator.dart';
 import 'theme_alpha.dart';
+import 'theme_plaster.dart';
 
 class _PuzzleThemeImpl implements PuzzleThemeData {
   final PuzzleHomeState _parent;
@@ -37,7 +38,7 @@ class _PuzzleThemeImpl implements PuzzleThemeData {
 }
 
 class PuzzleHomeState extends State
-    with BaseTheme, ThemeAlpha, SingleTickerProviderStateMixin {
+    with BaseTheme, ThemePlaster, ThemeAlpha, SingleTickerProviderStateMixin {
   @override
   final PuzzleAnimator puzzle;
 

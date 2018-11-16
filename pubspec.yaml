@@ -18,4 +18,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - asset/seattle.jpg
+    - asset/
+
+  fonts:
+  - family: Plaster
+    fonts:
+    - asset: asset/fonts/plaster/Plaster-Regular.ttf
