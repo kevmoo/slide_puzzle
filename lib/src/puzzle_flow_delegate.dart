@@ -3,7 +3,7 @@ import 'flutter.dart';
 import 'puzzle_animator.dart';
 
 class PuzzleFlowDelegate extends FlowDelegate {
-  static const _tileSize = 65.0;
+  static const _tileSize = 140.0;
   final PuzzleProxy _puzzleAnimator;
 
   PuzzleFlowDelegate(this._puzzleAnimator, Listenable repaint)

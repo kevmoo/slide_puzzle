@@ -21,11 +21,12 @@ class ThemeSimple extends SharedTheme {
     if (i == puzzle.tileCount) {
       if (puzzle.solved) {
         return const Center(
-            child: Icon(
-          Icons.thumb_up,
-          size: 36,
-          color: Colors.white,
-        ));
+          child: Icon(
+            Icons.thumb_up,
+            size: 72,
+            color: Colors.white,
+          ),
+        );
       }
       return const Center();
     }
@@ -39,12 +40,12 @@ class ThemeSimple extends SharedTheme {
         style: TextStyle(
           fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
         ),
-        textScaleFactor: 1.4,
+        textScaleFactor: 3,
       ),
       onPressed: tilePress(i),
       shape: RoundedRectangleBorder(
-        side: const BorderSide(width: 1),
-        borderRadius: BorderRadius.circular(5),
+        side: const BorderSide(width: 2),
+        borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.symmetric(),
       color: Colors.white,

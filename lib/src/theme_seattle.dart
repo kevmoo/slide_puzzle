@@ -37,7 +37,7 @@ class ThemeSeattle extends SharedTheme {
 
     final correctPosition = puzzle.isCorrectPosition(i);
     final content = Ink(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         image: decorationImage,
       ),
@@ -55,7 +55,7 @@ class ThemeSeattle extends SharedTheme {
                   fontWeight: FontWeight.normal,
                   color: correctPosition ? Colors.white : Colors.black,
                 ),
-                textScaleFactor: 1.4,
+                textScaleFactor: 2.8,
               ),
             ),
     );

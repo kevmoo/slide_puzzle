@@ -118,14 +118,14 @@ abstract class SharedTheme extends PuzzleTheme {
                       child: Padding(
                         padding: const EdgeInsets.all(35),
                         child: FittedBox(
-                          alignment: Alignment.centerLeft,
+                          alignment: Alignment.topLeft,
                           fit: BoxFit.contain,
                           child: Material(
                             animationDuration: puzzleAnimationDuration,
                             shape: puzzleBorder,
                             color: puzzleBackgroundColor,
                             child: Container(
-                              padding: const EdgeInsets.all(7),
+                              padding: const EdgeInsets.all(12),
                               child: Flow(
                                 delegate: PuzzleFlowDelegate(
                                     puzzle, animationNotifier),
@@ -148,7 +148,7 @@ abstract class SharedTheme extends PuzzleTheme {
   Widget tileButton(int i);
 
   Widget _widgetForTile(int i) => Padding(
-        padding: const EdgeInsets.all(2),
+        padding: const EdgeInsets.all(4),
         child: tileButton(i),
       );
 }
