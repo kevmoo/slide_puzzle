@@ -266,19 +266,17 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   }
 }
 
-void _paintImage({
-  @required Canvas canvas,
-  @required Rect rect,
-  @required ui.Image image,
-  @required int puzzleWidth,
-  @required int puzzleHeight,
-  @required int pieceIndex,
-  double scale = 1.0,
-  ColorFilter colorFilter,
-  BoxFit fit,
-  Alignment alignment = Alignment.center,
-  bool invertColors = false,
-}) {
+void _paintImage(
+    {@required Canvas canvas,
+    @required Rect rect,
+    @required ui.Image image,
+    @required int puzzleWidth,
+    @required int puzzleHeight,
+    @required int pieceIndex,
+    double scale = 1.0,
+    ColorFilter colorFilter,
+    BoxFit fit,
+    Alignment alignment = Alignment.center}) {
   assert(canvas != null);
   assert(image != null);
   assert(alignment != null);
@@ -293,8 +291,7 @@ void _paintImage({
   final destinationSize = fittedSizes.destination;
   final Paint paint = Paint()
     ..isAntiAlias = false
-    ..filterQuality = FilterQuality.medium
-    ..invertColors = invertColors;
+    ..filterQuality = FilterQuality.medium;
   if (colorFilter != null) paint.colorFilter = colorFilter;
   final double halfWidthDelta =
       (outputSize.width - destinationSize.width) / 2.0;
