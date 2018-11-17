@@ -14,12 +14,14 @@ class Array2d {
 
   Array2d._raw(this.width, this._source);
 
-  Array2d.wrap(this.width, this._source) {
+  factory Array2d.wrap(int width, Uint8List _source) {
     requireArgumentNotNull(width, 'width');
     requireArgumentNotNull(_source, 'source');
     requireArgument(width >= 0, 'width', 'width must be non-zero');
 
-    if (width * height == 0) {
+    final value = Array2d._raw(width, _source);
+
+    if (width * value.height == 0) {
       requireArgument(_source.isEmpty, 'width',
           'width must be greater than zero if the source is non-empty');
     } else {
@@ -28,6 +30,8 @@ class Array2d {
       requireArgument(_source.length % width == 0, 'width',
           'width must evenly divide the source');
     }
+
+    return value;
   }
 
   Array2d clone() => Array2d._raw(width, Uint8List.fromList(_source));
@@ -41,26 +45,12 @@ class Array2d {
     return _source[i];
   }
 
-  void swap(math.Point<int> a, math.Point<int> b) {
-    final aIndex = _getIndex(a.x, a.y);
-    final aValue = _source[aIndex];
-    final bIndex = _getIndex(b.x, b.y);
-
-    _source[aIndex] = _source[bIndex];
-    _source[bIndex] = aValue;
-  }
-
   Point coordinatesOfValue(int value) {
     final index = _source.indexOf(value);
     final x = index % width;
     final y = index ~/ width;
     assert(_getIndex(x, y) == index);
     return Point(x, y);
-  }
-
-  void setValues(List<int> values) {
-    assert(values.length == _source.length);
-    _source.setRange(0, _source.length, values);
   }
 
   int _getIndex(int x, int y) {

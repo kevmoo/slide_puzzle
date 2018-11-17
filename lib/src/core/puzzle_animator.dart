@@ -27,9 +27,10 @@ abstract class PuzzleProxy {
 }
 
 class PuzzleAnimator implements PuzzleProxy {
-  final Puzzle _puzzle;
   final List<Body> _locations;
   final _controller = StreamController<PuzzleEvent>();
+  Puzzle _puzzle;
+  int _clickCount = 0;
 
   bool _stable;
 
@@ -52,11 +53,11 @@ class PuzzleAnimator implements PuzzleProxy {
 
   int get incorrectTiles => _puzzle.incorrectTiles;
 
-  int get clickCount => _puzzle.clickCount;
+  int get clickCount => _clickCount;
 
   @override
   void reset() {
-    _puzzle.reset();
+    _puzzle = _puzzle.reset();
     _controller.add(PuzzleEvent.reset);
   }
 
@@ -67,8 +68,6 @@ class PuzzleAnimator implements PuzzleProxy {
 
   @override
   Point<double> location(int index) => _locations[index].location;
-
-  List<int> _lastPlan;
 
   int _lastBadClick;
   int _badClickCount = 0;
@@ -81,52 +80,14 @@ class PuzzleAnimator implements PuzzleProxy {
               (_puzzle.width - 1.0) / 2, (_puzzle.height - 1.0) / 2, 0, 0);
         });
 
-  void playRandom({Duration limit = const Duration(milliseconds: 5)}) {
+  void playRandom() {
     if (_puzzle.fitness == 0) {
       return;
     }
 
-    limit ??= const Duration(milliseconds: 5);
-
-    final watch = Stopwatch()..start();
-
-    List<int> bestClicks;
-    int bestScore;
-
-    void evaluateClone(Puzzle clone, List<int> clicks) {
-      final score = _scorePuzzle(clone);
-
-      if (clone.toString() != _puzzle.toString() &&
-          (bestScore == null || bestScore > score)) {
-        bestScore = score;
-        bestClicks = clicks;
-      }
-    }
-
-    if (_lastPlan != null) {
-      // If we have an existing plan, score it
-      final clone = _puzzle.clone();
-      for (var click in _lastPlan) {
-        clone.clickValue(click);
-      }
-      evaluateClone(clone, _lastPlan);
-      if (bestScore != null) {
-        // We want to give `_lastPlan` a handicap to prioritize having a
-        // more stable plan
-        bestScore -= _puzzle.length;
-      }
-    }
-
-    do {
-      final clone = _puzzle.clone();
-      final clicks = clone.clickRandom(_puzzle.tileCount);
-      evaluateClone(clone, clicks);
-    } while (watch.elapsed < limit);
-
-    // Only playing the first option in the "plan"
-    _clickValue(bestClicks.removeAt(0));
-
-    _lastPlan = bestClicks;
+    _puzzle = _puzzle.clickRandom();
+    _clickCount++;
+    _controller.add(PuzzleEvent.click);
   }
 
   @override
@@ -149,7 +110,7 @@ class PuzzleAnimator implements PuzzleProxy {
             }
             return i;
           });
-          _puzzle.reset(source: newValues);
+          _puzzle = _puzzle.reset(source: newValues);
           _lastBadClick = null;
           _badClickCount = 0;
         }
@@ -165,7 +126,14 @@ class PuzzleAnimator implements PuzzleProxy {
 
   bool _clickValue(int value) {
     _controller.add(PuzzleEvent.click);
-    return _puzzle.clickValue(value);
+    final newPuzzle = _puzzle.clickValue(value);
+    if (newPuzzle == null) {
+      return false;
+    } else {
+      _clickCount++;
+      _puzzle = newPuzzle;
+      return true;
+    }
   }
 
   void _shake(int tileValue) {
@@ -203,16 +171,4 @@ class PuzzleAnimator implements PuzzleProxy {
     final target = _puzzle.coordinatesOf(item);
     return Point(target.x.toDouble(), target.y.toDouble());
   }
-}
-
-int _scorePuzzle(Puzzle puzzle) {
-  var score = puzzle.fitness * puzzle.incorrectTiles;
-  for (var i = 0; i < puzzle.tileCount; i++) {
-    if (puzzle.isCorrectPosition(i)) {
-      score -= puzzle.length;
-    } else {
-      break;
-    }
-  }
-  return score;
 }

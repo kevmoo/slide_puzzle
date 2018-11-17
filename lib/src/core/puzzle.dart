@@ -13,10 +13,6 @@ final _spacesRegexp = RegExp(' +');
 class Puzzle {
   final Array2d _array;
 
-  int _clickCount = 0;
-
-  int get clickCount => _clickCount;
-
   int get width => _array.width;
 
   int get height => _array.height;
@@ -52,19 +48,20 @@ class Puzzle {
 
   bool get solvable => _solvable(width, _array.dataView);
 
-  void reset({List<int> source}) {
-    source ??= _randomizeList(width, _array.dataView);
+  Puzzle reset({List<int> source}) {
+    final data = (source == null)
+        ? _randomizeList(width, _array.dataView)
+        : Uint8List.fromList(source);
 
-    if (source.length != _array.length) {
+    if (data.length != _array.length) {
       throw ArgumentError.value(source, 'source', 'Cannot change the size!');
     }
-    _validate(source);
-    if (!_solvable(width, source)) {
+    _validate(data);
+    if (!_solvable(width, data)) {
       throw ArgumentError.value(source, 'source', 'Not a solvable puzzle.');
     }
-    _array.setValues(source);
 
-    _clickCount = 0;
+    return Puzzle._raw(Array2d.wrap(width, data));
   }
 
   int get incorrectTiles {
@@ -103,23 +100,20 @@ class Puzzle {
     return value;
   }
 
-  List<int> clickRandom(int count) {
-    assert(count > 0);
-    final clicks = <int>[];
-    int lastTarget;
-    while (clicks.length < count) {
+  Puzzle clickRandom({bool vertical}) {
+    Puzzle clicks;
+    while (clicks == null) {
       final randomTarget = _rnd.nextInt(tileCount);
-      if (randomTarget != lastTarget && movable(randomTarget)) {
-        final result = clickValue(randomTarget);
-        assert(result);
-        clicks.add(randomTarget);
-        lastTarget = randomTarget;
+      if (_movable(randomTarget)) {
+        clicks = clickValue(randomTarget);
+        assert(clicks != null);
+        break;
       }
     }
     return clicks;
   }
 
-  bool movable(int tileValue) {
+  bool _movable(int tileValue) {
     if (tileValue == tileCount) {
       return false;
     }
@@ -132,40 +126,38 @@ class Puzzle {
     return true;
   }
 
-  bool clickValue(int tileValue) {
-    if (!movable(tileValue)) {
-      return false;
+  Puzzle clickValue(int tileValue) {
+    if (!_movable(tileValue)) {
+      return null;
     }
     final target = coordinatesOf(tileValue);
 
-    _shift(target);
-    _clickCount++;
-    return true;
+    final newStore = Uint8List.fromList(_array.dataView);
+
+    _shift(newStore, target);
+    return Puzzle._raw(Array2d.wrap(width, newStore));
   }
 
-  void _shift(Point target) {
+  void _shift(Uint8List source, Point target) {
     final lastCoord = openPosition();
     final delta = lastCoord - target;
 
+    void _staticSwap(Point a, Point b) {
+      final aIndex = a.x + a.y * width;
+      final aValue = source[aIndex];
+      final bIndex = b.x + b.y * width;
+
+      source[aIndex] = source[bIndex];
+      source[bIndex] = aValue;
+    }
+
     if (delta.magnitude.toInt() > 1) {
       final shiftPoint = target + Point(delta.x.sign, delta.y.sign);
-      _shift(shiftPoint);
-      _swap(target, shiftPoint);
+      _shift(source, shiftPoint);
+      _staticSwap(target, shiftPoint);
     } else {
-      _swap(lastCoord, target);
+      _staticSwap(lastCoord, target);
     }
-  }
-
-  void _swap(Point a, Point b) {
-    assert(a != b);
-    if (a.x == b.x) {
-      assert((a.y - b.y).abs() == 1);
-    } else {
-      assert(a.y == b.y);
-      assert((a.x - b.x).abs() == 1);
-    }
-
-    _array.swap(a, b);
   }
 
   Point coordinatesOf(int value) => _array.coordinatesOfValue(value);
@@ -177,8 +169,8 @@ class Puzzle {
 List<int> _randomList(int width, int height) => _randomizeList(
     width, List<int>.generate(width * height, (i) => i, growable: false));
 
-List<int> _randomizeList(int width, List<int> existing) {
-  final copy = existing.toList(growable: false);
+Uint8List _randomizeList(int width, List<int> existing) {
+  final copy = Uint8List.fromList(existing);
   do {
     copy.shuffle(_rnd);
   } while (!_solvable(width, copy) ||

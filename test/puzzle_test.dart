@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:slide_puzzle/src/core/puzzle.dart';
@@ -18,8 +17,6 @@ Puzzle _ordered(int width, int height, {int offset = 0}) {
 void _printPuzzleOnFailure(Puzzle puzzle) {
   printOnFailure('* here is the puzzle\n$puzzle');
 }
-
-Future _micro() => Future.delayed(Duration(milliseconds: 1));
 
 void main() {
   test('must be at least 2 x 3', () {
@@ -59,16 +56,10 @@ void main() {
   });
 
   group('click', () {
-    bool doClick(Puzzle puzzle, int tileValue) {
-      final startCount = puzzle.clickCount;
-      final startString = puzzle.toString();
+    Puzzle doClick(Puzzle puzzle, int tileValue) {
       final clickResult = puzzle.clickValue(tileValue);
-      if (clickResult) {
-        expect(puzzle.clickCount, startCount + 1);
-        expect(puzzle.toString(), isNot(startString));
-      } else {
-        expect(puzzle.clickCount, startCount);
-        expect(puzzle.toString(), startString);
+      if (clickResult != null) {
+        expect(clickResult.toString(), isNot(puzzle.toString()));
       }
       return clickResult;
     }
@@ -76,7 +67,7 @@ void main() {
     test('click on last tile is a noop', () {
       var puzzle = _ordered(4, 4);
       expect(puzzle.valueAt(0, 0), 0);
-      expect(doClick(puzzle, 0), isFalse);
+      expect(doClick(puzzle, 0), isNull);
 
       puzzle = _ordered(3, 3, offset: 2);
       expect(puzzle.toString(), '''
@@ -85,23 +76,23 @@ void main() {
 4 5 6''');
 
       expect(puzzle.valueAt(2, 0), 0);
-      expect(doClick(puzzle, 1), isFalse);
+      expect(doClick(puzzle, 1), isNull);
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
-        expect(doClick(puzzle, 24), isFalse,
+        expect(doClick(puzzle, 24), isNull,
             reason: 'clicking on the sliding tile is a no-op');
       }
     });
 
-    test('click on a cell not aligned with zero is a noop', () async {
+    test('click on a cell not aligned with zero is a noop', () {
       var puzzle = _ordered(4, 4);
       expect(puzzle.valueAt(1, 1), 5);
-      expect(doClick(puzzle, 4), isFalse);
+      expect(doClick(puzzle, 4), isNull);
 
       puzzle = _ordered(3, 3, offset: 2);
       expect(puzzle.valueAt(0, 1), 1);
-      expect(doClick(puzzle, 3), isFalse);
+      expect(doClick(puzzle, 3), isNull);
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
@@ -116,15 +107,13 @@ void main() {
               randomPoint.y == zeroLocation.y);
 
           expect(doClick(puzzle, puzzle.valueAt(randomPoint.x, randomPoint.y)),
-              isFalse);
+              isNull);
         }
-
-        await _micro();
       }
     });
 
-    test('click to shift', () async {
-      final puzzle = _ordered(4, 4, offset: 1);
+    test('click to shift', () {
+      var puzzle = _ordered(4, 4, offset: 1);
       expect(puzzle.incorrectTiles, 15);
       expect(puzzle.toString(), '''
 15  0  1  2
@@ -133,39 +122,39 @@ void main() {
 11 12 13 14''');
 
       expect(puzzle.valueAt(1, 0), 0);
-      expect(doClick(puzzle, 0), isTrue);
+      puzzle = doClick(puzzle, 0);
       expect(puzzle.toString(), '''
  0 15  1  2
  3  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 0), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 0);
       expect(puzzle.toString(), '''
 15  0  1  2
  3  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 3), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 3);
       expect(puzzle.toString(), '''
  3  0  1  2
 15  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 3), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 3);
       expect(puzzle.toString(), '''
 15  0  1  2
  3  4  5  6
  7  8  9 10
 11 12 13 14''');
 
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 2), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 2);
       expect(puzzle.toString(), '''
  0  1  2 15
  3  4  5  6
@@ -173,24 +162,24 @@ void main() {
 11 12 13 14''');
 
       expect(puzzle.incorrectTiles, 12);
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 14), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 14);
       expect(puzzle.toString(), '''
  0  1  2  6
  3  4  5 10
  7  8  9 14
 11 12 13 15''');
 
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 11), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 11);
       expect(puzzle.toString(), '''
  0  1  2  6
  3  4  5 10
  7  8  9 14
 15 11 12 13''');
 
-      expect(doClick(puzzle, 15), isFalse);
-      expect(doClick(puzzle, 0), isTrue);
+      expect(doClick(puzzle, 15), isNull);
+      puzzle = doClick(puzzle, 0);
       expect(puzzle.toString(), '''
 15  1  2  6
  0  4  5 10
@@ -198,9 +187,6 @@ void main() {
  7 11 12 13''');
 
       expect(puzzle.incorrectTiles, 13);
-      expect(puzzle.clickCount, 8);
-
-      await _micro();
     });
   });
 
@@ -219,28 +205,30 @@ void main() {
   });
 
   test('reset', () {
-    final puzzle = Puzzle(4, 4);
+    var puzzle = Puzzle(4, 4);
     expect(puzzle.incorrectTiles, puzzle.tileCount);
     expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
 
     do {
-      // click around until one tile is in the right location
-      puzzle.clickValue(_rnd.nextInt(puzzle.tileCount));
+      Puzzle newPuzzle;
+      do {
+        // click around until one tile is in the right location
+        newPuzzle = puzzle.clickValue(_rnd.nextInt(puzzle.tileCount));
+      } while (newPuzzle == null);
+      puzzle = newPuzzle;
     } while (puzzle.incorrectTiles == puzzle.tileCount);
 
     expect(puzzle.incorrectTiles, lessThan(puzzle.tileCount));
-    expect(puzzle.clickCount, greaterThan(0));
 
-    puzzle.reset();
+    puzzle = puzzle.reset();
 
     expect(puzzle.solvable, isTrue);
     expect(puzzle.incorrectTiles, puzzle.tileCount);
     expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
-    expect(puzzle.clickCount, 0);
   });
 
   test('fitness', () {
-    final puzzle = Puzzle.raw(3, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    var puzzle = Puzzle.raw(3, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
     expect(puzzle.incorrectTiles, 0);
     expect(puzzle.fitness, 0);
     expect(puzzle.toString(), '''
@@ -248,7 +236,7 @@ void main() {
 3 4 5
 6 7 8''');
 
-    expect(puzzle.clickValue(7), isTrue);
+    puzzle = puzzle.clickValue(7);
     expect(puzzle.incorrectTiles, 1);
     expect(puzzle.fitness, 1);
     expect(puzzle.toString(), '''
@@ -256,10 +244,10 @@ void main() {
 3 4 5
 6 8 7''');
 
-    expect(puzzle.clickValue(6), isTrue);
-    expect(puzzle.clickValue(3), isTrue);
-    expect(puzzle.clickValue(4), isTrue);
-    expect(puzzle.clickValue(6), isTrue);
+    puzzle = puzzle.clickValue(6);
+    puzzle = puzzle.clickValue(3);
+    puzzle = puzzle.clickValue(4);
+    puzzle = puzzle.clickValue(6);
     expect(puzzle.toString(), '''
 0 1 2
 4 6 5
@@ -280,28 +268,21 @@ void main() {
     expect(puzzle3.fitness, 8);
   });
 
-  test('click random', () async {
+  test('click random', () {
     final puzzle = Puzzle(4, 4);
-    final moves = puzzle.clickRandom(5);
-    expect(moves.length, 5);
-    expect(puzzle.clickCount, 5);
-    await _micro();
+    final moves = puzzle.clickRandom();
+    expect(puzzle.toString(), isNot(moves.toString()));
   });
 
   test('clone', () {
-    final puzzle = Puzzle(4, 4);
-    expect(puzzle.clickRandom(5), hasLength(5));
-    expect(puzzle.clickCount, 5);
+    var puzzle = Puzzle(4, 4);
     final clone = puzzle.clone();
     expect(clone, isNot(same(puzzle)));
     expect(clone.toString(), puzzle.toString());
     expect(clone.incorrectTiles, puzzle.incorrectTiles);
-    expect(clone.clickCount, 0);
 
-    expect(puzzle.clickRandom(1), hasLength(1));
+    puzzle = puzzle.clickRandom();
     expect(clone.toString(), isNot(puzzle.toString()));
-    expect(puzzle.clickCount, 6);
-    expect(clone.clickCount, 0);
   });
 
   test('solvable', () {
@@ -309,64 +290,6 @@ void main() {
     expect(Puzzle.raw(4, _solvable4x4n2).solvable, isTrue);
     expect(Puzzle.raw(4, _unsolvable4x4).solvable, isFalse);
   });
-
-  test('bad self play', () {
-    int _solvePuzzle(Puzzle puzzle) {
-      int _score(Puzzle p) => p.fitness + p.incorrectTiles;
-
-      while (puzzle.incorrectTiles > 0) {
-        final options = Iterable.generate(puzzle.tileCount * 20, (i) {
-          final p = puzzle.clone();
-          return MapEntry(p, p.clickRandom(puzzle.tileCount));
-        }).toList();
-
-        options.sort((a, b) {
-          return _score(a.key).compareTo(_score(b.key));
-        });
-
-        options.first.value.forEach(puzzle.clickValue);
-        expect(options.first.key.toString(), puzzle.toString());
-
-        if (puzzle.clickCount % 1000 == 0) {
-          print(
-              '*** - ${puzzle.clickCount} - fitness ${puzzle.fitness} - left ${puzzle.incorrectTiles}');
-          print(puzzle);
-        }
-      }
-
-      return puzzle.clickCount;
-    }
-
-    print(_solvePuzzle(Puzzle.raw(4, _solvable4x4)));
-    print(_solvePuzzle(Puzzle.raw(4, _solvable4x4n2)));
-
-    Puzzle puzzle;
-
-    var totalPlays = 0;
-    var totalClicksToWin = 0;
-
-    for (var height = 2; height < 6; height++) {
-      for (var width = 2; width < 6; width++) {
-        if (height * width < 6) {
-          continue;
-        }
-        for (var i = 0; i < 10; i++) {
-          do {
-            puzzle = Puzzle(width, height);
-          } while (!puzzle.solvable);
-
-          print(['<#####', height, width, i].join('\n'));
-
-          final clicksToSolve = _solvePuzzle(puzzle);
-          print('Clicks to solve: $clicksToSolve');
-          print('####>');
-          totalPlays++;
-          totalClicksToWin += clicksToSolve;
-        }
-        print(['!!!!', totalClicksToWin / totalPlays, '!!!!!'].join('\n'));
-      }
-    }
-  }, skip: true);
 }
 
 // examples from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
