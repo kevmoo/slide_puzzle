@@ -186,6 +186,12 @@ void main() {
  3  8  9 14
  7 11 12 13''');
 
+      expect(puzzle.clickableValues(), unorderedEquals([0, 3, 7, 1, 2, 6]));
+      expect(
+          puzzle.clickableValues(vertical: true), unorderedEquals([0, 3, 7]));
+      expect(
+          puzzle.clickableValues(vertical: false), unorderedEquals([1, 2, 6]));
+
       expect(puzzle.incorrectTiles, 13);
     });
   });

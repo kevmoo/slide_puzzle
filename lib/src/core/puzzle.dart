@@ -113,6 +113,24 @@ class Puzzle {
     return clicks;
   }
 
+  Iterable<int> clickableValues({bool vertical}) sync* {
+    final open = openPosition();
+    if (vertical == null || vertical == false) {
+      for (var x = 0; x < width; x++) {
+        if (x != open.x) {
+          yield valueAt(x, open.y);
+        }
+      }
+    }
+    if (vertical == null || vertical) {
+      for (var y = 0; y < height; y++) {
+        if (y != open.y) {
+          yield valueAt(open.x, y);
+        }
+      }
+    }
+  }
+
   bool _movable(int tileValue) {
     if (tileValue == tileCount) {
       return false;
