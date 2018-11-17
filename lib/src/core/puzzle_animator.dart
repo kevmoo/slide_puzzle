@@ -29,6 +29,7 @@ abstract class PuzzleProxy {
 class PuzzleAnimator implements PuzzleProxy {
   final List<Body> _locations;
   final _controller = StreamController<PuzzleEvent>();
+  bool _nextRandomVertical = true;
   Puzzle _puzzle;
   int _clickCount = 0;
 
@@ -85,7 +86,8 @@ class PuzzleAnimator implements PuzzleProxy {
       return;
     }
 
-    _puzzle = _puzzle.clickRandom();
+    _puzzle = _puzzle.clickRandom(vertical: _nextRandomVertical);
+    _nextRandomVertical = !_nextRandomVertical;
     _clickCount++;
     _controller.add(PuzzleEvent.click);
   }

@@ -101,16 +101,8 @@ class Puzzle {
   }
 
   Puzzle clickRandom({bool vertical}) {
-    Puzzle clicks;
-    while (clicks == null) {
-      final randomTarget = _rnd.nextInt(tileCount);
-      if (_movable(randomTarget)) {
-        clicks = clickValue(randomTarget);
-        assert(clicks != null);
-        break;
-      }
-    }
-    return clicks;
+    final clickable = clickableValues(vertical: vertical).toList();
+    return clickValue(clickable[_rnd.nextInt(clickable.length)]);
   }
 
   Iterable<int> clickableValues({bool vertical}) sync* {
