@@ -1,6 +1,5 @@
+import 'core/puzzle_animator.dart';
 import 'flutter.dart';
-
-import 'puzzle_animator.dart';
 
 abstract class PuzzleTheme {
   final String name;

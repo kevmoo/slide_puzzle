@@ -1,6 +1,6 @@
 import 'dart:math' show Point, sqrt1_2;
 
-import 'package:slide_puzzle/src/body.dart';
+import 'package:slide_puzzle/src/core/body.dart';
 import 'package:test/test.dart';
 
 Point<double> _point(double x, double y) => Point<double>(x, y);

@@ -1,6 +1,5 @@
+import 'src/core/puzzle_animator.dart';
 import 'src/flutter.dart';
-
-import 'src/puzzle_animator.dart';
 import 'src/puzzle_home_state.dart';
 
 void main() => runApp(PuzzleApp());

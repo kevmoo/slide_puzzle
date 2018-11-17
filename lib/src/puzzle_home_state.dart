@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'base_theme.dart';
+import 'core/puzzle_animator.dart';
 import 'flutter.dart';
 import 'frame_nanny.dart';
-import 'puzzle_animator.dart';
 import 'theme_plaster.dart';
 import 'theme_seattle.dart';
 import 'theme_simple.dart';

@@ -1,6 +1,5 @@
+import 'core/puzzle_animator.dart';
 import 'flutter.dart';
-
-import 'puzzle_animator.dart';
 
 class PuzzleFlowDelegate extends FlowDelegate {
   static const _tileSize = 140.0;

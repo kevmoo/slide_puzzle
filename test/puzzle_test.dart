@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:slide_puzzle/src/puzzle.dart';
+import 'package:slide_puzzle/src/core/puzzle.dart';
 import 'package:test/test.dart';
 
 final _rnd = math.Random();
