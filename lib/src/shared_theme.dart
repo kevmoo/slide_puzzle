@@ -121,7 +121,8 @@ abstract class SharedTheme extends PuzzleTheme {
                             shape: puzzleBorder,
                             color: puzzleBackgroundColor,
                             child: Container(
-                              constraints: BoxConstraints.tightForFinite(),
+                              constraints:
+                                  const BoxConstraints.tightForFinite(),
                               padding: const EdgeInsets.all(10),
                               child: Flow(
                                 delegate: PuzzleFlowDelegate(
