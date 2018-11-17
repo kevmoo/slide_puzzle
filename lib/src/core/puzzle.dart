@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:math' show Point, Random;
+import 'dart:math' show Random;
 import 'dart:typed_data';
 
 import 'array_2d.dart';
+import 'point_int.dart';
 import 'util.dart';
 
 final _rnd = Random();
@@ -76,7 +77,7 @@ class Puzzle {
     return count;
   }
 
-  Point<int> openPosition() => coordinatesOf(tileCount);
+  Point openPosition() => coordinatesOf(tileCount);
 
   Puzzle clone() => Puzzle._raw(_array.clone());
 
@@ -142,12 +143,12 @@ class Puzzle {
     return true;
   }
 
-  void _shift(Point<int> target) {
+  void _shift(Point target) {
     final lastCoord = openPosition();
     final delta = lastCoord - target;
 
     if (delta.magnitude.toInt() > 1) {
-      final shiftPoint = target + Point<int>(delta.x.sign, delta.y.sign);
+      final shiftPoint = target + Point(delta.x.sign, delta.y.sign);
       _shift(shiftPoint);
       _swap(target, shiftPoint);
     } else {
@@ -155,7 +156,7 @@ class Puzzle {
     }
   }
 
-  void _swap(Point<int> a, Point<int> b) {
+  void _swap(Point a, Point b) {
     assert(a != b);
     if (a.x == b.x) {
       assert((a.y - b.y).abs() == 1);
@@ -167,7 +168,7 @@ class Puzzle {
     _array.swap(a, b);
   }
 
-  Point<int> coordinatesOf(int value) => _array.coordinatesOfValue(value);
+  Point coordinatesOf(int value) => _array.coordinatesOfValue(value);
 
   @override
   String toString() => _array.toString();

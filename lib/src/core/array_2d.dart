@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'point_int.dart';
 import 'util.dart';
 
 class Array2d {
@@ -49,12 +50,12 @@ class Array2d {
     _source[bIndex] = aValue;
   }
 
-  math.Point<int> coordinatesOfValue(int value) {
+  Point coordinatesOfValue(int value) {
     final index = _source.indexOf(value);
     final x = index % width;
     final y = index ~/ width;
     assert(_getIndex(x, y) == index);
-    return math.Point<int>(x, y);
+    return Point(x, y);
   }
 
   void setValues(List<int> values) {

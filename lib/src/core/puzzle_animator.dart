@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' show Point;
 
 import 'body.dart';
 import 'puzzle.dart';
