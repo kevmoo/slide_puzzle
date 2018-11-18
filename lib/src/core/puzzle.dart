@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:math' show Random;
+import 'dart:math' show Random, max;
 import 'dart:typed_data';
 
-import 'array_2d.dart';
 import 'point_int.dart';
 import 'util.dart';
 
@@ -11,20 +10,20 @@ final _rnd = Random();
 final _spacesRegexp = RegExp(' +');
 
 class Puzzle {
-  final Array2d _array;
+  final Uint8List _source;
 
-  int get width => _array.width;
+  final int width;
 
-  int get height => _array.height;
+  int get height => _source.length ~/ width;
 
-  Puzzle._raw(this._array);
+  Puzzle._raw(this.width, this._source);
 
-  Puzzle.raw(int width, List<int> source)
-      : _array = Array2d.wrap(width, Uint8List.fromList(source)) {
+  Puzzle.raw(this.width, List<int> source)
+      : _source = Uint8List.fromList(source) {
     requireArgument(width >= 2, 'width', 'Must be at least 2.');
-    requireArgument(_array.length >= 6, 'source', 'Must be at least 6 items');
+    requireArgument(_source.length >= 6, 'source', 'Must be at least 6 items');
 
-    _validate(_array.dataView);
+    _validate(_source);
   }
 
   Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
@@ -38,22 +37,25 @@ class Puzzle {
     return Puzzle.raw(rows.first.length, rows.expand((row) => row).toList());
   }
 
-  int valueAt(int x, int y) => _array.getValueAtLocation(x, y);
+  int valueAt(int x, int y) {
+    final i = _getIndex(x, y);
+    return _source[i];
+  }
 
-  int get length => _array.length;
+  int get length => _source.length;
 
-  int get tileCount => _array.length - 1;
+  int get tileCount => _source.length - 1;
 
-  bool isCorrectPosition(int cellValue) => cellValue == _array[cellValue];
+  bool isCorrectPosition(int cellValue) => cellValue == _source[cellValue];
 
-  bool get solvable => _solvable(width, _array.dataView);
+  bool get solvable => _solvable(width, _source);
 
   Puzzle reset({List<int> source}) {
     final data = (source == null)
-        ? _randomizeList(width, _array.dataView)
+        ? _randomizeList(width, _source)
         : Uint8List.fromList(source);
 
-    if (data.length != _array.length) {
+    if (data.length != _source.length) {
       throw ArgumentError.value(source, 'source', 'Cannot change the size!');
     }
     _validate(data);
@@ -61,7 +63,7 @@ class Puzzle {
       throw ArgumentError.value(source, 'source', 'Not a solvable puzzle.');
     }
 
-    return Puzzle._raw(Array2d.wrap(width, data));
+    return Puzzle._raw(width, data);
   }
 
   int get incorrectTiles {
@@ -76,7 +78,7 @@ class Puzzle {
 
   Point openPosition() => coordinatesOf(tileCount);
 
-  Puzzle clone() => Puzzle._raw(_array.clone());
+  Puzzle clone() => Puzzle._raw(width, Uint8List.fromList(_source));
 
   /// A measure of how close the puzzle is to being solved.
   ///
@@ -142,10 +144,10 @@ class Puzzle {
     }
     final target = coordinatesOf(tileValue);
 
-    final newStore = Uint8List.fromList(_array.dataView);
+    final newStore = Uint8List.fromList(_source);
 
     _shift(newStore, target);
-    return Puzzle._raw(Array2d.wrap(width, newStore));
+    return Puzzle._raw(width, newStore);
   }
 
   void _shift(Uint8List source, Point target) {
@@ -170,13 +172,37 @@ class Puzzle {
     }
   }
 
-  Point coordinatesOf(int value) => _array.coordinatesOfValue(value);
+  Point coordinatesOf(int value) {
+    final index = _source.indexOf(value);
+    final x = index % width;
+    final y = index ~/ width;
+    assert(_getIndex(x, y) == index);
+    return Point(x, y);
+  }
+
+  int _getIndex(int x, int y) {
+    assert(x >= 0 && x < width);
+    assert(y >= 0 && y < height);
+    return x + y * width;
+  }
 
   @override
-  String toString() => _array.toString();
+  String toString() {
+    final grid = List<List<String>>.generate(
+        height,
+        (row) => List<String>.generate(
+            width, (col) => valueAt(col, row).toString()));
+
+    final longestLength =
+        grid.expand((r) => r).fold(0, (int l, cell) => max(l, cell.length));
+
+    return grid
+        .map((r) => r.map((v) => v.padLeft(longestLength)).join(' '))
+        .join('\n');
+  }
 }
 
-List<int> _randomList(int width, int height) => _randomizeList(
+Uint8List _randomList(int width, int height) => _randomizeList(
     width, List<int>.generate(width * height, (i) => i, growable: false));
 
 Uint8List _randomizeList(int width, List<int> existing) {
