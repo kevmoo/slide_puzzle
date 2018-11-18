@@ -278,11 +278,13 @@ int _countInversions(List<int> items) {
     if (value == tileCount) {
       continue;
     }
-    score += items
-        .skip(i + 1)
-        .where((v) => v != tileCount)
-        .where((v) => v < value)
-        .length;
+
+    for (var j = i + 1; j < items.length; j++) {
+      final v = items[j];
+      if (v != tileCount && v < value) {
+        score++;
+      }
+    }
   }
   return score;
 }
