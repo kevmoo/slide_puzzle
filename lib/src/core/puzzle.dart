@@ -187,6 +187,31 @@ class Puzzle {
   }
 
   @override
+  bool operator ==(other) {
+    if (other is Puzzle && other.width == width && other.length == length) {
+      for (var i = 0; i < _source.length; i++) {
+        if (other._source[i] != _source[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    var _idCache = 0;
+    for (var i = 0; i < _source.length; i++) {
+      _idCache = (_idCache << 2) + _source[i];
+    }
+    _idCache += _idCache << 3;
+    _idCache ^= _idCache >> 11;
+    _idCache += _idCache << 15;
+    return _idCache;
+  }
+
+  @override
   String toString() {
     final grid = List<List<String>>.generate(
         height,

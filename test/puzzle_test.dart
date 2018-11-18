@@ -204,7 +204,7 @@ void main() {
           expect(puzzle.solvable, isTrue);
           expect(puzzle.incorrectTiles, puzzle.tileCount);
           expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
-          expect(Puzzle.parse(puzzle.toString()).toString(), puzzle.toString());
+          expect(Puzzle.parse(puzzle.toString()), puzzle);
         }
       }
     }
@@ -277,18 +277,18 @@ void main() {
   test('click random', () {
     final puzzle = Puzzle(4, 4);
     final moves = puzzle.clickRandom();
-    expect(puzzle.toString(), isNot(moves.toString()));
+    expect(puzzle, isNot(moves));
   });
 
   test('clone', () {
     var puzzle = Puzzle(4, 4);
     final clone = puzzle.clone();
     expect(clone, isNot(same(puzzle)));
-    expect(clone.toString(), puzzle.toString());
+    expect(clone, puzzle);
     expect(clone.incorrectTiles, puzzle.incorrectTiles);
 
     puzzle = puzzle.clickRandom();
-    expect(clone.toString(), isNot(puzzle.toString()));
+    expect(clone, isNot(puzzle));
   });
 
   test('solvable', () {
