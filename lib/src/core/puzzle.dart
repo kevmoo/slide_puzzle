@@ -201,14 +201,14 @@ class Puzzle {
 
   @override
   int get hashCode {
-    var _idCache = 0;
+    var v = 0;
     for (var i = 0; i < _source.length; i++) {
-      _idCache = (_idCache << 2) + _source[i];
+      v = (v << 2) + _source[i];
     }
-    _idCache += _idCache << 3;
-    _idCache ^= _idCache >> 11;
-    _idCache += _idCache << 15;
-    return _idCache;
+    v += v << 3;
+    v ^= v >> 11;
+    v += v << 15;
+    return v;
   }
 
   @override
