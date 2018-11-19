@@ -57,10 +57,7 @@ class PuzzleAnimator implements PuzzleProxy {
   int get clickCount => _clickCount;
 
   @override
-  void reset() {
-    _puzzle = _puzzle.reset();
-    _controller.add(PuzzleEvent.reset);
-  }
+  void reset() => _resetCore();
 
   Stream<PuzzleEvent> get onEvent => _controller.stream;
 
@@ -112,9 +109,7 @@ class PuzzleAnimator implements PuzzleProxy {
             }
             return i;
           });
-          _puzzle = _puzzle.reset(source: newValues);
-          _lastBadClick = null;
-          _badClickCount = 0;
+          _resetCore(source: newValues);
         }
       } else {
         _badClickCount = 0;
@@ -124,6 +119,14 @@ class PuzzleAnimator implements PuzzleProxy {
       _lastBadClick = null;
       _badClickCount = 0;
     }
+  }
+
+  void _resetCore({List<int> source}) {
+    _puzzle = _puzzle.reset(source: source);
+    _clickCount = 0;
+    _lastBadClick = null;
+    _badClickCount = 0;
+    _controller.add(PuzzleEvent.reset);
   }
 
   bool _clickValue(int value) {
