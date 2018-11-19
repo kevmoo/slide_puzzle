@@ -26,87 +26,82 @@ abstract class SharedTheme extends PuzzleTheme {
           Material(
             animationDuration: puzzleAnimationDuration,
             color: puzzleThemeBackground,
-            child: SizedBox.expand(
-              child: Padding(
-                padding: const EdgeInsets.all(30),
+            child: Center(
+              child: SizedBox(
+                height: 600,
+                width: 1000,
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.all(35),
-                        child: Material(
-                          shape: puzzleBorder,
-                          color: puzzleBackgroundColor,
-                          child: Padding(
-                            padding: const EdgeInsets.all(25),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                ListTile(
-                                  title: Text(
-                                    'Moves',
-                                    textScaleFactor: _paramScale,
-                                  ),
-                                  trailing: Text(
-                                    clickCountText,
-                                    textScaleFactor: _paramScale,
-                                  ),
+                      child: Material(
+                        shape: puzzleBorder,
+                        color: puzzleBackgroundColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(25),
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: <Widget>[
+                              ListTile(
+                                title: Text(
+                                  'Moves',
+                                  textScaleFactor: _paramScale,
                                 ),
-                                ListTile(
-                                  title: Text(
-                                    'Tiles left',
-                                    textScaleFactor: _paramScale,
-                                  ),
-                                  trailing: Text(
-                                    tilesLeftText,
-                                    textScaleFactor: _paramScale,
-                                  ),
+                                trailing: Text(
+                                  clickCountText,
+                                  textScaleFactor: _paramScale,
                                 ),
-                                const Divider(),
-                                const ListTile(
-                                  title: Text(
-                                    'Options',
-                                    textScaleFactor: 1.3,
-                                  ),
+                              ),
+                              ListTile(
+                                title: Text(
+                                  'Tiles left',
+                                  textScaleFactor: _paramScale,
                                 ),
-                                CheckboxListTile(
-                                  title: const Text('Auto play'),
-                                  value: autoPlay,
-                                  onChanged: setAutoPlay,
+                                trailing: Text(
+                                  tilesLeftText,
+                                  textScaleFactor: _paramScale,
                                 ),
-                                FlatButton(
-                                  onPressed: puzzle.reset,
-                                  child: const Text('Shuffle tiles'),
+                              ),
+                              const Divider(),
+                              const ListTile(
+                                title: Text(
+                                  'Options',
+                                  textScaleFactor: 1.3,
                                 ),
-                                const ListTile(
-                                  title: Text(
-                                    'Themes',
-                                    textScaleFactor: 1.3,
-                                  ),
+                              ),
+                              CheckboxListTile(
+                                title: const Text('Auto play'),
+                                value: autoPlay,
+                                onChanged: setAutoPlay,
+                              ),
+                              ListTile(
+                                onTap: puzzle.reset,
+                                title: const Text('Shuffle tiles'),
+                              ),
+                              const ListTile(
+                                title: Text(
+                                  'Themes',
+                                  textScaleFactor: 1.3,
                                 ),
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: themeData
-                                      .map(
-                                        (themeData) => ListTile(
-                                              onTap: themeData.select,
-                                              title: Text(
-                                                themeData.name,
-                                                style: TextStyle(
-                                                    fontWeight: themeData
-                                                            .selected
-                                                        ? FontWeight.bold
-                                                        : FontWeight.normal),
-                                              ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: themeData
+                                    .map(
+                                      (themeData) => ListTile(
+                                            onTap: themeData.select,
+                                            title: Text(
+                                              themeData.name,
+                                              style: TextStyle(
+                                                  fontWeight: themeData.selected
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal),
                                             ),
-                                      )
-                                      .toList(),
-                                )
-                              ],
-                            ),
+                                          ),
+                                    )
+                                    .toList(),
+                              )
+                            ],
                           ),
                         ),
                       ),
@@ -114,22 +109,18 @@ abstract class SharedTheme extends PuzzleTheme {
                     Expanded(
                       flex: 2,
                       child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(35),
-                          child: Material(
-                            animationDuration: puzzleAnimationDuration,
-                            shape: puzzleBorder,
-                            color: puzzleBackgroundColor,
-                            child: Container(
-                              constraints:
-                                  const BoxConstraints.tightForFinite(),
-                              padding: const EdgeInsets.all(10),
-                              child: Flow(
-                                delegate: PuzzleFlowDelegate(
-                                    puzzle, animationNotifier),
-                                children: List<Widget>.generate(
-                                    puzzle.length, _widgetForTile),
-                              ),
+                        child: Material(
+                          animationDuration: puzzleAnimationDuration,
+                          shape: puzzleBorder,
+                          color: puzzleBackgroundColor,
+                          child: Container(
+                            constraints: const BoxConstraints.tightForFinite(),
+                            padding: const EdgeInsets.all(10),
+                            child: Flow(
+                              delegate:
+                                  PuzzleFlowDelegate(puzzle, animationNotifier),
+                              children: List<Widget>.generate(
+                                  puzzle.length, _widgetForTile),
                             ),
                           ),
                         ),
