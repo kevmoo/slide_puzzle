@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' show Random, max;
 import 'dart:typed_data';
@@ -5,28 +6,52 @@ import 'dart:typed_data';
 import 'point_int.dart';
 import 'util.dart';
 
+part 'puzzle_simple.dart';
+
+part 'puzzle_smart.dart';
+
 final _rnd = Random();
 
 final _spacesRegexp = RegExp(' +');
 
-class Puzzle {
-  final Uint8List _source;
+abstract class Puzzle {
+  int get width;
 
-  final int width;
+  int get length;
 
-  int get height => _source.length ~/ width;
+  int operator [](int index);
 
-  Puzzle._raw(this.width, this._source);
+  int indexOf(int value);
 
-  Puzzle.raw(this.width, List<int> source)
-      : _source = Uint8List.fromList(source) {
-    requireArgument(width >= 2, 'width', 'Must be at least 2.');
-    requireArgument(_source.length >= 6, 'source', 'Must be at least 6 items');
+  List<int> get _intView;
 
-    _validate(_source);
+  List<int> _copyData();
+
+  Puzzle _newWithValues(List<int> values);
+
+  Puzzle clone();
+
+  int get height => length ~/ width;
+
+  Puzzle._();
+
+  factory Puzzle._raw(int width, List<int> source) {
+    if (source.length <= 16) {
+      return _PuzzleSmart(width, source);
+    }
+    return _PuzzleSimple(width, source);
   }
 
-  Puzzle(int width, int height) : this.raw(width, _randomList(width, height));
+  factory Puzzle.raw(int width, List<int> source) {
+    requireArgument(width >= 3, 'width', 'Must be at least 3.');
+    requireArgument(source.length >= 6, 'source', 'Must be at least 6 items');
+    _validate(source);
+
+    return Puzzle._raw(width, source);
+  }
+
+  factory Puzzle(int width, int height) =>
+      Puzzle.raw(width, _randomList(width, height));
 
   factory Puzzle.parse(String input) {
     final rows = LineSplitter.split(input).map((line) {
@@ -39,31 +64,29 @@ class Puzzle {
 
   int valueAt(int x, int y) {
     final i = _getIndex(x, y);
-    return _source[i];
+    return this[i];
   }
 
-  int get length => _source.length;
+  int get tileCount => length - 1;
 
-  int get tileCount => _source.length - 1;
+  bool isCorrectPosition(int cellValue) => cellValue == this[cellValue];
 
-  bool isCorrectPosition(int cellValue) => cellValue == _source[cellValue];
-
-  bool get solvable => _solvable(width, _source);
+  bool get solvable => isSolvable(width, _intView);
 
   Puzzle reset({List<int> source}) {
     final data = (source == null)
-        ? _randomizeList(width, _source)
+        ? _randomizeList(width, _intView)
         : Uint8List.fromList(source);
 
-    if (data.length != _source.length) {
+    if (data.length != length) {
       throw ArgumentError.value(source, 'source', 'Cannot change the size!');
     }
     _validate(data);
-    if (!_solvable(width, data)) {
+    if (!isSolvable(width, data)) {
       throw ArgumentError.value(source, 'source', 'Not a solvable puzzle.');
     }
 
-    return Puzzle._raw(width, data);
+    return _newWithValues(data);
   }
 
   int get incorrectTiles {
@@ -77,8 +100,6 @@ class Puzzle {
   }
 
   Point openPosition() => coordinatesOf(tileCount);
-
-  Puzzle clone() => Puzzle._raw(width, Uint8List.fromList(_source));
 
   /// A measure of how close the puzzle is to being solved.
   ///
@@ -99,6 +120,7 @@ class Puzzle {
         value += delta * delta;
       }
     }
+    value *= incorrectTiles;
     return value;
   }
 
@@ -107,22 +129,34 @@ class Puzzle {
     return clickValue(clickable[_rnd.nextInt(clickable.length)]);
   }
 
-  Iterable<int> clickableValues({bool vertical}) sync* {
+  Iterable<Puzzle> allMovable() => clickableValues().map(clickValue);
+
+  List<int> clickableValues({bool vertical}) {
     final open = openPosition();
-    if (vertical == null || vertical == false) {
+    final doRow = (vertical == null || vertical == false);
+    final doColumn = (vertical == null || vertical);
+
+    final values =
+        Uint8List((doRow ? (width - 1) : 0) + (doColumn ? (height - 1) : 0));
+
+    var index = 0;
+
+    if (doRow) {
       for (var x = 0; x < width; x++) {
         if (x != open.x) {
-          yield valueAt(x, open.y);
+          values[index++] = valueAt(x, open.y);
         }
       }
     }
-    if (vertical == null || vertical) {
+    if (doColumn) {
       for (var y = 0; y < height; y++) {
         if (y != open.y) {
-          yield valueAt(open.x, y);
+          values[index++] = valueAt(open.x, y);
         }
       }
     }
+
+    return values;
   }
 
   bool _movable(int tileValue) {
@@ -144,36 +178,38 @@ class Puzzle {
     }
     final target = coordinatesOf(tileValue);
 
-    final newStore = Uint8List.fromList(_source);
+    final newStore = _copyData();
 
-    _shift(newStore, target);
-    return Puzzle._raw(width, newStore);
+    _shift(newStore, target.x, target.y);
+    return _newWithValues(newStore);
   }
 
-  void _shift(Uint8List source, Point target) {
+  void _shift(List<int> source, int targetX, int targetY) {
     final lastCoord = openPosition();
-    final delta = lastCoord - target;
+    final deltaX = lastCoord.x - targetX;
+    final deltaY = lastCoord.y - targetY;
 
-    void _staticSwap(Point a, Point b) {
-      final aIndex = a.x + a.y * width;
-      final aValue = source[aIndex];
-      final bIndex = b.x + b.y * width;
-
-      source[aIndex] = source[bIndex];
-      source[bIndex] = aValue;
-    }
-
-    if (delta.magnitude.toInt() > 1) {
-      final shiftPoint = target + Point(delta.x.sign, delta.y.sign);
-      _shift(source, shiftPoint);
-      _staticSwap(target, shiftPoint);
+    if ((deltaX.abs() + deltaY.abs()) > 1) {
+      final shiftPointX = targetX + deltaX.sign;
+      final shiftPointY = targetY + deltaY.sign;
+      _shift(source, shiftPointX, shiftPointY);
+      _staticSwap(source, targetX, targetY, shiftPointX, shiftPointY);
     } else {
-      _staticSwap(lastCoord, target);
+      _staticSwap(source, lastCoord.x, lastCoord.y, targetX, targetY);
     }
+  }
+
+  void _staticSwap(List<int> source, int ax, int ay, int bx, int by) {
+    final aIndex = ax + ay * width;
+    final aValue = source[aIndex];
+    final bIndex = bx + by * width;
+
+    source[aIndex] = source[bIndex];
+    source[bIndex] = aValue;
   }
 
   Point coordinatesOf(int value) {
-    final index = _source.indexOf(value);
+    final index = indexOf(value);
     final x = index % width;
     final y = index ~/ width;
     assert(_getIndex(x, y) == index);
@@ -187,32 +223,9 @@ class Puzzle {
   }
 
   @override
-  bool operator ==(other) {
-    if (other is Puzzle && other.width == width && other.length == length) {
-      for (var i = 0; i < _source.length; i++) {
-        if (other._source[i] != _source[i]) {
-          return false;
-        }
-      }
-      return true;
-    }
-    return false;
-  }
+  String toString() => _toString();
 
-  @override
-  int get hashCode {
-    var v = 0;
-    for (var i = 0; i < _source.length; i++) {
-      v = (v << 2) + _source[i];
-    }
-    v += v << 3;
-    v ^= v >> 11;
-    v += v << 15;
-    return v;
-  }
-
-  @override
-  String toString() {
+  String _toString() {
     final grid = List<List<String>>.generate(
         height,
         (row) => List<String>.generate(
@@ -234,30 +247,9 @@ Uint8List _randomizeList(int width, List<int> existing) {
   final copy = Uint8List.fromList(existing);
   do {
     copy.shuffle(_rnd);
-  } while (!_solvable(width, copy) ||
+  } while (!isSolvable(width, copy) ||
       copy.any((v) => copy[v] == v || copy[v] == existing[v]));
   return copy;
-}
-
-// Logic from
-// https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-// Used with gratitude!
-bool _solvable(int width, List<int> list) {
-  final height = list.length ~/ width;
-  assert(width * height == list.length);
-  final inversions = _countInversions(list);
-
-  if (width.isOdd) {
-    return inversions.isEven;
-  }
-
-  final blankRow = list.indexOf(list.length - 1) ~/ width;
-
-  if ((height - blankRow).isEven) {
-    return inversions.isOdd;
-  } else {
-    return inversions.isEven;
-  }
 }
 
 void _validate(List<int> source) {
@@ -268,23 +260,4 @@ void _validate(List<int> source) {
         'Must contain each number from 0 to `length - 1` '
         'once and only once.');
   }
-}
-
-int _countInversions(List<int> items) {
-  final tileCount = items.length - 1;
-  var score = 0;
-  for (var i = 0; i < items.length; i++) {
-    final value = items[i];
-    if (value == tileCount) {
-      continue;
-    }
-
-    for (var j = i + 1; j < items.length; j++) {
-      final v = items[j];
-      if (v != tileCount && v < value) {
-        score++;
-      }
-    }
-  }
-  return score;
 }

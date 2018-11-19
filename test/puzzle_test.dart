@@ -19,11 +19,10 @@ void _printPuzzleOnFailure(Puzzle puzzle) {
 }
 
 void main() {
-  test('must be at least 2 x 3', () {
+  test('must be at least 3 x 2', () {
     expect(() => Puzzle.raw(3, []), throwsArgumentError);
     expect(() => Puzzle.raw(3, [0, 1, 2]), throwsArgumentError);
     expect(Puzzle.raw(3, [0, 1, 2, 3, 4, 5]).incorrectTiles, 0);
-    expect(Puzzle.raw(2, [0, 1, 2, 3, 4, 5]).incorrectTiles, 0);
   });
 
   test('initial values must be correct', () {
@@ -204,7 +203,7 @@ void main() {
           expect(puzzle.solvable, isTrue);
           expect(puzzle.incorrectTiles, puzzle.tileCount);
           expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
-          expect(Puzzle.parse(puzzle.toString()), puzzle);
+          expect(Puzzle.parse(puzzle.toString()) == puzzle, isTrue);
         }
       }
     }
@@ -259,7 +258,7 @@ void main() {
 4 6 5
 3 8 7''');
     expect(puzzle.incorrectTiles, 4);
-    expect(puzzle.fitness, 7);
+    expect(puzzle.fitness, 28);
 
     final puzzle2 = Puzzle.raw(3, [8, 1, 2, 3, 4, 5, 6, 7, 0]);
     expect(puzzle2.incorrectTiles, 1);
@@ -271,7 +270,7 @@ void main() {
 
     final puzzle3 = Puzzle.raw(3, [3, 0, 1, 4, 5, 2, 7, 6, 8]);
     expect(puzzle3.incorrectTiles, 8);
-    expect(puzzle3.fitness, 8);
+    expect(puzzle3.fitness, 64);
   });
 
   test('click random', () {
@@ -284,7 +283,7 @@ void main() {
     var puzzle = Puzzle(4, 4);
     final clone = puzzle.clone();
     expect(clone, isNot(same(puzzle)));
-    expect(clone, puzzle);
+    expect(clone == puzzle, isTrue);
     expect(clone.incorrectTiles, puzzle.incorrectTiles);
 
     puzzle = puzzle.clickRandom();
