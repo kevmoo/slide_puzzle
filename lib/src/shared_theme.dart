@@ -11,11 +11,11 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Color get puzzleThemeBackground;
 
-  ShapeBorder get puzzleBorder;
+  RoundedRectangleBorder get puzzleBorder;
 
   Color get puzzleBackgroundColor;
 
-  Duration get puzzleAnimationDuration => kThemeAnimationDuration;
+  Duration get puzzleAnimationDuration => kThemeAnimationDuration * 2;
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -100,7 +100,9 @@ abstract class SharedTheme extends PuzzleTheme {
                       child: Flow(
                         delegate: PuzzleFlowDelegate(puzzle, animationNotifier),
                         children: List<Widget>.generate(
-                            puzzle.length, _widgetForTile),
+                          puzzle.length,
+                          _widgetForTile,
+                        ),
                       ),
                     ),
                   ),
@@ -112,6 +114,43 @@ abstract class SharedTheme extends PuzzleTheme {
       );
 
   Widget tileButton(int i);
+
+  Ink createInk(
+    Widget child, {
+    Gradient gradient,
+    DecorationImage image,
+    EdgeInsetsGeometry padding,
+  }) =>
+      Ink(
+        padding: padding,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          image: image,
+          borderRadius: puzzleBorder.borderRadius,
+          border: Border.all(
+              width: puzzleBorder.side.width, color: puzzleBorder.side.color),
+        ),
+        child: child,
+      );
+
+  RaisedButton createButton(
+    int tileValue,
+    Widget content, {
+    Color color,
+    Color disabledColor,
+    RoundedRectangleBorder shape,
+  }) =>
+      RaisedButton(
+        // ignored! https://github.com/flutter/flutter/issues/24583
+        clipBehavior: Clip.hardEdge,
+        animationDuration: puzzleAnimationDuration,
+        onPressed: tilePress(tileValue),
+        shape: shape ?? puzzleBorder,
+        padding: const EdgeInsets.symmetric(),
+        child: content,
+        color: color,
+        disabledColor: disabledColor,
+      );
 
   Widget _widgetForTile(int i) => Padding(
         padding: const EdgeInsets.all(4),

@@ -15,9 +15,12 @@ class ThemeSimple extends SharedTheme {
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override
-  RoundedRectangleBorder get puzzleBorder => RoundedRectangleBorder(
-      side: const BorderSide(color: Colors.black87, width: 2),
-      borderRadius: BorderRadius.circular(5));
+  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
+        side: BorderSide(color: Colors.black87, width: 2),
+        borderRadius: BorderRadius.all(
+          Radius.circular(5),
+        ),
+      );
 
   @override
   Widget tileButton(int i) {
@@ -35,24 +38,27 @@ class ThemeSimple extends SharedTheme {
     }
 
     final correctPosition = puzzle.isCorrectPosition(i);
-    return RaisedButton(
-      animationDuration: puzzleAnimationDuration,
-      elevation: 1,
-      child: Text(
-        (i + 1).toString(),
-        style: TextStyle(
-          fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
-        ),
-        textScaleFactor: 3,
+
+    final content = createInk(
+      Center(
+        child: puzzle.solved
+            ? null
+            : Text(
+                (i + 1).toString(),
+                style: TextStyle(
+                    fontWeight:
+                        correctPosition ? FontWeight.bold : FontWeight.normal),
+                textScaleFactor: 3.0,
+              ),
       ),
-      onPressed: tilePress(i),
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(width: 2),
-        borderRadius: BorderRadius.circular(10),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Colors.white, Color(0xffcccccc)],
+        tileMode: TileMode.clamp, // repeats the gradient over the canvas
       ),
-      padding: const EdgeInsets.symmetric(),
-      color: Colors.white,
-      disabledColor: Colors.white,
     );
+
+    return createButton(i, content);
   }
 }

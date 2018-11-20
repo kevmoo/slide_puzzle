@@ -21,9 +21,8 @@ class ThemeSeattle extends SharedTheme {
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override
-  final puzzleBorder = RoundedRectangleBorder(
-      side: const BorderSide(color: Colors.transparent, width: 5),
-      borderRadius: BorderRadius.circular(5));
+  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(5)));
 
   @override
   Widget tileButton(int i) {
@@ -39,12 +38,8 @@ class ThemeSeattle extends SharedTheme {
         image: const AssetImage('asset/seattle.jpg'));
 
     final correctPosition = puzzle.isCorrectPosition(i);
-    final content = Ink(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        image: decorationImage,
-      ),
-      child: puzzle.solved
+    final content = createInk(
+      puzzle.solved
           ? const Center()
           : Container(
               decoration: ShapeDecoration(
@@ -61,15 +56,10 @@ class ThemeSeattle extends SharedTheme {
                 textScaleFactor: 2.8,
               ),
             ),
+      image: decorationImage,
+      padding: const EdgeInsets.all(32),
     );
 
-    return RaisedButton(
-      animationDuration: puzzleAnimationDuration,
-      highlightElevation: 0,
-      child: content,
-      padding: const EdgeInsets.symmetric(),
-      onPressed: tilePress(i),
-      color: Colors.grey,
-    );
+    return createButton(i, content);
   }
 }

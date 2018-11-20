@@ -19,12 +19,14 @@ class ThemePlaster extends SharedTheme {
   Color get puzzleBackgroundColor => _yellowIsh;
 
   @override
-  ShapeBorder get puzzleBorder => RoundedRectangleBorder(
-        side: const BorderSide(
+  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
+        side: BorderSide(
           color: Color.fromARGB(255, 103, 103, 105),
           width: 8,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.all(
+          Radius.circular(18),
+        ),
       );
 
   @override
@@ -47,25 +49,24 @@ class ThemePlaster extends SharedTheme {
       return const Center();
     }
 
-    return RaisedButton(
-      animationDuration: puzzleAnimationDuration,
-      elevation: 2,
-      child: Text(
-        (i + 1).toString(),
-        style: TextStyle(
-          color: primary ? _yellowIsh : _chocolate,
-          fontFamily: 'Plaster',
-        ),
-        textScaleFactor: 5.5,
+    final content = Text(
+      (i + 1).toString(),
+      style: TextStyle(
+        color: primary ? _yellowIsh : _chocolate,
+        fontFamily: 'Plaster',
       ),
-      onPressed: tilePress(i),
+      textScaleFactor: 5.5,
+    );
+
+    return createButton(
+      i,
+      content,
+      color: primary ? _orangeIsh : _yellowIsh,
+      disabledColor: primary ? _orangeIsh : _yellowIsh,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: primary ? _chocolate : _orangeIsh, width: 5),
         borderRadius: BorderRadius.circular(5),
       ),
-      padding: const EdgeInsets.symmetric(),
-      color: primary ? _orangeIsh : _yellowIsh,
-      disabledColor: primary ? _orangeIsh : _yellowIsh,
     );
   }
 }
