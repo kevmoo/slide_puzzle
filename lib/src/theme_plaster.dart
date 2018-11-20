@@ -7,7 +7,10 @@ const _chocolate = Color.fromARGB(255, 66, 66, 68);
 const _orangeIsh = Color.fromARGB(255, 224, 107, 83);
 
 class ThemePlaster extends SharedTheme {
-  ThemePlaster(AppState baseTheme) : super('Plaster', baseTheme);
+  @override
+  String get name => 'Plaster';
+
+  ThemePlaster(AppState baseTheme) : super(baseTheme);
 
   @override
   Color get puzzleThemeBackground => _chocolate;

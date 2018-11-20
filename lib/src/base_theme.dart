@@ -1,9 +1,11 @@
 import 'core/puzzle_animator.dart';
 import 'flutter.dart';
 
-abstract class PuzzleTheme {
-  final String name;
+abstract class PuzzleThemeOption {
+  String get name;
+}
 
+abstract class PuzzleTheme implements PuzzleThemeOption {
   final AppState _appState;
 
   PuzzleProxy get puzzle => _appState.puzzle;
@@ -12,7 +14,7 @@ abstract class PuzzleTheme {
 
   String get tilesLeftText => _appState.tilesLeftText;
 
-  Iterable<PuzzleTheme> get themeData => _appState.themeData;
+  Iterable<PuzzleThemeOption> get themeData => _appState.themeData;
 
   bool get autoPlay => _appState.autoPlay;
 
@@ -33,22 +35,17 @@ abstract class PuzzleTheme {
     };
   }
 
-  PuzzleTheme(this.name, this._appState);
+  PuzzleTheme(this._appState);
 
   AnimationNotifier get animationNotifier => _appState.animationNotifier;
 
   Widget build(BuildContext context);
 
-  void Function() get select {
-    if (selected) {
-      return null;
-    }
-    return _select;
+  PuzzleTheme get currentTheme => _appState.currentTheme;
+
+  void selectTheme(PuzzleThemeOption thing) {
+    _appState.currentTheme = thing as PuzzleTheme;
   }
-
-  void _select() => _appState.currentTheme = this;
-
-  bool get selected => _appState.currentTheme == this;
 }
 
 abstract class AppState {
@@ -64,7 +61,7 @@ abstract class AppState {
 
   String get tilesLeftText;
 
-  Iterable<PuzzleTheme> get themeData;
+  Iterable<PuzzleThemeOption> get themeData;
 
   PuzzleTheme get currentTheme;
 

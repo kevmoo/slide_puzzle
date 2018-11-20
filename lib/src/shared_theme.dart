@@ -5,7 +5,7 @@ import 'puzzle_flow_delegate.dart';
 abstract class SharedTheme extends PuzzleTheme {
   final _paramScale = 1.5;
 
-  SharedTheme(String name, AppState proxy) : super(name, proxy);
+  SharedTheme(AppState proxy) : super(proxy);
 
   Widget get backgroundChild => null;
 
@@ -27,20 +27,21 @@ abstract class SharedTheme extends PuzzleTheme {
             animationDuration: puzzleAnimationDuration,
             color: puzzleThemeBackground,
             child: Center(
-              child: SizedBox(
-                height: 600,
-                width: 1000,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Expanded(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints.tightFor(width: 320),
                       child: Material(
                         shape: puzzleBorder,
                         color: puzzleBackgroundColor,
                         child: Padding(
-                          padding: const EdgeInsets.all(25),
+                          padding: const EdgeInsets.all(15),
                           child: ListView(
                             shrinkWrap: true,
+                            padding: const EdgeInsets.all(0),
                             children: <Widget>[
                               ListTile(
                                 title: Text(
@@ -63,12 +64,6 @@ abstract class SharedTheme extends PuzzleTheme {
                                 ),
                               ),
                               const Divider(),
-                              const ListTile(
-                                title: Text(
-                                  'Options',
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
                               CheckboxListTile(
                                 title: const Text('Auto play'),
                                 value: autoPlay,
@@ -78,56 +73,38 @@ abstract class SharedTheme extends PuzzleTheme {
                                 onTap: puzzle.reset,
                                 title: const Text('Shuffle tiles'),
                               ),
-                              const ListTile(
-                                title: Text(
-                                  'Themes',
-                                  textScaleFactor: 1.3,
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: themeData
-                                    .map(
-                                      (themeData) => ListTile(
-                                            onTap: themeData.select,
-                                            title: Text(
-                                              themeData.name,
-                                              style: TextStyle(
-                                                  fontWeight: themeData.selected
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal),
-                                            ),
-                                          ),
-                                    )
-                                    .toList(),
-                              )
-                            ],
+                              const Divider(),
+                            ]..addAll(themeData.map(
+                                (themeData) => RadioListTile<PuzzleThemeOption>(
+                                      title: Text(themeData.name),
+                                      onChanged: selectTheme,
+                                      value: themeData,
+                                      groupValue: currentTheme,
+                                    ),
+                              )),
                           ),
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Center(
-                        child: Material(
-                          animationDuration: puzzleAnimationDuration,
-                          shape: puzzleBorder,
-                          color: puzzleBackgroundColor,
-                          child: Container(
-                            constraints: const BoxConstraints.tightForFinite(),
-                            padding: const EdgeInsets.all(10),
-                            child: Flow(
-                              delegate:
-                                  PuzzleFlowDelegate(puzzle, animationNotifier),
-                              children: List<Widget>.generate(
-                                  puzzle.length, _widgetForTile),
-                            ),
-                          ),
-                        ),
+                  ),
+                  const SizedBox(
+                    width: 40,
+                  ),
+                  Material(
+                    animationDuration: puzzleAnimationDuration,
+                    shape: puzzleBorder,
+                    color: puzzleBackgroundColor,
+                    child: Container(
+                      constraints: const BoxConstraints.tightForFinite(),
+                      padding: const EdgeInsets.all(10),
+                      child: Flow(
+                        delegate: PuzzleFlowDelegate(puzzle, animationNotifier),
+                        children: List<Widget>.generate(
+                            puzzle.length, _widgetForTile),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           )

@@ -3,7 +3,10 @@ import 'flutter.dart';
 import 'shared_theme.dart';
 
 class ThemeSimple extends SharedTheme {
-  ThemeSimple(AppState proxy) : super('Simple', proxy);
+  @override
+  String get name => 'Simple';
+
+  ThemeSimple(AppState proxy) : super(proxy);
 
   @override
   Color get puzzleThemeBackground => const Color.fromARGB(255, 54, 81, 102);

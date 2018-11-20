@@ -4,7 +4,10 @@ import 'flutter.dart';
 import 'shared_theme.dart';
 
 class ThemeSeattle extends SharedTheme {
-  ThemeSeattle(AppState proxy) : super('Seattle', proxy);
+  @override
+  String get name => 'Seattle';
+
+  ThemeSeattle(AppState proxy) : super(proxy);
 
   @override
   Color get puzzleThemeBackground => const Color.fromARGB(153, 90, 135, 170);
