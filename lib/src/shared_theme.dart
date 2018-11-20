@@ -74,14 +74,17 @@ abstract class SharedTheme extends PuzzleTheme {
                                 title: const Text('Shuffle tiles'),
                               ),
                               const Divider(),
-                            ]..addAll(themeData.map(
-                                (themeData) => RadioListTile<PuzzleThemeOption>(
-                                      title: Text(themeData.name),
-                                      onChanged: selectTheme,
-                                      value: themeData,
-                                      groupValue: currentTheme,
-                                    ),
-                              )),
+                            ]..addAll(
+                                themeData.map(
+                                  (themeData) =>
+                                      RadioListTile<PuzzleThemeOption>(
+                                        title: Text(themeData.name),
+                                        onChanged: selectTheme,
+                                        value: themeData,
+                                        groupValue: currentTheme,
+                                      ),
+                                ),
+                              ),
                           ),
                         ),
                       ),
@@ -128,7 +131,9 @@ abstract class SharedTheme extends PuzzleTheme {
           image: image,
           borderRadius: puzzleBorder.borderRadius,
           border: Border.all(
-              width: puzzleBorder.side.width, color: puzzleBorder.side.color),
+            width: puzzleBorder.side.width,
+            color: puzzleBorder.side.color,
+          ),
         ),
         child: child,
       );
