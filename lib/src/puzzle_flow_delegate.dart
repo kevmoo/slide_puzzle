@@ -3,14 +3,14 @@ import 'flutter.dart';
 
 class PuzzleFlowDelegate extends FlowDelegate {
   static const _tileSize = 140.0;
-  final PuzzleProxy _puzzleAnimator;
+  final PuzzleProxy _puzzleProxy;
 
-  PuzzleFlowDelegate(this._puzzleAnimator, Listenable repaint)
+  PuzzleFlowDelegate(this._puzzleProxy, Listenable repaint)
       : super(repaint: repaint);
 
   @override
-  Size getSize(BoxConstraints constraints) => Size(
-      _tileSize * _puzzleAnimator.width, _tileSize * _puzzleAnimator.height);
+  Size getSize(BoxConstraints constraints) =>
+      Size(_tileSize * _puzzleProxy.width, _tileSize * _puzzleProxy.height);
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) =>
@@ -18,8 +18,8 @@ class PuzzleFlowDelegate extends FlowDelegate {
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    for (var i = 0; i < _puzzleAnimator.length; i++) {
-      final tileLocation = _puzzleAnimator.location(i);
+    for (var i = 0; i < _puzzleProxy.length; i++) {
+      final tileLocation = _puzzleProxy.location(i);
       context.paintChild(i,
           transform: Matrix4.translationValues(tileLocation.x * _tileSize,
               tileLocation.y * _tileSize, i.toDouble()));
@@ -28,5 +28,5 @@ class PuzzleFlowDelegate extends FlowDelegate {
 
   @override
   bool shouldRepaint(covariant PuzzleFlowDelegate oldDelegate) =>
-      !identical(oldDelegate._puzzleAnimator, _puzzleAnimator);
+      !identical(oldDelegate._puzzleProxy, _puzzleProxy);
 }

@@ -21,6 +21,10 @@ abstract class PuzzleProxy {
 
   int get tileCount;
 
+  int get clickCount;
+
+  int get incorrectTiles;
+
   Point<double> location(int index);
 
   bool isCorrectPosition(int value);
@@ -52,8 +56,10 @@ class PuzzleAnimator implements PuzzleProxy {
   @override
   int get tileCount => _puzzle.tileCount;
 
+  @override
   int get incorrectTiles => _puzzle.incorrectTiles;
 
+  @override
   int get clickCount => _clickCount;
 
   @override

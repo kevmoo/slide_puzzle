@@ -73,20 +73,6 @@ class PuzzleHomeState extends State
     super.initState();
   }
 
-  /// Returns the number of tiles left, but prefixed with enough whitespace
-  /// so the string doesn't change length for all valid values for this puzzle
-  @override
-  String get tilesLeftText => puzzle.incorrectTiles
-      .toString()
-      .padLeft(puzzle.tileCount.toString().length);
-
-  /// Returns the number of tiles left, but prefixed with enough whitespace
-  /// so the string doesn't change length for all valid values for this puzzle
-  @override
-  String get clickCountText => puzzle.clickCount
-      .toString()
-      .padLeft((puzzle.tileCount * puzzle.tileCount).toString().length);
-
   @override
   Widget build(BuildContext context) => _currentTheme.build(context);
 

@@ -10,9 +10,9 @@ abstract class PuzzleTheme implements PuzzleThemeOption {
 
   PuzzleProxy get puzzle => _appState.puzzle;
 
-  String get clickCountText => _appState.clickCountText;
+  String get clickCountText => puzzle.clickCount.toString();
 
-  String get tilesLeftText => _appState.tilesLeftText;
+  String get tilesLeftText => puzzle.incorrectTiles.toString();
 
   Iterable<PuzzleThemeOption> get themeData => _appState.themeData;
 
@@ -56,10 +56,6 @@ abstract class AppState {
   void setAutoPlay(bool newValue);
 
   AnimationNotifier get animationNotifier;
-
-  String get clickCountText;
-
-  String get tilesLeftText;
 
   Iterable<PuzzleThemeOption> get themeData;
 
