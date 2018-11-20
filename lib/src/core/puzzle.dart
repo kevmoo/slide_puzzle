@@ -129,7 +129,8 @@ abstract class Puzzle {
     return clickValue(clickable[_rnd.nextInt(clickable.length)]);
   }
 
-  Iterable<Puzzle> allMovable() => clickableValues().map(clickValue);
+  Iterable<Puzzle> allMovable() =>
+      (clickableValues()..shuffle(_rnd)).map(clickValue);
 
   List<int> clickableValues({bool vertical}) {
     final open = openPosition();
