@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'base_theme.dart';
 import 'core/puzzle_animator.dart';
@@ -8,9 +9,22 @@ import 'theme_plaster.dart';
 import 'theme_seattle.dart';
 import 'theme_simple.dart';
 
+class _Shake extends Animatable<Offset> {
+  const _Shake();
+
+  @override
+  Offset transform(double t) => Offset(0.01 * math.sin(t * math.pi * 3), 0);
+}
+
 class PuzzleHomeState extends State
-    with SingleTickerProviderStateMixin
+    with TickerProviderStateMixin
     implements AppState {
+  AnimationController _controller;
+  Animation<Offset> _shuffleOffsetAnimation;
+
+  @override
+  Animation<Offset> get shuffleOffsetAnimation => _shuffleOffsetAnimation;
+
   @override
   final PuzzleAnimator puzzle;
 
@@ -68,9 +82,16 @@ class PuzzleHomeState extends State
 
   @override
   void initState() {
+    super.initState();
     _ticker ??= createTicker(_onTick);
     _ensureTicking();
-    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+
+    _shuffleOffsetAnimation = _controller.drive(const _Shake());
   }
 
   @override
@@ -79,6 +100,7 @@ class PuzzleHomeState extends State
   @override
   void dispose() {
     animationNotifier.dispose();
+    _controller?.dispose();
     _ticker?.dispose();
     sub.cancel();
     super.dispose();
@@ -87,6 +109,11 @@ class PuzzleHomeState extends State
   void _onPuzzleEvent(PuzzleEvent e) {
     _tickerTimeSinceLastEvent = Duration.zero;
     _ensureTicking();
+    if (e == PuzzleEvent.noop) {
+      assert(e == PuzzleEvent.noop);
+      _controller.reset();
+      _controller.forward();
+    }
     setState(() {
       // noop
     });

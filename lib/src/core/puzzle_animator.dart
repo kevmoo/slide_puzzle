@@ -4,7 +4,7 @@ import 'dart:math' show Point, Random;
 import 'body.dart';
 import 'puzzle.dart';
 
-enum PuzzleEvent { click, reset }
+enum PuzzleEvent { click, reset, noop }
 
 abstract class PuzzleProxy {
   int get width;
@@ -98,14 +98,15 @@ class PuzzleAnimator implements PuzzleProxy {
 
   @override
   void clickOrShake(int tileValue) {
-    _controller.add(PuzzleEvent.click);
     if (solved) {
+      _controller.add(PuzzleEvent.noop);
       _shake(tileValue);
       _lastBadClick = null;
       _badClickCount = 0;
       return;
     }
 
+    _controller.add(PuzzleEvent.click);
     if (!_clickValue(tileValue)) {
       _shake(tileValue);
 

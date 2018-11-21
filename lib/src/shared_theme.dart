@@ -4,7 +4,7 @@ import 'puzzle_flow_delegate.dart';
 import 'widgets/material_interior_alt.dart';
 
 abstract class SharedTheme extends PuzzleTheme {
-  final _paramScale = 1.5;
+  double get _paramScale => 1.5;
 
   SharedTheme(AppState proxy) : super(proxy);
 
@@ -28,6 +28,9 @@ abstract class SharedTheme extends PuzzleTheme {
         color: puzzleBackgroundColor,
         child: child,
       );
+
+  TextStyle get _tilesLeftStyle =>
+      puzzle.solved ? const TextStyle(fontWeight: FontWeight.bold) : null;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -69,14 +72,19 @@ abstract class SharedTheme extends PuzzleTheme {
                                   textScaleFactor: _paramScale,
                                 ),
                               ),
-                              ListTile(
-                                title: Text(
-                                  'Tiles left',
-                                  textScaleFactor: _paramScale,
-                                ),
-                                trailing: Text(
-                                  tilesLeftText,
-                                  textScaleFactor: _paramScale,
+                              SlideTransition(
+                                position: shuffleOffsetAnimation,
+                                child: ListTile(
+                                  title: Text(
+                                    'Tiles left',
+                                    textScaleFactor: _paramScale,
+                                    style: _tilesLeftStyle,
+                                  ),
+                                  trailing: Text(
+                                    tilesLeftText,
+                                    textScaleFactor: _paramScale,
+                                    style: _tilesLeftStyle,
+                                  ),
                                 ),
                               ),
                               const Divider(),
@@ -85,9 +93,12 @@ abstract class SharedTheme extends PuzzleTheme {
                                 value: autoPlay,
                                 onChanged: setAutoPlay,
                               ),
-                              ListTile(
-                                onTap: puzzle.reset,
-                                title: const Text('Shuffle tiles'),
+                              SlideTransition(
+                                position: shuffleOffsetAnimation,
+                                child: ListTile(
+                                  onTap: puzzle.reset,
+                                  title: const Text('Shuffle tiles'),
+                                ),
                               ),
                               const Divider(),
                             ]..addAll(

@@ -8,6 +8,9 @@ abstract class PuzzleThemeOption {
 abstract class PuzzleTheme implements PuzzleThemeOption {
   final AppState _appState;
 
+  Animation<Offset> get shuffleOffsetAnimation =>
+      _appState.shuffleOffsetAnimation;
+
   PuzzleProxy get puzzle => _appState.puzzle;
 
   String get clickCountText => puzzle.clickCount.toString();
@@ -44,6 +47,8 @@ abstract class PuzzleTheme implements PuzzleThemeOption {
 }
 
 abstract class AppState {
+  Animation<Offset> get shuffleOffsetAnimation;
+
   PuzzleProxy get puzzle;
 
   bool get autoPlay;
