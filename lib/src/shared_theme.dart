@@ -16,6 +16,8 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Duration get puzzleAnimationDuration => kThemeAnimationDuration * 3;
 
+  EdgeInsetsGeometry get tilePadding => const EdgeInsets.all(4);
+
   // Thought about using AnimatedContainer here, but it causes some weird
   // resizing behavior
   Widget _styledWrapper(Widget child) => MaterialInterior(
@@ -114,7 +116,7 @@ abstract class SharedTheme extends PuzzleTheme {
                       delegate: PuzzleFlowDelegate(puzzle, animationNotifier),
                       children: List<Widget>.generate(
                         puzzle.length,
-                        _widgetForTile,
+                        tileButton,
                       ),
                     ),
                   )),
@@ -147,27 +149,26 @@ abstract class SharedTheme extends PuzzleTheme {
         child: child,
       );
 
-  RaisedButton createButton(
+  Widget createButton(
     int tileValue,
     Widget content, {
     Color color,
     Color disabledColor,
     RoundedRectangleBorder shape,
   }) =>
-      RaisedButton(
-        // ignored! https://github.com/flutter/flutter/issues/24583
-        clipBehavior: Clip.hardEdge,
-        animationDuration: puzzleAnimationDuration,
-        onPressed: () => tilePress(tileValue),
-        shape: shape ?? puzzleBorder,
-        padding: const EdgeInsets.symmetric(),
-        child: content,
-        color: color,
-        disabledColor: disabledColor,
-      );
-
-  Widget _widgetForTile(int i) => Padding(
-        padding: const EdgeInsets.all(4),
-        child: tileButton(i),
+      AnimatedContainer(
+        duration: puzzleAnimationDuration,
+        padding: tilePadding,
+        child: RaisedButton(
+          // ignored! https://github.com/flutter/flutter/issues/24583
+          clipBehavior: Clip.hardEdge,
+          animationDuration: puzzleAnimationDuration,
+          onPressed: () => tilePress(tileValue),
+          shape: shape ?? puzzleBorder,
+          padding: const EdgeInsets.symmetric(),
+          child: content,
+          color: color,
+          disabledColor: disabledColor,
+        ),
       );
 }

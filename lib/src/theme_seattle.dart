@@ -19,6 +19,10 @@ class ThemeSeattle extends SharedTheme {
   RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder();
 
   @override
+  EdgeInsetsGeometry get tilePadding =>
+      puzzle.solved ? const EdgeInsets.all(1) : const EdgeInsets.all(4);
+
+  @override
   Widget tileButton(int i) {
     if (i == puzzle.tileCount && !puzzle.solved) {
       return const Center();
