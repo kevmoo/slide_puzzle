@@ -13,11 +13,6 @@ class ThemeSeattle extends SharedTheme {
   Color get puzzleThemeBackground => const Color.fromARGB(153, 90, 135, 170);
 
   @override
-  Widget get backgroundChild => const Image(
-        image: AssetImage('asset/seattle.jpg'),
-      );
-
-  @override
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override

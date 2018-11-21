@@ -1,13 +1,16 @@
 import 'base_theme.dart';
 import 'flutter.dart';
 import 'puzzle_flow_delegate.dart';
+import 'widgets/material_interior_alt.dart';
 
 abstract class SharedTheme extends PuzzleTheme {
   final _paramScale = 1.5;
 
   SharedTheme(AppState proxy) : super(proxy);
 
-  Widget get backgroundChild => null;
+  final _backgroundChild = const Image(
+    image: AssetImage('asset/seattle.jpg'),
+  );
 
   Color get puzzleThemeBackground;
 
@@ -15,16 +18,29 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Color get puzzleBackgroundColor;
 
-  Duration get puzzleAnimationDuration => kThemeAnimationDuration * 2;
+  Duration get puzzleAnimationDuration => kThemeAnimationDuration * 5;
+
+  Widget _styledWrapper(Widget child) => MaterialInterior(
+        duration: puzzleAnimationDuration,
+        elevation: 5,
+        shadowColor: Colors.black,
+        shape: puzzleBorder,
+        color: puzzleBackgroundColor,
+        child: child,
+      );
 
   @override
-  Widget build(BuildContext context) => Stack(
+  Widget build(BuildContext context) => Material(
+          child: Stack(
         children: <Widget>[
           SizedBox.expand(
-            child: FittedBox(fit: BoxFit.cover, child: backgroundChild),
+            child: FittedBox(fit: BoxFit.cover, child: _backgroundChild),
           ),
-          Material(
-            animationDuration: puzzleAnimationDuration,
+          AnimatedPhysicalModel(
+            duration: puzzleAnimationDuration,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: BoxShape.rectangle,
             color: puzzleThemeBackground,
             child: Center(
               child: Row(
@@ -34,10 +50,8 @@ abstract class SharedTheme extends PuzzleTheme {
                   Flexible(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints.tightFor(width: 320),
-                      child: Material(
-                        shape: puzzleBorder,
-                        color: puzzleBackgroundColor,
-                        child: Padding(
+                      child: _styledWrapper(
+                        Padding(
                           padding: const EdgeInsets.all(15),
                           child: ListView(
                             shrinkWrap: true,
@@ -93,28 +107,23 @@ abstract class SharedTheme extends PuzzleTheme {
                   const SizedBox(
                     width: 40,
                   ),
-                  Material(
-                    animationDuration: puzzleAnimationDuration,
-                    shape: puzzleBorder,
-                    color: puzzleBackgroundColor,
-                    child: Container(
-                      constraints: const BoxConstraints.tightForFinite(),
-                      padding: const EdgeInsets.all(10),
-                      child: Flow(
-                        delegate: PuzzleFlowDelegate(puzzle, animationNotifier),
-                        children: List<Widget>.generate(
-                          puzzle.length,
-                          _widgetForTile,
-                        ),
+                  _styledWrapper(Container(
+                    constraints: const BoxConstraints.tightForFinite(),
+                    padding: const EdgeInsets.all(10),
+                    child: Flow(
+                      delegate: PuzzleFlowDelegate(puzzle, animationNotifier),
+                      children: List<Widget>.generate(
+                        puzzle.length,
+                        _widgetForTile,
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),
           )
         ],
-      );
+      ));
 
   Widget tileButton(int i);
 
