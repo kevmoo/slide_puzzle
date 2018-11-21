@@ -126,6 +126,7 @@ class PuzzleAnimator implements PuzzleProxy {
             return i;
           });
           _resetCore(source: newValues);
+          _clickCount = 999;
         }
       } else {
         _badClickCount = 0;
