@@ -16,9 +16,9 @@ class ThemeSimple extends SharedTheme {
 
   @override
   RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
-        side: BorderSide(color: Colors.black87, width: 2),
+        side: BorderSide(color: Colors.black38, width: 2),
         borderRadius: BorderRadius.all(
-          Radius.circular(5),
+          Radius.circular(10),
         ),
       );
 

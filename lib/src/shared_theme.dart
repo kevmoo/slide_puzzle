@@ -14,7 +14,7 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Color get puzzleBackgroundColor;
 
-  Duration get puzzleAnimationDuration => kThemeAnimationDuration * 5;
+  Duration get puzzleAnimationDuration => kThemeAnimationDuration * 3;
 
   // Thought about using AnimatedContainer here, but it causes some weird
   // resizing behavior

@@ -16,8 +16,7 @@ class ThemeSeattle extends SharedTheme {
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override
-  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5)));
+  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder();
 
   @override
   Widget tileButton(int i) {
