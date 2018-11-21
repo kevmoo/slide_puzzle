@@ -30,7 +30,7 @@ class ThemeSimple extends SharedTheme {
           child: Icon(
             Icons.thumb_up,
             size: 72,
-            color: Colors.white,
+            color: Colors.black,
           ),
         );
       }
@@ -41,15 +41,14 @@ class ThemeSimple extends SharedTheme {
 
     final content = createInk(
       Center(
-        child: puzzle.solved
-            ? null
-            : Text(
-                (i + 1).toString(),
-                style: TextStyle(
-                    fontWeight:
-                        correctPosition ? FontWeight.bold : FontWeight.normal),
-                textScaleFactor: 3.0,
-              ),
+        child: Text(
+          (i + 1).toString(),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
+          ),
+          textScaleFactor: 3.0,
+        ),
       ),
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
