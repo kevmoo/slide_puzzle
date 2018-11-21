@@ -158,7 +158,7 @@ abstract class SharedTheme extends PuzzleTheme {
         // ignored! https://github.com/flutter/flutter/issues/24583
         clipBehavior: Clip.hardEdge,
         animationDuration: puzzleAnimationDuration,
-        onPressed: tilePress(tileValue),
+        onPressed: () => tilePress(tileValue),
         shape: shape ?? puzzleBorder,
         padding: const EdgeInsets.symmetric(),
         child: content,

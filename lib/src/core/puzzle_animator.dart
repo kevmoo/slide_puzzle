@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math' show Point;
+import 'dart:math' show Point, Random;
 
 import 'body.dart';
 import 'puzzle.dart';
@@ -31,6 +31,7 @@ abstract class PuzzleProxy {
 }
 
 class PuzzleAnimator implements PuzzleProxy {
+  final _rnd = Random();
   final List<Body> _locations;
   final _controller = StreamController<PuzzleEvent>();
   bool _nextRandomVertical = true;
@@ -97,6 +98,14 @@ class PuzzleAnimator implements PuzzleProxy {
 
   @override
   void clickOrShake(int tileValue) {
+    _controller.add(PuzzleEvent.click);
+    if (solved) {
+      _shake(tileValue);
+      _lastBadClick = null;
+      _badClickCount = 0;
+      return;
+    }
+
     if (!_clickValue(tileValue)) {
       _shake(tileValue);
 
@@ -136,7 +145,6 @@ class PuzzleAnimator implements PuzzleProxy {
   }
 
   bool _clickValue(int value) {
-    _controller.add(PuzzleEvent.click);
     final newPuzzle = _puzzle.clickValue(value);
     if (newPuzzle == null) {
       return false;
@@ -148,10 +156,16 @@ class PuzzleAnimator implements PuzzleProxy {
   }
 
   void _shake(int tileValue) {
-    final delta = _puzzle.openPosition() - _puzzle.coordinatesOf(tileValue);
-    final deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
+    Point<double> deltaDouble;
+    if (solved) {
+      deltaDouble = Point(_rnd.nextDouble() - 0.5, _rnd.nextDouble() - 0.5);
+    } else {
+      final delta = _puzzle.openPosition() - _puzzle.coordinatesOf(tileValue);
+      deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
+    }
+    deltaDouble *= (0.5 / deltaDouble.magnitude);
 
-    _locations[tileValue].kick(deltaDouble * (0.5 / deltaDouble.magnitude));
+    _locations[tileValue].kick(deltaDouble);
   }
 
   void update(Duration timeDelta) {

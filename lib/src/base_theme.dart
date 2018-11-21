@@ -25,14 +25,9 @@ abstract class PuzzleTheme implements PuzzleThemeOption {
     return _appState.setAutoPlay;
   }
 
-  void Function() tilePress(int tileValue) {
-    if (puzzle.solved) {
-      return null;
-    }
-    return () {
-      _appState.setAutoPlay(false);
-      _appState.puzzle.clickOrShake(tileValue);
-    };
+  void tilePress(int tileValue) {
+    _appState.setAutoPlay(false);
+    _appState.puzzle.clickOrShake(tileValue);
   }
 
   PuzzleTheme(this._appState);
