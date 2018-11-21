@@ -2,12 +2,10 @@
 
 import 'dart:ui' as ui show Image;
 
-import 'flutter.dart';
+import '../flutter.dart';
 
-/// An image for a box decoration.
-///
-/// The image is painted using [_paintImage], which describes the meanings of the
-/// various fields on this class in more detail.
+// A model on top of DecorationImage that supports slicing up the source image
+// efficiently to draw it as tiles in the puzzle game
 @immutable
 class DecorationImagePlus implements DecorationImage {
   final int puzzleWidth, puzzleHeight, pieceIndex;

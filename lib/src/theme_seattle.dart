@@ -1,7 +1,7 @@
 import 'base_theme.dart';
-import 'decoration_image_plus.dart';
 import 'flutter.dart';
 import 'shared_theme.dart';
+import 'widgets/decoration_image_plus.dart';
 
 class ThemeSeattle extends SharedTheme {
   @override
