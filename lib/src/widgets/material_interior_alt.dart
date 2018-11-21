@@ -1,7 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import '../flutter.dart';
 
 // Copied from
 // https://github.com/flutter/flutter/blob/f5b02e3c05ed1ab31e890add84fb56e35de2d392/packages/flutter/lib/src/material/material.dart#L593-L715
@@ -51,15 +48,6 @@ class MaterialInterior extends ImplicitlyAnimatedWidget {
 
   @override
   _MaterialInteriorState createState() => _MaterialInteriorState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
-    properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
-  }
 }
 
 class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
