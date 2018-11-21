@@ -8,10 +8,6 @@ abstract class SharedTheme extends PuzzleTheme {
 
   SharedTheme(AppState proxy) : super(proxy);
 
-  final _backgroundChild = const Image(
-    image: AssetImage('asset/seattle.jpg'),
-  );
-
   Color get puzzleThemeBackground;
 
   RoundedRectangleBorder get puzzleBorder;
@@ -20,6 +16,8 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Duration get puzzleAnimationDuration => kThemeAnimationDuration * 5;
 
+  // Thought about using AnimatedContainer here, but it causes some weird
+  // resizing behavior
   Widget _styledWrapper(Widget child) => MaterialInterior(
         duration: puzzleAnimationDuration,
         elevation: 5,
@@ -33,14 +31,16 @@ abstract class SharedTheme extends PuzzleTheme {
   Widget build(BuildContext context) => Material(
           child: Stack(
         children: <Widget>[
-          SizedBox.expand(
-            child: FittedBox(fit: BoxFit.cover, child: _backgroundChild),
+          const SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: Image(
+                image: AssetImage('asset/seattle.jpg'),
+              ),
+            ),
           ),
-          AnimatedPhysicalModel(
+          AnimatedContainer(
             duration: puzzleAnimationDuration,
-            elevation: 0,
-            shadowColor: Colors.transparent,
-            shape: BoxShape.rectangle,
             color: puzzleThemeBackground,
             child: Center(
               child: Row(
