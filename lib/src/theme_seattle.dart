@@ -16,7 +16,11 @@ class ThemeSeattle extends SharedTheme {
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override
-  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder();
+  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(1),
+        ),
+      );
 
   @override
   EdgeInsetsGeometry get tilePadding =>

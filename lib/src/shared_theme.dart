@@ -151,11 +151,6 @@ abstract class SharedTheme extends PuzzleTheme {
         decoration: BoxDecoration(
           gradient: gradient,
           image: image,
-          borderRadius: puzzleBorder.borderRadius,
-          border: Border.all(
-            width: puzzleBorder.side.width,
-            color: puzzleBorder.side.color,
-          ),
         ),
         child: child,
       );
