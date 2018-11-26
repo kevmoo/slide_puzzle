@@ -113,9 +113,12 @@ abstract class Puzzle {
       if (!isCorrectPosition(i)) {
         final correctColumn = i % width;
         final correctRow = i ~/ width;
-        final currentLocation = coordinatesOf(i);
-        final delta = (correctColumn - currentLocation.x).abs() +
-            (correctRow - currentLocation.y).abs();
+
+        final index = indexOf(i);
+        final x = index % width;
+        final y = index ~/ width;
+
+        final delta = (correctColumn - x).abs() + (correctRow - y).abs();
 
         value += delta * delta;
       }
