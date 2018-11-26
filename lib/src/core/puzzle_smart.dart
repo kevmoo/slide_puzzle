@@ -27,7 +27,7 @@ mixin _SliceListMixin on ListMixin<int> {
   }
 
   @override
-  int indexOf(covariant int value, [int start]) {
+  int indexOf(Object value, [int start]) {
     for (var i = 0; i < _data.length; i++) {
       final cellValue = _data[i];
       for (var j = 0; j < _valuesPerCell; j++) {
