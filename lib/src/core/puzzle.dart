@@ -130,7 +130,7 @@ abstract class Puzzle {
   }
 
   Iterable<Puzzle> allMovable() =>
-      (clickableValues()..shuffle(_rnd)).map(clickValue);
+      (clickableValues()..shuffle(_rnd)).map(_clickValue);
 
   List<int> clickableValues({bool vertical}) {
     final open = openPosition();
@@ -177,6 +177,11 @@ abstract class Puzzle {
     if (!_movable(tileValue)) {
       return null;
     }
+    return _clickValue(tileValue);
+  }
+
+  Puzzle _clickValue(int tileValue) {
+    assert(_movable(tileValue));
     final target = coordinatesOf(tileValue);
 
     final newStore = _copyData();
