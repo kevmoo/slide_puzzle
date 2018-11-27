@@ -133,7 +133,7 @@ abstract class SharedTheme extends PuzzleTheme {
                       ),
                       children: List<Widget>.generate(
                         puzzle.length,
-                        tileButton,
+                        _tileButton,
                       ),
                     ),
                   )),
@@ -143,6 +143,14 @@ abstract class SharedTheme extends PuzzleTheme {
           )
         ],
       ));
+
+  Widget _tileButton(int i) {
+    if (i == puzzle.tileCount && !puzzle.solved) {
+      return const Center();
+    }
+
+    return tileButton(i);
+  }
 
   Widget tileButton(int i);
 

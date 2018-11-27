@@ -25,16 +25,14 @@ class ThemeSimple extends SharedTheme {
   @override
   Widget tileButton(int i) {
     if (i == puzzle.tileCount) {
-      if (puzzle.solved) {
-        return const Center(
-          child: Icon(
-            Icons.thumb_up,
-            size: 72,
-            color: Colors.black,
-          ),
-        );
-      }
-      return const Center();
+      assert(puzzle.solved);
+      return const Center(
+        child: Icon(
+          Icons.thumb_up,
+          size: 72,
+          color: Colors.black,
+        ),
+      );
     }
 
     final correctPosition = puzzle.isCorrectPosition(i);
@@ -46,8 +44,8 @@ class ThemeSimple extends SharedTheme {
           style: TextStyle(
             color: Colors.black,
             fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
+            fontSize: 42,
           ),
-          textScaleFactor: 3.0,
         ),
       ),
       gradient: const LinearGradient(

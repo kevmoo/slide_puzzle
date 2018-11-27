@@ -29,7 +29,7 @@ class ThemeSeattle extends SharedTheme {
   @override
   Widget tileButton(int i) {
     if (i == puzzle.tileCount && !puzzle.solved) {
-      return const Center();
+      assert(puzzle.solved);
     }
 
     final decorationImage = DecorationImagePlus(
@@ -54,8 +54,8 @@ class ThemeSeattle extends SharedTheme {
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
                   color: correctPosition ? Colors.white : Colors.black,
+                  fontSize: 42,
                 ),
-                textScaleFactor: 2.8,
               ),
             ),
       image: decorationImage,

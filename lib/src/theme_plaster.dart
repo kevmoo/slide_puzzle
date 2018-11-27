@@ -37,16 +37,14 @@ class ThemePlaster extends SharedTheme {
     final primary = (correctColumn + correctRow).isEven;
 
     if (i == puzzle.tileCount) {
-      if (puzzle.solved) {
-        return const Center(
-          child: Icon(
-            Icons.thumb_up,
-            size: 72,
-            color: _chocolate,
-          ),
-        );
-      }
-      return const Center();
+      assert(puzzle.solved);
+      return const Center(
+        child: Icon(
+          Icons.thumb_up,
+          size: 72,
+          color: _chocolate,
+        ),
+      );
     }
 
     final content = Text(
@@ -54,8 +52,8 @@ class ThemePlaster extends SharedTheme {
       style: TextStyle(
         color: primary ? _yellowIsh : _chocolate,
         fontFamily: 'Plaster',
+        fontSize: 77,
       ),
-      textScaleFactor: 5.5,
     );
 
     return createButton(
