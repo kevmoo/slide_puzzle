@@ -56,8 +56,11 @@ class PuzzleHomeState extends State
   PuzzleHomeState(this.puzzle) {
     sub = puzzle.onEvent.listen(_onPuzzleEvent);
 
-    _themeDataCache = List.unmodifiable(
-        [ThemeSimple(this), ThemeSeattle(this), ThemePlaster(this)]);
+    _themeDataCache = List.unmodifiable([
+      ThemeSimple(this),
+      ThemeSeattle(this),
+      ThemePlaster(this),
+    ]);
 
     _currentTheme = themeData.first;
   }
