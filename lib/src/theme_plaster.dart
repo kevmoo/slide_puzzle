@@ -62,7 +62,6 @@ class ThemePlaster extends SharedTheme {
       i,
       content,
       color: primary ? _orangeIsh : _yellowIsh,
-      disabledColor: primary ? _orangeIsh : _yellowIsh,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: primary ? _chocolate : _orangeIsh, width: 5),
         borderRadius: BorderRadius.circular(5),

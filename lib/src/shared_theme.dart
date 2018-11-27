@@ -165,22 +165,18 @@ abstract class SharedTheme extends PuzzleTheme {
     int tileValue,
     Widget content, {
     Color color,
-    Color disabledColor,
     RoundedRectangleBorder shape,
   }) =>
       AnimatedContainer(
         duration: puzzleAnimationDuration,
         padding: tilePadding,
         child: RaisedButton(
-          // ignored! https://github.com/flutter/flutter/issues/24583
-          clipBehavior: Clip.hardEdge,
           animationDuration: puzzleAnimationDuration,
           onPressed: () => tilePress(tileValue),
           shape: shape ?? puzzleBorder,
           padding: const EdgeInsets.symmetric(),
           child: content,
           color: color,
-          disabledColor: disabledColor,
         ),
       );
 }
