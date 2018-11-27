@@ -4,6 +4,8 @@ import 'puzzle_flow_delegate.dart';
 import 'widgets/material_interior_alt.dart';
 
 abstract class SharedTheme extends PuzzleTheme {
+  Size get _tileSize => const Size(140.0, 140.0);
+
   double get _paramScale => 1.5;
 
   SharedTheme(AppState proxy) : super(proxy);
@@ -124,7 +126,11 @@ abstract class SharedTheme extends PuzzleTheme {
                     constraints: const BoxConstraints.tightForFinite(),
                     padding: const EdgeInsets.all(10),
                     child: Flow(
-                      delegate: PuzzleFlowDelegate(puzzle, animationNotifier),
+                      delegate: PuzzleFlowDelegate(
+                        _tileSize,
+                        puzzle,
+                        animationNotifier,
+                      ),
                       children: List<Widget>.generate(
                         puzzle.length,
                         tileButton,
