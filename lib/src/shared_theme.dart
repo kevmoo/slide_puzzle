@@ -1,14 +1,17 @@
-import 'base_theme.dart';
+import 'app_state.dart';
+import 'core/puzzle_animator.dart';
 import 'flutter.dart';
 import 'puzzle_flow_delegate.dart';
 import 'widgets/material_interior_alt.dart';
 
-abstract class SharedTheme extends PuzzleTheme {
-  Size get _tileSize => const Size(140.0, 140.0);
+abstract class SharedTheme {
+  SharedTheme(this._appState);
 
-  double get _paramScale => 1.5;
+  final AppState _appState;
 
-  SharedTheme(AppState proxy) : super(proxy);
+  PuzzleProxy get puzzle => _appState.puzzle;
+
+  String get name;
 
   Color get puzzleThemeBackground;
 
@@ -16,25 +19,8 @@ abstract class SharedTheme extends PuzzleTheme {
 
   Color get puzzleBackgroundColor;
 
-  Duration get puzzleAnimationDuration => kThemeAnimationDuration * 3;
-
   EdgeInsetsGeometry get tilePadding => const EdgeInsets.all(4);
 
-  // Thought about using AnimatedContainer here, but it causes some weird
-  // resizing behavior
-  Widget _styledWrapper(Widget child) => MaterialInterior(
-        duration: puzzleAnimationDuration,
-        elevation: 5,
-        shadowColor: Colors.black,
-        shape: puzzleBorder,
-        color: puzzleBackgroundColor,
-        child: child,
-      );
-
-  TextStyle get _tilesLeftStyle =>
-      puzzle.solved ? const TextStyle(fontWeight: FontWeight.bold) : null;
-
-  @override
   Widget build(BuildContext context) => Material(
           child: Stack(
         children: <Widget>[
@@ -47,7 +33,7 @@ abstract class SharedTheme extends PuzzleTheme {
             ),
           ),
           AnimatedContainer(
-            duration: puzzleAnimationDuration,
+            duration: _puzzleAnimationDuration,
             color: puzzleThemeBackground,
             child: Center(
               child: Row(
@@ -55,69 +41,7 @@ abstract class SharedTheme extends PuzzleTheme {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints.tightFor(width: 320),
-                      child: _styledWrapper(
-                        Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: ListView(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.all(0),
-                            children: <Widget>[
-                              ListTile(
-                                title: Text(
-                                  'Moves',
-                                  textScaleFactor: _paramScale,
-                                ),
-                                trailing: Text(
-                                  clickCountText,
-                                  textScaleFactor: _paramScale,
-                                ),
-                              ),
-                              SlideTransition(
-                                position: shuffleOffsetAnimation,
-                                child: ListTile(
-                                  title: Text(
-                                    'Tiles left',
-                                    textScaleFactor: _paramScale,
-                                    style: _tilesLeftStyle,
-                                  ),
-                                  trailing: Text(
-                                    tilesLeftText,
-                                    textScaleFactor: _paramScale,
-                                    style: _tilesLeftStyle,
-                                  ),
-                                ),
-                              ),
-                              const Divider(),
-                              CheckboxListTile(
-                                title: const Text('Auto play'),
-                                value: autoPlay,
-                                onChanged: setAutoPlay,
-                              ),
-                              SlideTransition(
-                                position: shuffleOffsetAnimation,
-                                child: ListTile(
-                                  onTap: puzzle.reset,
-                                  title: const Text('Shuffle tiles'),
-                                ),
-                              ),
-                              const Divider(),
-                            ]..addAll(
-                                themeData.map(
-                                  (themeData) =>
-                                      RadioListTile<PuzzleThemeOption>(
-                                        title: Text(themeData.name),
-                                        onChanged: selectTheme,
-                                        value: themeData,
-                                        groupValue: currentTheme,
-                                      ),
-                                ),
-                              ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: _buildControlsWidget(),
                   ),
                   const SizedBox(
                     width: 40,
@@ -129,7 +53,7 @@ abstract class SharedTheme extends PuzzleTheme {
                       delegate: PuzzleFlowDelegate(
                         _tileSize,
                         puzzle,
-                        animationNotifier,
+                        _appState.animationNotifier,
                       ),
                       children: List<Widget>.generate(
                         puzzle.length,
@@ -143,6 +67,95 @@ abstract class SharedTheme extends PuzzleTheme {
           )
         ],
       ));
+
+  Duration get _puzzleAnimationDuration => kThemeAnimationDuration * 3;
+
+  // Thought about using AnimatedContainer here, but it causes some weird
+  // resizing behavior
+  Widget _styledWrapper(Widget child) => MaterialInterior(
+        duration: _puzzleAnimationDuration,
+        elevation: 5,
+        shadowColor: Colors.black,
+        shape: puzzleBorder,
+        color: puzzleBackgroundColor,
+        child: child,
+      );
+
+  Size get _tileSize => const Size(140.0, 140.0);
+
+  void Function(bool newValue) get _setAutoPlay {
+    if (puzzle.solved) {
+      return null;
+    }
+    return _appState.setAutoPlay;
+  }
+
+  void _tilePress(int tileValue) {
+    _appState.setAutoPlay(false);
+    _appState.puzzle.clickOrShake(tileValue);
+  }
+
+  void _selectTheme(SharedTheme thing) {
+    _appState.currentTheme = thing;
+  }
+
+  ConstrainedBox _buildControlsWidget() {
+    const tileTextScale = 1.5;
+
+    ListTile doTile(String title, String trailing) => ListTile(
+          title: Text(
+            title,
+            textScaleFactor: tileTextScale,
+          ),
+          trailing: Text(
+            trailing,
+            textScaleFactor: tileTextScale,
+          ),
+        );
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints.tightFor(width: 320),
+      child: _styledWrapper(
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(0),
+            children: <Widget>[
+              doTile('Moves', puzzle.clickCount.toString()),
+              SlideTransition(
+                position: _appState.shuffleOffsetAnimation,
+                child: doTile('Tiles left', puzzle.incorrectTiles.toString()),
+              ),
+              const Divider(),
+              CheckboxListTile(
+                title: const Text('Auto play'),
+                value: _appState.autoPlay,
+                onChanged: _setAutoPlay,
+              ),
+              SlideTransition(
+                position: _appState.shuffleOffsetAnimation,
+                child: ListTile(
+                  onTap: puzzle.reset,
+                  title: const Text('Shuffle tiles'),
+                ),
+              ),
+              const Divider(),
+            ]..addAll(
+                _appState.themeData.map(
+                  (themeData) => RadioListTile<SharedTheme>(
+                        title: Text(themeData.name),
+                        onChanged: _selectTheme,
+                        value: themeData,
+                        groupValue: _appState.currentTheme,
+                      ),
+                ),
+              ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _tileButton(int i) {
     if (i == puzzle.tileCount && !puzzle.solved) {
@@ -176,11 +189,12 @@ abstract class SharedTheme extends PuzzleTheme {
     RoundedRectangleBorder shape,
   }) =>
       AnimatedContainer(
-        duration: puzzleAnimationDuration,
+        duration: _puzzleAnimationDuration,
         padding: tilePadding,
         child: RaisedButton(
-          animationDuration: puzzleAnimationDuration,
-          onPressed: () => tilePress(tileValue),
+          clipBehavior: Clip.hardEdge,
+          animationDuration: _puzzleAnimationDuration,
+          onPressed: () => _tilePress(tileValue),
           shape: shape ?? puzzleBorder,
           padding: const EdgeInsets.symmetric(),
           child: content,

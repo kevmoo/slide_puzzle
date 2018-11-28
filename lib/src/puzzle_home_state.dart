@@ -1,20 +1,14 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'base_theme.dart';
+import 'app_state.dart';
 import 'core/puzzle_animator.dart';
 import 'flutter.dart';
 import 'frame_nanny.dart';
+import 'shared_theme.dart';
 import 'theme_plaster.dart';
 import 'theme_seattle.dart';
 import 'theme_simple.dart';
-
-class _Shake extends Animatable<Offset> {
-  const _Shake();
-
-  @override
-  Offset transform(double t) => Offset(0.01 * math.sin(t * math.pi * 3), 0);
-}
 
 class PuzzleHomeState extends State
     with TickerProviderStateMixin
@@ -29,17 +23,17 @@ class PuzzleHomeState extends State
   final PuzzleAnimator puzzle;
 
   @override
-  final animationNotifier = AnimationNotifier();
+  final animationNotifier = _AnimationNotifier();
 
   final _nanny = FrameNanny();
 
-  PuzzleTheme _currentTheme;
+  SharedTheme _currentTheme;
 
   @override
-  PuzzleTheme get currentTheme => _currentTheme;
+  SharedTheme get currentTheme => _currentTheme;
 
   @override
-  set currentTheme(PuzzleTheme theme) {
+  set currentTheme(SharedTheme theme) {
     setState(() {
       _currentTheme = theme;
     });
@@ -65,10 +59,10 @@ class PuzzleHomeState extends State
     _currentTheme = themeData.first;
   }
 
-  List<PuzzleTheme> _themeDataCache;
+  List<SharedTheme> _themeDataCache;
 
   @override
-  Iterable<PuzzleTheme> get themeData => _themeDataCache;
+  Iterable<SharedTheme> get themeData => _themeDataCache;
 
   @override
   void setAutoPlay(bool newValue) {
@@ -161,5 +155,21 @@ class PuzzleHomeState extends State
         setAutoPlay(false);
       }
     }
+  }
+}
+
+class _Shake extends Animatable<Offset> {
+  const _Shake();
+
+  @override
+  Offset transform(double t) => Offset(0.01 * math.sin(t * math.pi * 3), 0);
+}
+
+class _AnimationNotifier extends ChangeNotifier implements AnimationNotifier {
+  _AnimationNotifier();
+
+  @override
+  void animate() {
+    notifyListeners();
   }
 }
