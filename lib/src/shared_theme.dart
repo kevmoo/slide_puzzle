@@ -21,6 +21,43 @@ abstract class SharedTheme {
 
   EdgeInsetsGeometry get tilePadding => const EdgeInsets.all(4);
 
+  Widget tileButton(int i);
+
+  Ink createInk(
+    Widget child, {
+    Gradient gradient,
+    DecorationImage image,
+    EdgeInsetsGeometry padding,
+  }) =>
+      Ink(
+        padding: padding,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          image: image,
+        ),
+        child: child,
+      );
+
+  Widget createButton(
+    int tileValue,
+    Widget content, {
+    Color color,
+    RoundedRectangleBorder shape,
+  }) =>
+      AnimatedContainer(
+        duration: _puzzleAnimationDuration,
+        padding: tilePadding,
+        child: RaisedButton(
+          clipBehavior: Clip.hardEdge,
+          animationDuration: _puzzleAnimationDuration,
+          onPressed: () => _tilePress(tileValue),
+          shape: shape ?? puzzleBorder,
+          padding: const EdgeInsets.symmetric(),
+          child: content,
+          color: color,
+        ),
+      );
+
   Widget build(BuildContext context) => Material(
           child: Stack(
         children: <Widget>[
@@ -164,41 +201,4 @@ abstract class SharedTheme {
 
     return tileButton(i);
   }
-
-  Widget tileButton(int i);
-
-  Ink createInk(
-    Widget child, {
-    Gradient gradient,
-    DecorationImage image,
-    EdgeInsetsGeometry padding,
-  }) =>
-      Ink(
-        padding: padding,
-        decoration: BoxDecoration(
-          gradient: gradient,
-          image: image,
-        ),
-        child: child,
-      );
-
-  Widget createButton(
-    int tileValue,
-    Widget content, {
-    Color color,
-    RoundedRectangleBorder shape,
-  }) =>
-      AnimatedContainer(
-        duration: _puzzleAnimationDuration,
-        padding: tilePadding,
-        child: RaisedButton(
-          clipBehavior: Clip.hardEdge,
-          animationDuration: _puzzleAnimationDuration,
-          onPressed: () => _tilePress(tileValue),
-          shape: shape ?? puzzleBorder,
-          padding: const EdgeInsets.symmetric(),
-          child: content,
-          color: color,
-        ),
-      );
 }
