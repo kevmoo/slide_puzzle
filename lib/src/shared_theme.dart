@@ -19,20 +19,18 @@ abstract class SharedTheme {
 
   Color get puzzleBackgroundColor;
 
-  EdgeInsetsGeometry get tilePadding => const EdgeInsets.all(4);
+  EdgeInsetsGeometry get tilePadding => const EdgeInsets.all(6);
 
   Widget tileButton(int i);
 
   Ink createInk(
     Widget child, {
-    Gradient gradient,
     DecorationImage image,
     EdgeInsetsGeometry padding,
   }) =>
       Ink(
         padding: padding,
         decoration: BoxDecoration(
-          gradient: gradient,
           image: image,
         ),
         child: child,
@@ -48,6 +46,7 @@ abstract class SharedTheme {
         duration: _puzzleAnimationDuration,
         padding: tilePadding,
         child: RaisedButton(
+          elevation: 4,
           clipBehavior: Clip.hardEdge,
           animationDuration: _puzzleAnimationDuration,
           onPressed: () => _tilePress(tileValue),
@@ -111,8 +110,6 @@ abstract class SharedTheme {
   // resizing behavior
   Widget _styledWrapper(Widget child) => MaterialInterior(
         duration: _puzzleAnimationDuration,
-        elevation: 5,
-        shadowColor: Colors.black,
         shape: puzzleBorder,
         color: puzzleBackgroundColor,
         child: child,

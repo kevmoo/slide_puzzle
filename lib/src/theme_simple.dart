@@ -9,16 +9,16 @@ class ThemeSimple extends SharedTheme {
   ThemeSimple(AppState proxy) : super(proxy);
 
   @override
-  Color get puzzleThemeBackground => const Color.fromARGB(255, 54, 81, 102);
+  Color get puzzleThemeBackground => Colors.white;
 
   @override
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override
   RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
-        side: BorderSide(color: Colors.black38, width: 2),
+        side: BorderSide(color: Colors.black26, width: 1),
         borderRadius: BorderRadius.all(
-          Radius.circular(10),
+          Radius.circular(4),
         ),
       );
 
@@ -42,20 +42,18 @@ class ThemeSimple extends SharedTheme {
         child: Text(
           (i + 1).toString(),
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
-            fontSize: 42,
+            fontSize: 49,
           ),
         ),
       ),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Colors.white, Color(0xffcccccc)],
-        tileMode: TileMode.clamp, // repeats the gradient over the canvas
-      ),
     );
 
-    return createButton(i, content);
+    return createButton(
+      i,
+      content,
+      color: const Color.fromARGB(255, 13, 87, 155),
+    );
   }
 }

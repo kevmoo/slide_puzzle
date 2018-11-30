@@ -9,18 +9,12 @@ class MaterialInterior extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.clipBehavior = Clip.none,
-    @required this.elevation,
     @required this.color,
-    @required this.shadowColor,
     Curve curve = Curves.linear,
     @required Duration duration,
   })  : assert(child != null),
         assert(shape != null),
-        assert(clipBehavior != null),
-        assert(elevation != null),
         assert(color != null),
-        assert(shadowColor != null),
         super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
@@ -34,17 +28,8 @@ class MaterialInterior extends ImplicitlyAnimatedWidget {
   /// determines the physical shape.
   final ShapeBorder shape;
 
-  /// {@macro flutter.widgets.Clip}
-  final Clip clipBehavior;
-
-  /// The target z-coordinate at which to place this physical object.
-  final double elevation;
-
   /// The target background color.
   final Color color;
-
-  /// The target shadow color.
-  final Color shadowColor;
 
   @override
   _MaterialInteriorState createState() => _MaterialInteriorState();
@@ -73,11 +58,10 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
         shape: shape,
       ),
       clipper: ShapeBorderClipper(
-          shape: shape, textDirection: Directionality.of(context)),
-      clipBehavior: widget.clipBehavior,
-      elevation: widget.elevation,
+        shape: shape,
+        textDirection: Directionality.of(context),
+      ),
       color: _color.evaluate(animation),
-      shadowColor: widget.shadowColor,
     );
   }
 }
