@@ -2,6 +2,8 @@ import 'app_state.dart';
 import 'flutter.dart';
 import 'shared_theme.dart';
 
+const _accentBlue = const Color(0xff000579e);
+
 class ThemeSimple extends SharedTheme {
   @override
   String get name => 'Simple';
@@ -13,6 +15,9 @@ class ThemeSimple extends SharedTheme {
 
   @override
   Color get puzzleBackgroundColor => Colors.white70;
+
+  @override
+  Color get puzzleAccentColor => _accentBlue;
 
   @override
   RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
@@ -30,7 +35,7 @@ class ThemeSimple extends SharedTheme {
         child: Icon(
           Icons.thumb_up,
           size: 72,
-          color: Colors.black,
+          color: _accentBlue,
         ),
       );
     }

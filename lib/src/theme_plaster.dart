@@ -19,6 +19,9 @@ class ThemePlaster extends SharedTheme {
   Color get puzzleBackgroundColor => _yellowIsh;
 
   @override
+  Color get puzzleAccentColor => _orangeIsh;
+
+  @override
   RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
         side: BorderSide(
           color: Color.fromARGB(255, 103, 103, 105),
@@ -42,7 +45,7 @@ class ThemePlaster extends SharedTheme {
         child: Icon(
           Icons.thumb_up,
           size: 72,
-          color: _chocolate,
+          color: _orangeIsh,
         ),
       );
     }

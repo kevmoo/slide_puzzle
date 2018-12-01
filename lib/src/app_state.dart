@@ -3,6 +3,8 @@ import 'flutter.dart';
 import 'shared_theme.dart';
 
 abstract class AppState {
+  TabController get tabController;
+
   Animation<Offset> get shuffleOffsetAnimation;
 
   PuzzleProxy get puzzle;

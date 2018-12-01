@@ -19,6 +19,8 @@ abstract class SharedTheme {
 
   Color get puzzleBackgroundColor;
 
+  Color get puzzleAccentColor;
+
   EdgeInsetsGeometry get tilePadding => const EdgeInsets.all(6);
 
   Widget tileButton(int i);
@@ -72,32 +74,72 @@ abstract class SharedTheme {
             duration: _puzzleAnimationDuration,
             color: puzzleThemeBackground,
             child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Flexible(
-                    child: _buildControlsWidget(),
-                  ),
-                  const SizedBox(
-                    width: 40,
-                  ),
-                  _styledWrapper(Container(
-                    constraints: const BoxConstraints.tightForFinite(),
-                    padding: const EdgeInsets.all(10),
-                    child: Flow(
-                      delegate: PuzzleFlowDelegate(
-                        _tileSize,
-                        puzzle,
-                        _appState.animationNotifier,
+              child: _styledWrapper(
+                SizedBox(
+                  width: 580,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.black26,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        child: TabBar(
+                          controller: _appState.tabController,
+                          labelPadding: const EdgeInsets.fromLTRB(0, 20, 0, 12),
+                          labelColor: puzzleAccentColor,
+                          indicatorColor: puzzleAccentColor,
+                          indicatorWeight: 1.5,
+                          unselectedLabelColor: Colors.black.withOpacity(0.6),
+                          tabs: _appState.themeData
+                              .map((st) => Text(
+                                    st.name.toUpperCase(),
+                                    style: const TextStyle(
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
                       ),
-                      children: List<Widget>.generate(
-                        puzzle.length,
-                        _tileButton,
+                      Container(
+                        constraints: const BoxConstraints.tightForFinite(),
+                        padding: const EdgeInsets.all(10),
+                        child: Flow(
+                          delegate: PuzzleFlowDelegate(
+                            _tileSize,
+                            puzzle,
+                            _appState.animationNotifier,
+                          ),
+                          children: List<Widget>.generate(
+                            puzzle.length,
+                            _tileButton,
+                          ),
+                        ),
                       ),
-                    ),
-                  )),
-                ],
+                      Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: Colors.black26, width: 1),
+                          ),
+                        ),
+                        padding: const EdgeInsets.only(
+                          left: 10,
+                          bottom: 6,
+                          top: 2,
+                          right: 10,
+                        ),
+                        child: Row(children: _bottomControls(context)),
+                      )
+                    ],
+                  ),
+                ),
               ),
             ),
           )
@@ -129,67 +171,41 @@ abstract class SharedTheme {
     _appState.puzzle.clickOrShake(tileValue);
   }
 
-  void _selectTheme(SharedTheme thing) {
-    _appState.currentTheme = thing;
-  }
+  TextStyle get _infoStyle => TextStyle(
+        color: puzzleAccentColor,
+        fontWeight: FontWeight.bold,
+      );
 
-  ConstrainedBox _buildControlsWidget() {
-    const tileTextScale = 1.5;
-
-    ListTile doTile(String title, String trailing) => ListTile(
-          title: Text(
-            title,
-            textScaleFactor: tileTextScale,
-          ),
-          trailing: Text(
-            trailing,
-            textScaleFactor: tileTextScale,
-          ),
-        );
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints.tightFor(width: 320),
-      child: _styledWrapper(
-        Padding(
-          padding: const EdgeInsets.all(15),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(0),
-            children: <Widget>[
-              doTile('Moves', puzzle.clickCount.toString()),
-              SlideTransition(
-                position: _appState.shuffleOffsetAnimation,
-                child: doTile('Tiles left', puzzle.incorrectTiles.toString()),
-              ),
-              const Divider(),
-              CheckboxListTile(
-                title: const Text('Auto play'),
-                value: _appState.autoPlay,
-                onChanged: _setAutoPlay,
-              ),
-              SlideTransition(
-                position: _appState.shuffleOffsetAnimation,
-                child: ListTile(
-                  onTap: puzzle.reset,
-                  title: const Text('Shuffle tiles'),
-                ),
-              ),
-              const Divider(),
-            ]..addAll(
-                _appState.themeData.map(
-                  (themeData) => RadioListTile<SharedTheme>(
-                        title: Text(themeData.name),
-                        onChanged: _selectTheme,
-                        value: themeData,
-                        groupValue: _appState.currentTheme,
-                      ),
-                ),
-              ),
+  List<Widget> _bottomControls(BuildContext context) => <Widget>[
+        IconButton(
+          onPressed: puzzle.reset,
+          icon: Icon(Icons.refresh, color: puzzleAccentColor),
+          //Icons.refresh,
+        ),
+        Checkbox(
+          value: _appState.autoPlay,
+          onChanged: _setAutoPlay,
+          activeColor: puzzleAccentColor,
+        ),
+        Expanded(
+          child: Container(),
+        ),
+        Text(
+          puzzle.clickCount.toString(),
+          textAlign: TextAlign.right,
+          style: _infoStyle,
+        ),
+        const Text(' Moves'),
+        SizedBox(
+          width: 28,
+          child: Text(
+            puzzle.incorrectTiles.toString(),
+            textAlign: TextAlign.right,
+            style: _infoStyle,
           ),
         ),
-      ),
-    );
-  }
+        const Text(' Tiles left  ')
+      ];
 
   Widget _tileButton(int i) {
     if (i == puzzle.tileCount && !puzzle.solved) {

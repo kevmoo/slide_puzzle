@@ -13,6 +13,7 @@ import 'theme_simple.dart';
 class PuzzleHomeState extends State
     with TickerProviderStateMixin
     implements AppState {
+  TabController _tabController;
   AnimationController _controller;
   Animation<Offset> _shuffleOffsetAnimation;
 
@@ -24,6 +25,9 @@ class PuzzleHomeState extends State
 
   @override
   final animationNotifier = _AnimationNotifier();
+
+  @override
+  TabController get tabController => _tabController;
 
   final _nanny = FrameNanny();
 
@@ -59,6 +63,25 @@ class PuzzleHomeState extends State
     _currentTheme = themeData.first;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _ticker ??= createTicker(_onTick);
+    _ensureTicking();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+
+    _shuffleOffsetAnimation = _controller.drive(const _Shake());
+    _tabController = TabController(vsync: this, length: _themeDataCache.length);
+
+    _tabController.addListener(() {
+      currentTheme = _themeDataCache[_tabController.index];
+    });
+  }
+
   List<SharedTheme> _themeDataCache;
 
   @override
@@ -78,25 +101,12 @@ class PuzzleHomeState extends State
   }
 
   @override
-  void initState() {
-    super.initState();
-    _ticker ??= createTicker(_onTick);
-    _ensureTicking();
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-
-    _shuffleOffsetAnimation = _controller.drive(const _Shake());
-  }
-
-  @override
   Widget build(BuildContext context) => _currentTheme.build(context);
 
   @override
   void dispose() {
     animationNotifier.dispose();
+    _tabController.dispose();
     _controller?.dispose();
     _ticker?.dispose();
     sub.cancel();
