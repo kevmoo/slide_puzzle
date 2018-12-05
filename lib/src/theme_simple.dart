@@ -2,7 +2,7 @@ import 'app_state.dart';
 import 'flutter.dart';
 import 'shared_theme.dart';
 
-const _accentBlue = const Color(0xff000579e);
+const _accentBlue = Color(0xff000579e);
 
 class ThemeSimple extends SharedTheme {
   @override
