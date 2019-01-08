@@ -121,15 +121,15 @@ class DecorationImagePlus implements DecorationImage {
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
-    final DecorationImagePlus typedOther = other;
-    return image == typedOther.image &&
-        colorFilter == typedOther.colorFilter &&
-        fit == typedOther.fit &&
-        alignment == typedOther.alignment &&
-        centerSlice == typedOther.centerSlice &&
-        repeat == typedOther.repeat &&
-        matchTextDirection == typedOther.matchTextDirection;
+    return other is DecorationImagePlus &&
+        other.runtimeType == runtimeType &&
+        image == other.image &&
+        colorFilter == other.colorFilter &&
+        fit == other.fit &&
+        alignment == other.alignment &&
+        centerSlice == other.centerSlice &&
+        repeat == other.repeat &&
+        matchTextDirection == other.matchTextDirection;
   }
 
   @override
