@@ -267,6 +267,6 @@ void _validate(List<int> source) {
         source.contains(i),
         'source',
         'Must contain each number from 0 to `length - 1` '
-        'once and only once.');
+            'once and only once.');
   }
 }
