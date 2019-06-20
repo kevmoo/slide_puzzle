@@ -143,8 +143,9 @@ class DecorationImagePlus implements DecorationImage {
     if (colorFilter != null) properties.add('$colorFilter');
     if (fit != null &&
         !(fit == BoxFit.fill && centerSlice != null) &&
-        !(fit == BoxFit.scaleDown && centerSlice == null))
+        !(fit == BoxFit.scaleDown && centerSlice == null)) {
       properties.add('$fit');
+    }
     properties.add('$alignment');
     if (centerSlice != null) properties.add('centerSlice: $centerSlice');
     if (repeat != ImageRepeat.noRepeat) properties.add('$repeat');
@@ -214,9 +215,10 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
 
     final ImageStream newImageStream = _details.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
-      _imageStream?.removeListener(_imageListener);
+      final listener = ImageStreamListener(_imageListener);
+      _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
-      _imageStream.addListener(_imageListener);
+      _imageStream.addListener(listener);
     }
     if (_image == null) return;
 
@@ -255,7 +257,7 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   /// After this method has been called, the object is no longer usable.
   @mustCallSuper
   void dispose() {
-    _imageStream?.removeListener(_imageListener);
+    _imageStream?.removeListener(ImageStreamListener(_imageListener));
   }
 
   @override
