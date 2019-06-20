@@ -1,4 +1,4 @@
-import 'core/puzzle_animator.dart';
+import 'core/puzzle_proxy.dart';
 import 'flutter.dart';
 
 class PuzzleFlowDelegate extends FlowDelegate {

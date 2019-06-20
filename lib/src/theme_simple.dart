@@ -1,4 +1,4 @@
-import 'app_state.dart';
+import 'core/puzzle_proxy.dart';
 import 'flutter.dart';
 import 'shared_theme.dart';
 
@@ -8,7 +8,7 @@ class ThemeSimple extends SharedTheme {
   @override
   String get name => 'Simple';
 
-  ThemeSimple(AppState proxy) : super(proxy);
+  const ThemeSimple();
 
   @override
   Color get puzzleThemeBackground => Colors.white;
@@ -20,7 +20,8 @@ class ThemeSimple extends SharedTheme {
   Color get puzzleAccentColor => _accentBlue;
 
   @override
-  RoundedRectangleBorder get puzzleBorder => const RoundedRectangleBorder(
+  RoundedRectangleBorder puzzleBorder(bool small) =>
+      const RoundedRectangleBorder(
         side: BorderSide(color: Colors.black26, width: 1),
         borderRadius: BorderRadius.all(
           Radius.circular(4),
@@ -28,7 +29,7 @@ class ThemeSimple extends SharedTheme {
       );
 
   @override
-  Widget tileButton(int i) {
+  Widget tileButton(int i, PuzzleProxy puzzle, bool small) {
     if (i == puzzle.tileCount) {
       assert(puzzle.solved);
       return const Center(
@@ -49,13 +50,15 @@ class ThemeSimple extends SharedTheme {
           style: TextStyle(
             color: Colors.white,
             fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
-            fontSize: 49,
+            fontSize: small ? 30 : 49,
           ),
         ),
       ),
     );
 
     return createButton(
+      puzzle,
+      small,
       i,
       content,
       color: const Color.fromARGB(255, 13, 87, 155),
