@@ -1,5 +1,6 @@
 // ignore_for_file: omit_local_variable_types, annotate_overrides
 
+import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
 import '../flutter.dart';
@@ -152,6 +153,13 @@ class DecorationImagePlus implements DecorationImage {
     if (matchTextDirection) properties.add('match text direction');
     return '$runtimeType(${properties.join(", ")})';
   }
+
+  @override
+  ImageErrorListener get onError => (error, stackTrace) {
+        developer.log('Failed to load image.\n'
+            '$error\n'
+            '$stackTrace', name: 'slide_puzzle.decoration_image_plus');
+      };
 }
 
 /// The painter for a [DecorationImagePlus].
