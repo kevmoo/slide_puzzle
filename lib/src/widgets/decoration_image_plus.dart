@@ -113,6 +113,9 @@ class DecorationImagePlus implements DecorationImage {
   /// in the top right.
   final bool matchTextDirection;
 
+  @override
+  final double scale = 1.0;
+
   /// Creates a [DecorationImagePainterPlus] for this [DecorationImagePlus].
   ///
   /// The `onChanged` argument must not be null. It will be called whenever the
