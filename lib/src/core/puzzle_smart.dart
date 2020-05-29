@@ -31,7 +31,7 @@ mixin _SliceListMixin on ListMixin<int> {
   }
 
   @override
-  int indexOf(Object value, [int start]) {
+  int indexOf(Object value, [int start = 0]) {
     for (var i = 0; i < _data.length; i++) {
       final cellValue = _data[i];
       for (var j = 0; j < _valuesPerCell; j++) {
@@ -90,7 +90,6 @@ class _PuzzleSmart extends Puzzle with ListMixin<int>, _SliceListMixin {
 
   static const _bitsPerCell = 32;
   static const _valuesPerCell = _bitsPerCell ~/ _bitsPerValue;
-  static const _valueMask = (1 << _bitsPerValue) - 1;
 
   @override
   final Uint32List _data;

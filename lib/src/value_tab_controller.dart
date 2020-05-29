@@ -30,8 +30,8 @@ class ValueTabController<T> extends StatefulWidget {
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
   static TabController of(BuildContext context) {
-    final scope = context.inheritFromWidgetOfExactType(_ValueTabControllerScope)
-        as _ValueTabControllerScope;
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<_ValueTabControllerScope>();
     return scope?.controller;
   }
 
