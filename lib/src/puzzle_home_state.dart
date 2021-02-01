@@ -90,7 +90,7 @@ class PuzzleHomeState extends State
         providers: [
           Provider<AppState>.value(value: this),
           ListenableProvider<PuzzleControls>.value(
-            listenable: _autoPlayListenable,
+            value: _autoPlayListenable,
           )
         ],
         child: Material(
