@@ -20,7 +20,7 @@ class ThemeSeattle extends SharedTheme {
   Color get puzzleBackgroundColor => Colors.white70;
 
   @override
-  Color get puzzleAccentColor => const Color(0xff000579f);
+  Color get puzzleAccentColor => const Color(0xFF000579);
 
   @override
   RoundedRectangleBorder puzzleBorder(bool small) =>

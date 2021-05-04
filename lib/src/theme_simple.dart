@@ -6,7 +6,7 @@ import 'core/puzzle_proxy.dart';
 import 'flutter.dart';
 import 'shared_theme.dart';
 
-const _accentBlue = Color(0xff000579e);
+const _accentBlue = Color(0xff000579);
 
 class ThemeSimple extends SharedTheme {
   @override
