@@ -62,6 +62,7 @@ linter:
     - prefer_typing_uninitialized_variables
     - recursive_getters
     - slash_for_doc_comments
+    - sort_child_properties_last
     - test_types_in_equals
     - throw_in_finally
     - type_init_formals
@@ -75,5 +76,6 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
+    - use_full_hex_values_for_flutter_colors
     - use_rethrow_when_possible
     - valid_regexps

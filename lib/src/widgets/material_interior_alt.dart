@@ -57,15 +57,15 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
   Widget build(BuildContext context) {
     final shape = _border.evaluate(animation);
     return PhysicalShape(
-      child: _ShapeBorderPaint(
-        child: widget.child,
-        shape: shape,
-      ),
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.of(context),
       ),
       color: _color.evaluate(animation),
+      child: _ShapeBorderPaint(
+        shape: shape,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -82,8 +82,8 @@ class _ShapeBorderPaint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      child: child,
       foregroundPainter: _ShapeBorderPainter(shape, Directionality.of(context)),
+      child: child,
     );
   }
 }
