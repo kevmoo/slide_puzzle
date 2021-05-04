@@ -50,15 +50,17 @@ abstract class SharedTheme {
       AnimatedContainer(
         duration: puzzleAnimationDuration,
         padding: tilePadding(puzzle),
-        child: RaisedButton(
-          elevation: 4,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            elevation: 4,
+            animationDuration: puzzleAnimationDuration,
+            shape: shape ?? puzzleBorder(small),
+            padding: const EdgeInsets.symmetric(),
+            primary: color,
+          ),
           clipBehavior: Clip.hardEdge,
-          animationDuration: puzzleAnimationDuration,
           onPressed: () => puzzle.clickOrShake(tileValue),
-          shape: shape ?? puzzleBorder(small),
-          padding: const EdgeInsets.symmetric(),
           child: content,
-          color: color,
         ),
       );
 
