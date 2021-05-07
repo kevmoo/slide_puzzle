@@ -10,16 +10,13 @@ import '../flutter.dart';
 // TODO(kevmoo): file a feature request for this?
 class MaterialInterior extends ImplicitlyAnimatedWidget {
   const MaterialInterior({
-    Key key,
-    @required this.child,
-    @required this.shape,
-    @required this.color,
+    Key? key,
+    required this.child,
+    required this.shape,
+    required this.color,
     Curve curve = Curves.linear,
-    @required Duration duration,
-  })  : assert(child != null),
-        assert(shape != null),
-        assert(color != null),
-        super(key: key, curve: curve, duration: duration);
+    required Duration duration,
+  }) : super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///
@@ -40,28 +37,28 @@ class MaterialInterior extends ImplicitlyAnimatedWidget {
 }
 
 class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
-  ShapeBorderTween _border;
-  ColorTween _color;
+  ShapeBorderTween? _border;
+  ColorTween? _color;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _border = visitor(_border, widget.shape,
-            (value) => ShapeBorderTween(begin: value as ShapeBorder))
-        as ShapeBorderTween;
+            (value) => ShapeBorderTween(begin: value as ShapeBorder?))
+        as ShapeBorderTween?;
     _color = visitor(
-            _color, widget.color, (value) => ColorTween(begin: value as Color))
-        as ColorTween;
+            _color, widget.color, (value) => ColorTween(begin: value as Color?))
+        as ColorTween?;
   }
 
   @override
   Widget build(BuildContext context) {
-    final shape = _border.evaluate(animation);
+    final shape = _border!.evaluate(animation)!;
     return PhysicalShape(
       clipper: ShapeBorderClipper(
         shape: shape,
         textDirection: Directionality.of(context),
       ),
-      color: _color.evaluate(animation),
+      color: _color!.evaluate(animation)!,
       child: _ShapeBorderPaint(
         shape: shape,
         child: widget.child,
@@ -72,8 +69,8 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
 
 class _ShapeBorderPaint extends StatelessWidget {
   const _ShapeBorderPaint({
-    @required this.child,
-    @required this.shape,
+    required this.child,
+    required this.shape,
   });
 
   final Widget child;

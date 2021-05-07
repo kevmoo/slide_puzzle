@@ -14,29 +14,29 @@ class PuzzleAnimator implements PuzzleProxy {
   final List<Body> _locations;
   final _controller = StreamController<PuzzleEvent>();
   bool _nextRandomVertical = true;
-  Puzzle _puzzle;
+  Puzzle? _puzzle;
   int _clickCount = 0;
 
-  bool _stable;
+  bool? _stable;
 
-  bool get stable => _stable;
-
-  @override
-  bool get solved => _puzzle.incorrectTiles == 0;
+  bool? get stable => _stable;
 
   @override
-  int get width => _puzzle.width;
+  bool get solved => _puzzle!.incorrectTiles == 0;
 
   @override
-  int get height => _puzzle.height;
+  int get width => _puzzle!.width;
 
   @override
-  int get length => _puzzle.length;
+  int get height => _puzzle!.height;
 
   @override
-  int get tileCount => _puzzle.tileCount;
+  int get length => _puzzle!.length;
 
-  int get incorrectTiles => _puzzle.incorrectTiles;
+  @override
+  int get tileCount => _puzzle!.tileCount;
+
+  int get incorrectTiles => _puzzle!.incorrectTiles;
 
   int get clickCount => _clickCount;
 
@@ -45,28 +45,28 @@ class PuzzleAnimator implements PuzzleProxy {
   Stream<PuzzleEvent> get onEvent => _controller.stream;
 
   @override
-  bool isCorrectPosition(int value) => _puzzle.isCorrectPosition(value);
+  bool isCorrectPosition(int value) => _puzzle!.isCorrectPosition(value);
 
   @override
   Point<double> location(int index) => _locations[index].location;
 
-  int _lastBadClick;
+  int? _lastBadClick;
   int _badClickCount = 0;
 
   PuzzleAnimator(int width, int height) : this._(Puzzle(width, height));
 
-  PuzzleAnimator._(this._puzzle)
+  PuzzleAnimator._(Puzzle this._puzzle)
       : _locations = List.generate(_puzzle.length, (i) {
           return Body.raw(
               (_puzzle.width - 1.0) / 2, (_puzzle.height - 1.0) / 2, 0, 0);
         });
 
   void playRandom() {
-    if (_puzzle.fitness == 0) {
+    if (_puzzle!.fitness == 0) {
       return;
     }
 
-    _puzzle = _puzzle.clickRandom(vertical: _nextRandomVertical);
+    _puzzle = _puzzle!.clickRandom(vertical: _nextRandomVertical);
     _nextRandomVertical = !_nextRandomVertical;
     _clickCount++;
     _controller.add(PuzzleEvent.random);
@@ -93,11 +93,11 @@ class PuzzleAnimator implements PuzzleProxy {
         _badClickCount++;
         if (_badClickCount >= 5) {
           // Do the reset!
-          final newValues = List.generate(_puzzle.length, (i) {
-            if (i == _puzzle.tileCount) {
-              return _puzzle.tileCount - 1;
-            } else if (i == (_puzzle.tileCount - 1)) {
-              return _puzzle.tileCount;
+          final newValues = List.generate(_puzzle!.length, (i) {
+            if (i == _puzzle!.tileCount) {
+              return _puzzle!.tileCount - 1;
+            } else if (i == (_puzzle!.tileCount - 1)) {
+              return _puzzle!.tileCount;
             }
             return i;
           });
@@ -114,8 +114,8 @@ class PuzzleAnimator implements PuzzleProxy {
     }
   }
 
-  void _resetCore({List<int> source}) {
-    _puzzle = _puzzle.reset(source: source);
+  void _resetCore({List<int>? source}) {
+    _puzzle = _puzzle!.reset(source: source);
     _clickCount = 0;
     _lastBadClick = null;
     _badClickCount = 0;
@@ -123,7 +123,7 @@ class PuzzleAnimator implements PuzzleProxy {
   }
 
   bool _clickValue(int value) {
-    final newPuzzle = _puzzle.clickValue(value);
+    final newPuzzle = _puzzle!.clickValue(value);
     if (newPuzzle == null) {
       return false;
     } else {
@@ -138,7 +138,7 @@ class PuzzleAnimator implements PuzzleProxy {
     if (solved) {
       deltaDouble = Point(_rnd.nextDouble() - 0.5, _rnd.nextDouble() - 0.5);
     } else {
-      final delta = _puzzle.openPosition() - _puzzle.coordinatesOf(tileValue);
+      final delta = _puzzle!.openPosition() - _puzzle!.coordinatesOf(tileValue);
       deltaDouble = Point(delta.x.toDouble(), delta.y.toDouble());
     }
     deltaDouble *= 0.5 / deltaDouble.magnitude;
@@ -157,7 +157,7 @@ class PuzzleAnimator implements PuzzleProxy {
     assert(animationSeconds > 0);
 
     _stable = true;
-    for (var i = 0; i < _puzzle.length; i++) {
+    for (var i = 0; i < _puzzle!.length; i++) {
       final target = _target(i);
       final body = _locations[i];
 
@@ -166,12 +166,12 @@ class PuzzleAnimator implements PuzzleProxy {
               drag: .9,
               maxVelocity: 1.0,
               snapTo: target) &&
-          _stable;
+          _stable!;
     }
   }
 
   Point<double> _target(int item) {
-    final target = _puzzle.coordinatesOf(item);
+    final target = _puzzle!.coordinatesOf(item);
     return Point(target.x.toDouble(), target.y.toDouble());
   }
 }

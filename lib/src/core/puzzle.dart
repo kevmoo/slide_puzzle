@@ -77,7 +77,7 @@ abstract class Puzzle {
 
   bool get solvable => isSolvable(width, _intView);
 
-  Puzzle reset({List<int> source}) {
+  Puzzle reset({List<int>? source}) {
     final data = (source == null)
         ? _randomizeList(width, _intView)
         : Uint8List.fromList(source);
@@ -130,7 +130,7 @@ abstract class Puzzle {
     return value * incorrectTiles;
   }
 
-  Puzzle clickRandom({bool vertical}) {
+  Puzzle? clickRandom({bool? vertical}) {
     final clickable = clickableValues(vertical: vertical).toList();
     return clickValue(clickable[_rnd.nextInt(clickable.length)]);
   }
@@ -138,7 +138,7 @@ abstract class Puzzle {
   Iterable<Puzzle> allMovable() =>
       (clickableValues()..shuffle(_rnd)).map(_clickValue);
 
-  List<int> clickableValues({bool vertical}) {
+  List<int> clickableValues({bool? vertical}) {
     final open = openPosition();
     final doRow = vertical == null || vertical == false;
     final doColumn = vertical == null || vertical;
@@ -179,7 +179,7 @@ abstract class Puzzle {
     return true;
   }
 
-  Puzzle clickValue(int tileValue) {
+  Puzzle? clickValue(int tileValue) {
     if (!_movable(tileValue)) {
       return null;
     }

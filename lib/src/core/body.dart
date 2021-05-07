@@ -39,15 +39,13 @@ class Body {
   bool animate(double seconds,
       {Point<double> force = zeroPoint,
       double drag = 0,
-      double maxVelocity,
-      Point<double> snapTo}) {
+      double? maxVelocity,
+      Point<double>? snapTo}) {
     assert(seconds.isFinite && seconds > 0,
         'milliseconds must be finite and > 0 (was $seconds)');
 
-    force ??= zeroPoint;
     assert(force.x.isFinite && force.y.isFinite, 'force must be finite');
 
-    drag ??= 0;
     assert(drag.isFinite && drag >= 0, 'drag must be finiate and >= 0');
 
     maxVelocity ??= double.infinity;

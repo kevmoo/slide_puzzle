@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-void requireArgument(bool truth, String argName, [String message]) {
+void requireArgument(bool truth, String argName, [String? message]) {
   if (!truth) {
     if (message == null || message.isEmpty) {
       message = 'value was invalid';
