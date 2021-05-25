@@ -53,8 +53,8 @@ class PuzzleHomeState extends State
   final _AnimationNotifier animationNotifier = _AnimationNotifier();
 
   Duration _tickerTimeSinceLastEvent = Duration.zero;
-  Ticker? _ticker;
-  Duration? _lastElapsed;
+  late Ticker _ticker;
+  late Duration _lastElapsed;
   late StreamSubscription _puzzleEventSubscription;
 
   bool _autoPlay = false;
@@ -68,7 +68,8 @@ class PuzzleHomeState extends State
   void initState() {
     super.initState();
     _autoPlayListenable = _PuzzleControls(this);
-    _ticker ??= createTicker(_onTick);
+    _ticker = createTicker(_onTick);
+    _lastElapsed = Duration.zero;
     _ensureTicking();
   }
 
@@ -113,7 +114,7 @@ class PuzzleHomeState extends State
   @override
   void dispose() {
     animationNotifier.dispose();
-    _ticker?.dispose();
+    _ticker.dispose();
     _autoPlayListenable.dispose();
     _puzzleEventSubscription.cancel();
     super.dispose();
@@ -132,8 +133,8 @@ class PuzzleHomeState extends State
   }
 
   void _ensureTicking() {
-    if (!_ticker!.isTicking) {
-      _ticker!.start();
+    if (!_ticker.isTicking) {
+      _ticker.start();
     }
   }
 
@@ -141,7 +142,7 @@ class PuzzleHomeState extends State
     if (elapsed == Duration.zero) {
       _lastElapsed = elapsed;
     }
-    final delta = elapsed - _lastElapsed!;
+    final delta = elapsed - _lastElapsed;
     _lastElapsed = elapsed;
 
     if (delta.inMilliseconds <= 0) {
@@ -153,12 +154,12 @@ class PuzzleHomeState extends State
     _tickerTimeSinceLastEvent += delta;
     puzzle.update(delta > _maxFrameDuration ? _maxFrameDuration : delta);
 
-    if (!puzzle.stable!) {
+    if (!puzzle.stable) {
       animationNotifier.animate();
     } else {
       if (!_autoPlay) {
-        _ticker!.stop();
-        _lastElapsed = null;
+        _ticker.stop();
+        _lastElapsed = Duration.zero;
       }
     }
 

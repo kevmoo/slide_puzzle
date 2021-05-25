@@ -29,7 +29,7 @@ class ValueTabController<T> extends StatefulWidget {
   /// ```dart
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
-  static TabController of(BuildContext context) {
+  static TabController? of(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<_ValueTabControllerScope>();
     return scope!.controller;

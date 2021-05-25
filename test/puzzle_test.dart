@@ -61,9 +61,7 @@ void main() {
   group('click', () {
     Puzzle? doClick(Puzzle puzzle, int tileValue) {
       final clickResult = puzzle.clickValue(tileValue);
-      if (clickResult != null) {
-        expect(clickResult.toString(), isNot(puzzle.toString()));
-      }
+      expect(clickResult.toString(), isNot(puzzle.toString()));
       return clickResult;
     }
 
