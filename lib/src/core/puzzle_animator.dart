@@ -17,7 +17,7 @@ class PuzzleAnimator implements PuzzleProxy {
   Puzzle? _puzzle;
   int _clickCount = 0;
 
-  bool? _stable;
+  bool _stable = true;
 
   bool? get stable => _stable;
 
