@@ -31,7 +31,7 @@ mixin _SliceListMixin on ListMixin<int> {
   }
 
   @override
-  int indexOf(Object value, [int start = 0]) {
+  int indexOf(Object? value, [int start = 0]) {
     for (var i = 0; i < _data.length; i++) {
       final cellValue = _data[i];
       for (var j = 0; j < _valuesPerCell; j++) {
@@ -40,7 +40,7 @@ mixin _SliceListMixin on ListMixin<int> {
 
         if (value == option) {
           final k = i * _valuesPerCell + j;
-          if (k < length && (start == null || k >= start)) {
+          if (k < length && (k >= start)) {
             return k;
           }
         }
@@ -100,7 +100,7 @@ class _PuzzleSmart extends Puzzle with ListMixin<int>, _SliceListMixin {
   @override
   final int length;
 
-  int _fitnessCache;
+  int? _fitnessCache;
 
   @override
   int get fitness => _fitnessCache ??= super.fitness;

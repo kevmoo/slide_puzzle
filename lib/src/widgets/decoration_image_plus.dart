@@ -20,21 +20,17 @@ class DecorationImagePlus implements DecorationImage {
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
   const DecorationImagePlus({
-    @required this.image,
-    @required this.puzzleWidth,
-    @required this.puzzleHeight,
-    @required this.pieceIndex,
+    required this.image,
+    required this.puzzleWidth,
+    required this.puzzleHeight,
+    required this.pieceIndex,
     this.colorFilter,
     this.fit,
     this.alignment = Alignment.center,
     this.centerSlice,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-  })  : assert(image != null),
-        assert(alignment != null),
-        assert(repeat != null),
-        assert(matchTextDirection != null),
-        assert(puzzleHeight > 1 &&
+  }) : assert(puzzleHeight > 1 &&
             puzzleHeight > 1 &&
             pieceIndex >= 0 &&
             pieceIndex < (puzzleHeight * puzzleWidth));
@@ -46,7 +42,7 @@ class DecorationImagePlus implements DecorationImage {
   final ImageProvider image;
 
   /// A color filter to apply to the image before painting it.
-  final ColorFilter colorFilter;
+  final ColorFilter? colorFilter;
 
   /// How the image should be inscribed into the box.
   ///
@@ -54,7 +50,7 @@ class DecorationImagePlus implements DecorationImage {
   /// [BoxFit.fill] if [centerSlice] is not null.
   ///
   /// See the discussion at [_paintImage] for more details.
-  final BoxFit fit;
+  final BoxFit? fit;
 
   /// How to align the image within its bounds.
   ///
@@ -98,7 +94,7 @@ class DecorationImagePlus implements DecorationImage {
   /// destination image size will result in [centerSlice] having no effect
   /// (since the nine regions of the image will be rendered with the same
   /// scaling, as if it wasn't specified).
-  final Rect centerSlice;
+  final Rect? centerSlice;
 
   /// How to paint any portions of the box that would not otherwise be covered
   /// by the image.
@@ -121,7 +117,6 @@ class DecorationImagePlus implements DecorationImage {
   /// image needs to be repainted, e.g. because it is loading incrementally or
   /// because it is animated.
   DecorationImagePainterPlus createPainter(VoidCallback onChanged) {
-    assert(onChanged != null);
     return DecorationImagePainterPlus._(this, onChanged);
   }
 
@@ -182,14 +177,13 @@ class DecorationImagePlus implements DecorationImage {
 /// This object should be disposed using the [dispose] method when it is no
 /// longer needed.
 class DecorationImagePainterPlus implements DecorationImagePainter {
-  DecorationImagePainterPlus._(this._details, this._onChanged)
-      : assert(_details != null);
+  DecorationImagePainterPlus._(this._details, this._onChanged);
 
   final DecorationImagePlus _details;
   final VoidCallback _onChanged;
 
-  ImageStream _imageStream;
-  ImageInfo _image;
+  ImageStream? _imageStream;
+  ImageInfo? _image;
 
   /// Draw the image onto the given canvas.
   ///
@@ -205,12 +199,8 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   /// because it had not yet been loaded the first time this method was called,
   /// then the `onChanged` callback passed to [DecorationImagePlus.createPainter]
   /// will be called.
-  void paint(Canvas canvas, Rect rect, Path clipPath,
+  void paint(Canvas canvas, Rect rect, Path? clipPath,
       ImageConfiguration configuration) {
-    assert(canvas != null);
-    assert(rect != null);
-    assert(configuration != null);
-
     if (_details.matchTextDirection) {
       assert(() {
         // We check this first so that the assert will fire immediately, not just
@@ -234,7 +224,7 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
       final listener = ImageStreamListener(_imageListener);
       _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
-      _imageStream.addListener(listener);
+      _imageStream!.addListener(listener);
     }
     if (_image == null) return;
 
@@ -249,8 +239,8 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
       puzzleHeight: _details.puzzleHeight,
       pieceIndex: _details.pieceIndex,
       rect: rect,
-      image: _image.image,
-      scale: _image.scale,
+      image: _image!.image,
+      scale: _image!.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -262,7 +252,6 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   void _imageListener(ImageInfo value, bool synchronousCall) {
     if (_image == value) return;
     _image = value;
-    assert(_onChanged != null);
     if (!synchronousCall) _onChanged();
   }
 
@@ -283,20 +272,16 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
 }
 
 void _paintImage(
-    {@required Canvas canvas,
-    @required Rect rect,
-    @required ui.Image image,
-    @required int puzzleWidth,
-    @required int puzzleHeight,
-    @required int pieceIndex,
+    {required Canvas canvas,
+    required Rect rect,
+    required ui.Image image,
+    required int puzzleWidth,
+    required int puzzleHeight,
+    required int pieceIndex,
     double scale = 1.0,
-    ColorFilter colorFilter,
-    BoxFit fit,
+    ColorFilter? colorFilter,
+    BoxFit? fit,
     Alignment alignment = Alignment.center}) {
-  assert(canvas != null);
-  assert(image != null);
-  assert(alignment != null);
-
   if (rect.isEmpty) return;
   final outputSize = rect.size;
   final inputSize = Size(image.width.toDouble(), image.height.toDouble());

@@ -17,7 +17,7 @@ class PuzzleAnimator implements PuzzleProxy {
   Puzzle _puzzle;
   int _clickCount = 0;
 
-  bool _stable;
+  bool _stable = true;
 
   bool get stable => _stable;
 
@@ -50,7 +50,7 @@ class PuzzleAnimator implements PuzzleProxy {
   @override
   Point<double> location(int index) => _locations[index].location;
 
-  int _lastBadClick;
+  int? _lastBadClick;
   int _badClickCount = 0;
 
   PuzzleAnimator(int width, int height) : this._(Puzzle(width, height));
@@ -65,8 +65,7 @@ class PuzzleAnimator implements PuzzleProxy {
     if (_puzzle.fitness == 0) {
       return;
     }
-
-    _puzzle = _puzzle.clickRandom(vertical: _nextRandomVertical);
+    _puzzle = _puzzle.clickRandom(vertical: _nextRandomVertical)!;
     _nextRandomVertical = !_nextRandomVertical;
     _clickCount++;
     _controller.add(PuzzleEvent.random);
@@ -114,7 +113,7 @@ class PuzzleAnimator implements PuzzleProxy {
     }
   }
 
-  void _resetCore({List<int> source}) {
+  void _resetCore({List<int>? source}) {
     _puzzle = _puzzle.reset(source: source);
     _clickCount = 0;
     _lastBadClick = null;

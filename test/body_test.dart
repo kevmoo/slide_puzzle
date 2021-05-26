@@ -20,7 +20,7 @@ void main() {
   });
 
   test('ctor args must be finite', () {
-    for (var badValue in [
+    for (final badValue in [
       double.nan,
       double.negativeInfinity,
       double.infinity
@@ -60,7 +60,7 @@ void main() {
           _throwsAssertError);
       expect(body.animate(1, maxVelocity: double.infinity), isFalse);
 
-      for (var badValue in [
+      for (final badValue in [
         double.nan,
         double.negativeInfinity,
         double.infinity
@@ -89,21 +89,21 @@ void main() {
           Body(velocity: _point(-sqrt1_2, -sqrt1_2)),
         ];
 
-        for (var b in bodies) {
+        for (final b in bodies) {
           expect(b.location.magnitude, 0);
         }
 
-        for (var b in bodies) {
+        for (final b in bodies) {
           b.animate(1);
           expect(b.location.magnitude, 1);
         }
 
-        for (var b in bodies) {
+        for (final b in bodies) {
           b.animate(1, drag: 0.5);
           expect(b.location.magnitude, closeTo(1.5, 0.0000001));
         }
 
-        for (var b in bodies) {
+        for (final b in bodies) {
           b.animate(1, drag: 1);
           expect(b.location.magnitude, closeTo(1.5, 0.0000001));
         }

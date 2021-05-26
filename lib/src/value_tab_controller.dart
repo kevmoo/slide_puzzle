@@ -8,9 +8,9 @@ import 'package:provider/provider.dart';
 class ValueTabController<T> extends StatefulWidget {
   /// Creates a default tab controller for the given [child] widget.
   const ValueTabController({
-    Key key,
-    @required this.child,
-    @required this.values,
+    Key? key,
+    required this.child,
+    required this.values,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -29,10 +29,10 @@ class ValueTabController<T> extends StatefulWidget {
   /// ```dart
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
-  static TabController of(BuildContext context) {
+  static TabController? of(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<_ValueTabControllerScope>();
-    return scope?.controller;
+    return scope!.controller;
   }
 
   @override
@@ -41,20 +41,19 @@ class ValueTabController<T> extends StatefulWidget {
 
 class _ValueTabControllerState<T> extends State<ValueTabController<T>>
     with SingleTickerProviderStateMixin {
-  final _notifier = ValueNotifier<T>(null);
+  late final ValueNotifier<T> _notifier;
 
-  TabController _controller;
+  late final TabController _controller;
 
   @override
   void initState() {
     super.initState();
+    _notifier = ValueNotifier<T>(widget.values.first);
     _controller = TabController(
       vsync: this,
       length: widget.values.length,
       initialIndex: 0,
     );
-
-    _notifier.value = widget.values.first;
 
     _controller.addListener(() {
       _notifier.value = widget.values[_controller.index];
@@ -71,7 +70,7 @@ class _ValueTabControllerState<T> extends State<ValueTabController<T>>
   Widget build(BuildContext context) => _ValueTabControllerScope(
         controller: _controller,
         enabled: TickerMode.of(context),
-        child: ValueListenableProvider.value(
+        child: ValueListenableProvider<T>.value(
           value: _notifier,
           child: widget.child,
         ),
@@ -79,9 +78,12 @@ class _ValueTabControllerState<T> extends State<ValueTabController<T>>
 }
 
 class _ValueTabControllerScope extends InheritedWidget {
-  const _ValueTabControllerScope(
-      {Key key, this.controller, this.enabled, Widget child})
-      : super(key: key, child: child);
+  const _ValueTabControllerScope({
+    Key? key,
+    required this.controller,
+    required this.enabled,
+    required Widget child,
+  }) : super(key: key, child: child);
 
   final TabController controller;
   final bool enabled;

@@ -33,7 +33,7 @@ void main() {
     expect(
         () => Puzzle.raw(3, [0, 1, 2, 3, 4, 5, 6, 7, 7]), throwsArgumentError);
 
-    final width = 3, height = 3;
+    const width = 3, height = 3;
 
     final puzzle = _ordered(width, height);
     expect(puzzle.width, width);
@@ -59,11 +59,9 @@ void main() {
   });
 
   group('click', () {
-    Puzzle doClick(Puzzle puzzle, int tileValue) {
+    Puzzle? doClick(Puzzle puzzle, int tileValue) {
       final clickResult = puzzle.clickValue(tileValue);
-      if (clickResult != null) {
-        expect(clickResult.toString(), isNot(puzzle.toString()));
-      }
+      expect(clickResult.toString(), isNot(puzzle.toString()));
       return clickResult;
     }
 
@@ -125,7 +123,7 @@ void main() {
 11 12 13 14''');
 
       expect(puzzle.valueAt(1, 0), 0);
-      puzzle = doClick(puzzle, 0);
+      puzzle = doClick(puzzle, 0)!;
       expect(puzzle.toString(), '''
  0 15  1  2
  3  4  5  6
@@ -133,7 +131,7 @@ void main() {
 11 12 13 14''');
 
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 0);
+      puzzle = doClick(puzzle, 0)!;
       expect(puzzle.toString(), '''
 15  0  1  2
  3  4  5  6
@@ -141,7 +139,7 @@ void main() {
 11 12 13 14''');
 
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 3);
+      puzzle = doClick(puzzle, 3)!;
       expect(puzzle.toString(), '''
  3  0  1  2
 15  4  5  6
@@ -149,7 +147,7 @@ void main() {
 11 12 13 14''');
 
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 3);
+      puzzle = doClick(puzzle, 3)!;
       expect(puzzle.toString(), '''
 15  0  1  2
  3  4  5  6
@@ -157,7 +155,7 @@ void main() {
 11 12 13 14''');
 
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 2);
+      puzzle = doClick(puzzle, 2)!;
       expect(puzzle.toString(), '''
  0  1  2 15
  3  4  5  6
@@ -166,7 +164,7 @@ void main() {
 
       expect(puzzle.incorrectTiles, 12);
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 14);
+      puzzle = doClick(puzzle, 14)!;
       expect(puzzle.toString(), '''
  0  1  2  6
  3  4  5 10
@@ -174,7 +172,7 @@ void main() {
 11 12 13 15''');
 
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 11);
+      puzzle = doClick(puzzle, 11)!;
       expect(puzzle.toString(), '''
  0  1  2  6
  3  4  5 10
@@ -182,7 +180,7 @@ void main() {
 15 11 12 13''');
 
       expect(doClick(puzzle, 15), isNull);
-      puzzle = doClick(puzzle, 0);
+      puzzle = doClick(puzzle, 0)!;
       expect(puzzle.toString(), '''
 15  1  2  6
  0  4  5 10
@@ -219,7 +217,7 @@ void main() {
     expect(puzzle.fitness, greaterThanOrEqualTo(puzzle.tileCount));
 
     do {
-      Puzzle newPuzzle;
+      Puzzle? newPuzzle;
       do {
         // click around until one tile is in the right location
         newPuzzle = puzzle.clickValue(_rnd.nextInt(puzzle.tileCount));
@@ -245,7 +243,7 @@ void main() {
 3 4 5
 6 7 8''');
 
-    puzzle = puzzle.clickValue(7);
+    puzzle = puzzle.clickValue(7)!;
     expect(puzzle.incorrectTiles, 1);
     expect(puzzle.fitness, 1);
     expect(puzzle.toString(), '''
@@ -253,10 +251,10 @@ void main() {
 3 4 5
 6 8 7''');
 
-    puzzle = puzzle.clickValue(6);
-    puzzle = puzzle.clickValue(3);
-    puzzle = puzzle.clickValue(4);
-    puzzle = puzzle.clickValue(6);
+    puzzle = puzzle.clickValue(6)!;
+    puzzle = puzzle.clickValue(3)!;
+    puzzle = puzzle.clickValue(4)!;
+    puzzle = puzzle.clickValue(6)!;
     expect(puzzle.toString(), '''
 0 1 2
 4 6 5
@@ -290,7 +288,7 @@ void main() {
     expect(clone == puzzle, isTrue);
     expect(clone.incorrectTiles, puzzle.incorrectTiles);
 
-    puzzle = puzzle.clickRandom();
+    puzzle = puzzle.clickRandom()!;
     expect(clone, isNot(puzzle));
   });
 

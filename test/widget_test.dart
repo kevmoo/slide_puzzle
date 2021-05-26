@@ -4,32 +4,24 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:slide_puzzle/main.dart';
+import 'package:slide_puzzle/src/flutter.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    final width = 4, height = 4;
-    final tiles = (width * height - 1);
+    const width = 4, height = 4;
+    const tiles = width * height - 1;
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(PuzzleApp());
+    await tester.pumpWidget(const PuzzleApp());
 
     // Verify that our counter starts at 0.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('Clicks: 0'), findsOneWidget);
-    expect(find.text('Tiles left: $tiles'), findsOneWidget);
-
+    expect(find.text('0'), findsOneWidget);
+    // expect(find.text('Clicks: 0'), findsOneWidget);
+    expect(find.text('$tiles'), findsNWidgets(2));
     for (var i = 1; i < tiles; i++) {
-      expect(find.text(i.toString()), findsOneWidget);
+      await tester.tap(find.widgetWithText(ElevatedButton, '1'));
+      expect(find.widgetWithText(ElevatedButton, i.toString()),
+          i != 15 ? findsOneWidget : findsNWidgets(2));
     }
-
-    /*
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-    */
   });
 }

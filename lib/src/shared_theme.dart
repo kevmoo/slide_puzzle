@@ -28,8 +28,8 @@ abstract class SharedTheme {
 
   Ink createInk(
     Widget child, {
-    DecorationImage image,
-    EdgeInsetsGeometry padding,
+    DecorationImage? image,
+    EdgeInsetsGeometry? padding,
   }) =>
       Ink(
         padding: padding,
@@ -44,8 +44,8 @@ abstract class SharedTheme {
     bool small,
     int tileValue,
     Widget content, {
-    Color color,
-    RoundedRectangleBorder shape,
+    Color? color,
+    RoundedRectangleBorder? shape,
   }) =>
       AnimatedContainer(
         duration: puzzleAnimationDuration,
