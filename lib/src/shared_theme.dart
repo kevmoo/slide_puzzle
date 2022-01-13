@@ -79,33 +79,50 @@ abstract class SharedTheme {
       );
 
   List<Widget> bottomControls(PuzzleControls controls) => <Widget>[
-        IconButton(
-          onPressed: controls.reset,
-          icon: Icon(Icons.refresh, color: puzzleAccentColor),
+        Tooltip(
+          message: 'Reset',
+          child: IconButton(
+            onPressed: controls.reset,
+            icon: Icon(Icons.refresh, color: puzzleAccentColor),
+          ),
         ),
-        Checkbox(
-          value: controls.autoPlay,
-          onChanged: controls.setAutoPlayFunction,
-          activeColor: puzzleAccentColor,
+        Tooltip(
+          message: 'Auto play',
+          child: Checkbox(
+            value: controls.autoPlay,
+            onChanged: controls.setAutoPlayFunction,
+            activeColor: puzzleAccentColor,
+          ),
         ),
         Expanded(
           child: Container(),
         ),
-        Text(
-          controls.clickCount.toString(),
-          textAlign: TextAlign.right,
-          style: _infoStyle,
-        ),
-        const Text(' Moves'),
-        SizedBox(
-          width: 28,
-          child: Text(
-            controls.incorrectTiles.toString(),
-            textAlign: TextAlign.right,
-            style: _infoStyle,
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: controls.clickCount.toString(),
+                style: _infoStyle,
+              ),
+              const TextSpan(text: ' Moves'),
+            ],
           ),
         ),
-        const Text(' Tiles left  ')
+        SizedBox(
+          width: 90,
+          child: RichText(
+            textAlign: TextAlign.right,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: controls.incorrectTiles.toString(),
+                  style: _infoStyle,
+                ),
+                const TextSpan(text: ' Tiles left'),
+              ],
+            ),
+          ),
+        ),
       ];
 
   Widget tileButtonCore(int i, PuzzleProxy puzzle, bool small) {
