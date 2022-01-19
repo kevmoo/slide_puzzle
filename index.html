@@ -26,6 +26,9 @@
   <meta name="apple-mobile-web-app-title" content="slide_puzzle">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
   <title>slide_puzzle</title>
   <link rel="manifest" href="manifest.json">
 </head>
@@ -34,7 +37,7 @@
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
-    var serviceWorkerVersion = '3004345415';
+    var serviceWorkerVersion = '223434391';
     var scriptLoaded = false;
     function loadMainDartJs() {
       if (scriptLoaded) {
@@ -82,7 +85,7 @@
           });
 
         // If service worker doesn't succeed in a reasonable amount of time,
-        // fallback to plaint <script> tag.
+        // fallback to plain <script> tag.
         setTimeout(() => {
           if (!scriptLoaded) {
             console.warn(
