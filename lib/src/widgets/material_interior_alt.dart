@@ -77,12 +77,11 @@ class _ShapeBorderPaint extends StatelessWidget {
   final ShapeBorder shape;
 
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      foregroundPainter: _ShapeBorderPainter(shape, Directionality.of(context)),
-      child: child,
-    );
-  }
+  Widget build(BuildContext context) => CustomPaint(
+        foregroundPainter:
+            _ShapeBorderPainter(shape, Directionality.of(context)),
+        child: child,
+      );
 }
 
 class _ShapeBorderPainter extends CustomPainter {
@@ -97,7 +96,6 @@ class _ShapeBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ShapeBorderPainter oldDelegate) {
-    return oldDelegate.border != border;
-  }
+  bool shouldRepaint(_ShapeBorderPainter oldDelegate) =>
+      oldDelegate.border != border;
 }

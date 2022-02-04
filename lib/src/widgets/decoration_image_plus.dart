@@ -116,9 +116,8 @@ class DecorationImagePlus implements DecorationImage {
   /// The `onChanged` argument must not be null. It will be called whenever the
   /// image needs to be repainted, e.g. because it is loading incrementally or
   /// because it is animated.
-  DecorationImagePainterPlus createPainter(VoidCallback onChanged) {
-    return DecorationImagePainterPlus._(this, onChanged);
-  }
+  DecorationImagePainterPlus createPainter(VoidCallback onChanged) =>
+      DecorationImagePainterPlus._(this, onChanged);
 
   @override
   bool operator ==(dynamic other) {
@@ -282,9 +281,8 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   }
 
   @override
-  String toString() {
-    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
-  }
+  String toString() =>
+      '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
 }
 
 void _paintImage(

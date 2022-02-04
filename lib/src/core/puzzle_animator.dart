@@ -56,10 +56,10 @@ class PuzzleAnimator implements PuzzleProxy {
   PuzzleAnimator(int width, int height) : this._(Puzzle(width, height));
 
   PuzzleAnimator._(this._puzzle)
-      : _locations = List.generate(_puzzle.length, (i) {
-          return Body.raw(
-              (_puzzle.width - 1.0) / 2, (_puzzle.height - 1.0) / 2, 0, 0);
-        });
+      : _locations = List.generate(
+            _puzzle.length,
+            (i) => Body.raw(
+                (_puzzle.width - 1.0) / 2, (_puzzle.height - 1.0) / 2, 0, 0));
 
   void playRandom() {
     if (_puzzle.fitness == 0) {

@@ -1,13 +1,15 @@
 include: package:pedantic/analysis_options.yaml
 
 analyzer:
-  strong-mode:
-    implicit-casts: false
+  language:
+    strict-casts: true
+    strict-inference: true
 
 linter:
   rules:
     - always_declare_return_types
     - annotate_overrides
+    - avoid_dynamic_calls
     - avoid_empty_else
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
@@ -52,6 +54,7 @@ linter:
     - prefer_const_constructors
     - prefer_contains
     - prefer_equal_for_default_values
+    - prefer_expression_function_bodies
     - prefer_final_fields
     - prefer_final_locals
     - prefer_initializing_formals

@@ -11,12 +11,6 @@ void requireArgument(bool truth, String argName, [String? message]) {
   }
 }
 
-void requireArgumentNotNull(argument, String argName) {
-  if (argument == null) {
-    throw ArgumentError.notNull(argName);
-  }
-}
-
 // Logic from
 // https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
 // Used with gratitude!

@@ -11,7 +11,6 @@ import 'point_int.dart';
 import 'util.dart';
 
 part 'puzzle_simple.dart';
-
 part 'puzzle_smart.dart';
 
 final _rnd = Random();
@@ -253,7 +252,9 @@ abstract class Puzzle {
 }
 
 Uint8List _randomList(int width, int height) => _randomizeList(
-    width, List<int>.generate(width * height, (i) => i, growable: false));
+      width,
+      List<int>.generate(width * height, (i) => i, growable: false),
+    );
 
 Uint8List _randomizeList(int width, List<int> existing) {
   final copy = Uint8List.fromList(existing);

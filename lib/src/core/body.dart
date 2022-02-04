@@ -106,6 +106,5 @@ Point<double> _unitPoint(Point<double> source) {
   return Point(result.x.isNaN ? 0 : result.x, result.y.isNaN ? 0 : result.y);
 }
 
-bool _sameDirection(Point a, Point b) {
-  return a.x.sign == b.x.sign && a.y.sign == b.y.sign;
-}
+bool _sameDirection(Point a, Point b) =>
+    a.x.sign == b.x.sign && a.y.sign == b.y.sign;

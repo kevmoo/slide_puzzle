@@ -11,9 +11,7 @@ final _rnd = math.Random();
 
 Puzzle _ordered(int width, int height, {int offset = 0}) {
   final length = width * height;
-  final list = List<int>.generate(length, (i) {
-    return (i - offset) % length;
-  });
+  final list = List<int>.generate(length, (i) => (i - offset) % length);
   return Puzzle.raw(width, list);
 }
 

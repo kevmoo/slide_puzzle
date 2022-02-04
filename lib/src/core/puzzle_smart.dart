@@ -17,31 +17,25 @@ mixin _SliceListMixin on ListMixin<int> {
   int _cellValue(int index) => _data[index ~/ _valuesPerCell];
 
   @override
-  int operator [](int index) {
-    /*
-    final bigValue = _data[index ~/ _valuesPerCell];
-    final shiftedValue =
-        bigValue >> (_maxShift - (index % _valuesPerCell)) * _bitsPerValue;
-    final flattenedValue = shiftedValue & _valueMask;
-    return flattenedValue;
-    */
-    return (_cellValue(index) >>
-            (_maxShift - (index % _valuesPerCell)) * _bitsPerValue) &
-        _valueMask;
-  }
+  int operator [](int index) =>
+      (_cellValue(index) >>
+          (_maxShift - (index % _valuesPerCell)) * _bitsPerValue) &
+      _valueMask;
 
   @override
   int indexOf(Object? value, [int start = 0]) {
-    for (var i = 0; i < _data.length; i++) {
-      final cellValue = _data[i];
-      for (var j = 0; j < _valuesPerCell; j++) {
-        final option =
-            (cellValue >> (_maxShift - j) * _bitsPerValue) & _valueMask;
+    if (value is int) {
+      for (var i = 0; i < _data.length; i++) {
+        final cellValue = _data[i];
+        for (var j = 0; j < _valuesPerCell; j++) {
+          final option =
+              (cellValue >> (_maxShift - j) * _bitsPerValue) & _valueMask;
 
-        if (value == option) {
-          final k = i * _valuesPerCell + j;
-          if (k < length && (k >= start)) {
-            return k;
+          if (value == option) {
+            final k = i * _valuesPerCell + j;
+            if (k < length && (k >= start)) {
+              return k;
+            }
           }
         }
       }
