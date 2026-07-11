@@ -1,7 +1,7 @@
 import 'dart:math' show Random;
 import 'package:slide_puzzle/src/core/puzzle.dart';
 
-import 'src/shortest_path.dart';
+import 'package:slide_puzzle/src/solver/shortest_path.dart';
 
 void main(List<String> args) {
   int? seed;
