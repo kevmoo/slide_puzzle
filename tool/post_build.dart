@@ -28,18 +28,17 @@ Future<void> main(List<String> args) async {
     print('Cleanup complete.');
   }
 
-  if (!_isWorkingTreeClean()) {
-    print('Skipping build info generation: working tree is dirty.');
-    return;
+  final isClean = _isWorkingTreeClean();
+  if (!isClean) {
+    print('WARNING: Working tree is dirty. Generating build info anyway.');
   }
 
   final currentBranch = _runGit(['branch', '--show-current']);
   if (currentBranch != 'master') {
     print(
-      'Skipping build info generation: '
-      'current branch is "$currentBranch" (expected "master").',
+      'WARNING: Current branch is "$currentBranch" (expected "master"). '
+      'Generating build info anyway.',
     );
-    return;
   }
 
   // Extract concise Flutter version (e.g. "Flutter 3.46.0-1.0.pre-530")
@@ -48,20 +47,21 @@ Future<void> main(List<String> args) async {
 
   // Shorten SHA for display
   final shortSha = gitInfo.substring(0, 7);
+  final displaySha = isClean ? shortSha : '$shortSha-dirty';
   final commitUrl = 'https://github.com/kevmoo/slide_puzzle/commit/$gitInfo';
 
-  final versionJsonFile = File.fromUri(stagingDir.uri.resolve('version.json'));
+  final buildInfoFile = File.fromUri(stagingDir.uri.resolve('build_info.json'));
   final jsonContent =
       '''{
   "flutter_version": "$flutterVersion",
   "commit_sha": "$gitInfo",
-  "short_sha": "$shortSha",
+  "short_sha": "$displaySha",
   "commit_url": "$commitUrl"
 }
 ''';
 
-  versionJsonFile.writeAsStringSync(jsonContent);
-  print('Wrote version.json to ${versionJsonFile.path}');
+  buildInfoFile.writeAsStringSync(jsonContent);
+  print('Wrote build_info.json to ${buildInfoFile.path}');
 }
 
 String _getFlutterVersion() {

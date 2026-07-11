@@ -26,7 +26,7 @@ class VersionInfo {
   static Future<VersionInfo?> load() async {
     if (kIsWeb) {
       try {
-        final response = await http.get(Uri.parse('version.json'));
+        final response = await http.get(Uri.parse('build_info.json'));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
           return VersionInfo.fromJson(data);
@@ -37,11 +37,11 @@ class VersionInfo {
     }
 
     try {
-      final content = await rootBundle.loadString('version.json');
+      final content = await rootBundle.loadString('build_info.json');
       final data = jsonDecode(content) as Map<String, dynamic>;
       return VersionInfo.fromJson(data);
     } catch (_) {
-      // Return null when running in dev without version.json
+      // Return null when running in dev without build_info.json
       return null;
     }
   }
