@@ -21122,7 +21122,7 @@ GH(){var s=0,r=A.Q(t.kx),q,p=2,o=[],n,m,l,k,j,i,h,g
 var $async$GH=A.K(function(a,b){if(a===1){o.push(b)
 s=p}for(;;)switch(s){case 0:p=4
 s=7
-return A.L(A.ayV(A.em("version.json",0,null)),$async$GH)
+return A.L(A.ayV(A.em("build_info.json",0,null)),$async$GH)
 case 7:n=b
 if(n.b===200){j=n
 m=t.a.a(B.bm.zA(A.ayI(A.awI(j.e)).dU(j.w),null))
@@ -21140,7 +21140,7 @@ case 3:s=2
 break
 case 6:p=9
 s=12
-return A.L($.Af().a6L("version.json"),$async$GH)
+return A.L($.Af().a6L("build_info.json"),$async$GH)
 case 12:l=b
 k=t.a.a(B.bm.zA(l,null))
 j=A.ajD(k)
