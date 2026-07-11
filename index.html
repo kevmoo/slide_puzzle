@@ -32,10 +32,32 @@
 
   <title>slide_puzzle</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    .build-info {
+      position: fixed;
+      bottom: 8px;
+      right: 8px;
+      z-index: 10000;
+      padding: 4px 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 11px;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .build-info a {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <div class="build-info">Flutter 3.46.0-1.0.pre-530 • <a href="https://github.com/kevmoo/slide_puzzle/commit/a7950fd8a4dd45a8c2fb9656a455b05280cd7d72" target="_blank" rel="noopener">a7950fd</a></div>
 </body>
 
 </html>
