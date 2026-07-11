@@ -12,17 +12,15 @@ extension type const _SliceList(Uint32List _data) {
   static const _valuesPerCell = _bitsPerCell ~/ _bitsPerValue;
   static const _valueMask = (1 << _bitsPerValue) - 1;
 
-  int _cellValue(int index) => _data[index ~/ _valuesPerCell];
+  int _cellValue(int index) => _data[index >> 3];
 
   int operator [](int index) =>
-      (_cellValue(index) >>
-          (_maxShift - (index % _valuesPerCell)) * _bitsPerValue) &
-      _valueMask;
+      (_cellValue(index) >> ((_maxShift - (index & 7)) << 2)) & _valueMask;
 
   void operator []=(int index, int value) {
     var cellValue = _cellValue(index);
 
-    final sharedShift = (_maxShift - (index % _valuesPerCell)) * _bitsPerValue;
+    final sharedShift = (_maxShift - (index & 7)) << 2;
 
     final wipeout = _valueMask << sharedShift;
 
@@ -32,7 +30,7 @@ extension type const _SliceList(Uint32List _data) {
 
     cellValue |= newShiftedValue;
 
-    _data[index ~/ _valuesPerCell] = cellValue;
+    _data[index >> 3] = cellValue;
   }
 
   int indexOf(Object? value, [int start = 0, int length = 16]) {
@@ -40,11 +38,10 @@ extension type const _SliceList(Uint32List _data) {
       for (var i = 0; i < _data.length; i++) {
         final cellValue = _data[i];
         for (var j = 0; j < _valuesPerCell; j++) {
-          final option =
-              (cellValue >> (_maxShift - j) * _bitsPerValue) & _valueMask;
+          final option = (cellValue >> ((_maxShift - j) << 2)) & _valueMask;
 
           if (value == option) {
-            final k = i * _valuesPerCell + j;
+            final k = (i << 3) + j;
             if (k < length && (k >= start)) {
               return k;
             }
@@ -91,6 +88,20 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
       throw UnsupportedError('immutable, yo!');
 
   @override
+  Point coordinatesOf(int value) {
+    final index = indexOf(value);
+    if (width == 4) {
+      final x = _colLookup[index];
+      final y = _rowLookup[index];
+      assert(_getIndex(x, y) == index);
+      return Point(x, y);
+    }
+    final (x, y) = (index % width, index ~/ width);
+    assert(_getIndex(x, y) == index);
+    return Point(x, y);
+  }
+
+  @override
   int indexOf(Object? value, [int start = 0]) =>
       _slice.indexOf(value, start, length);
 
@@ -135,8 +146,8 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
   }
 
   void _staticSwapSlice(_SliceList source, int ax, int ay, int bx, int by) {
-    final aIndex = ax + ay * width;
-    final bIndex = bx + by * width;
+    final aIndex = (width == 4) ? ax + (ay << 2) : ax + ay * width;
+    final bIndex = (width == 4) ? bx + (by << 2) : bx + by * width;
     final temp = source[aIndex];
     source[aIndex] = source[bIndex];
     source[bIndex] = temp;
@@ -149,8 +160,60 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
     var manhattan = 0;
     final openTile = length - 1;
     final w = width;
-    final h = length ~/ w;
+    final h = (w == 4) ? length >> 2 : length ~/ w;
     final slice = _slice;
+
+    if (w == 4) {
+      for (var pos = 0; pos < length; pos++) {
+        final val = slice[pos];
+        if (val != pos && val != openTile) {
+          incorrect++;
+          final correctCol = val & 3;
+          final correctRow = val >> 2;
+          final currentCol = pos & 3;
+          final currentRow = pos >> 2;
+
+          final colDelta = (correctCol - currentCol).abs();
+          final rowDelta = (correctRow - currentRow).abs();
+          final delta = colDelta + rowDelta;
+
+          deltaSumSq += delta * delta;
+          manhattan += delta;
+        }
+      }
+
+      var linearConflicts = 0;
+      for (var r = 0; r < 4; r++) {
+        var goalsMask = 0;
+        var goalsCount = 0;
+        final rowOffset = r << 2;
+        for (var c = 0; c < 4; c++) {
+          final val = slice[c + rowOffset];
+          if (val != openTile && (val >> 2) == r) {
+            goalsMask |= (val & 3) << (goalsCount << 2);
+            goalsCount++;
+          }
+        }
+        linearConflicts += countRemovals(goalsMask, goalsCount);
+      }
+      for (var c = 0; c < 4; c++) {
+        var goalsMask = 0;
+        var goalsCount = 0;
+        for (var r = 0; r < 4; r++) {
+          final val = slice[c + (r << 2)];
+          if (val != openTile && (val & 3) == c) {
+            goalsMask |= (val >> 2) << (goalsCount << 2);
+            goalsCount++;
+          }
+        }
+        linearConflicts += countRemovals(goalsMask, goalsCount);
+      }
+
+      _incorrectTilesCache = incorrect;
+      _fitnessCache = deltaSumSq * incorrect;
+      _lowerBoundCache = manhattan + 2 * linearConflicts;
+      return;
+    }
 
     for (var pos = 0; pos < length; pos++) {
       final val = slice[pos];
@@ -248,10 +311,10 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
     for (var i = 0; i < data.length; i++) {
       var value = 0;
       for (var j = 0; j < _valuesPerCell; j++) {
-        final k = i * _valuesPerCell + j;
+        final k = (i << 3) + j;
         if (k < source.length) {
           // shift the value over 4 bits for item 0, 3 for item 2, etc
-          final sourceValue = source[k] << ((_maxShift - j) * _bitsPerValue);
+          final sourceValue = source[k] << ((_maxShift - j) << 2);
           value |= sourceValue;
         }
       }

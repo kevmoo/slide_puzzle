@@ -17,6 +17,10 @@ final _rnd = Random();
 
 final _spacesRegexp = RegExp(' +');
 
+const _colLookup = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
+
+const _rowLookup = [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3];
+
 sealed class Puzzle {
   int get width;
 
@@ -34,7 +38,7 @@ sealed class Puzzle {
 
   Puzzle clone();
 
-  int get height => length ~/ width;
+  int get height => (width == 4) ? length >> 2 : length ~/ width;
 
   Puzzle._();
 
@@ -129,6 +133,58 @@ sealed class Puzzle {
     final openTile = length - 1;
     final w = width;
     final h = height;
+
+    if (w == 4) {
+      for (var pos = 0; pos < length; pos++) {
+        final val = this[pos];
+        if (val != pos && val != openTile) {
+          incorrect++;
+          final correctCol = val & 3;
+          final correctRow = val >> 2;
+          final currentCol = pos & 3;
+          final currentRow = pos >> 2;
+
+          final colDelta = (correctCol - currentCol).abs();
+          final rowDelta = (correctRow - currentRow).abs();
+          final delta = colDelta + rowDelta;
+
+          deltaSumSq += delta * delta;
+          manhattan += delta;
+        }
+      }
+
+      var linearConflicts = 0;
+      for (var r = 0; r < 4; r++) {
+        var goalsMask = 0;
+        var goalsCount = 0;
+        final rowOffset = r << 2;
+        for (var c = 0; c < 4; c++) {
+          final val = this[c + rowOffset];
+          if (val != openTile && (val >> 2) == r) {
+            goalsMask |= (val & 3) << (goalsCount << 2);
+            goalsCount++;
+          }
+        }
+        linearConflicts += countRemovals(goalsMask, goalsCount);
+      }
+      for (var c = 0; c < 4; c++) {
+        var goalsMask = 0;
+        var goalsCount = 0;
+        for (var r = 0; r < 4; r++) {
+          final val = this[c + (r << 2)];
+          if (val != openTile && (val & 3) == c) {
+            goalsMask |= (val >> 2) << (goalsCount << 2);
+            goalsCount++;
+          }
+        }
+        linearConflicts += countRemovals(goalsMask, goalsCount);
+      }
+
+      _incorrectTilesCache = incorrect;
+      _fitnessCache = deltaSumSq * incorrect;
+      _lowerBoundCache = manhattan + 2 * linearConflicts;
+      return;
+    }
 
     for (var pos = 0; pos < length; pos++) {
       final val = this[pos];
@@ -263,8 +319,8 @@ sealed class Puzzle {
   }
 
   void _staticSwap(List<int> source, int ax, int ay, int bx, int by) {
-    final aIndex = ax + ay * width;
-    final bIndex = bx + by * width;
+    final aIndex = (width == 4) ? ax + (ay << 2) : ax + ay * width;
+    final bIndex = (width == 4) ? bx + (by << 2) : bx + by * width;
     final temp = source[aIndex];
     source[aIndex] = source[bIndex];
     source[bIndex] = temp;
@@ -272,7 +328,14 @@ sealed class Puzzle {
 
   Point coordinatesOf(int value) {
     final index = indexOf(value);
-    final (x, y) = (index % width, index ~/ width);
+    final int x, y;
+    if (width == 4 && index < 16) {
+      x = _colLookup[index];
+      y = _rowLookup[index];
+    } else {
+      x = index % width;
+      y = index ~/ width;
+    }
     assert(_getIndex(x, y) == index);
     return Point(x, y);
   }
@@ -280,7 +343,7 @@ sealed class Puzzle {
   int _getIndex(int x, int y) {
     assert(x >= 0 && x < width);
     assert(y >= 0 && y < height);
-    return x + y * width;
+    return (width == 4) ? x + (y << 2) : x + y * width;
   }
 
   @override
@@ -323,7 +386,7 @@ Uint8List _randomizeList(
 }) {
   final copy = Uint8List.fromList(existing);
   final rnd = random ?? _rnd;
-  final height = existing.length ~/ width;
+  final height = (width == 4) ? existing.length >> 2 : existing.length ~/ width;
   do {
     if (easy && width > 2 && height > 2) {
       final activeIndices = <int>[];
