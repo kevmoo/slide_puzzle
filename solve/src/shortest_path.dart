@@ -31,6 +31,9 @@ Iterable<List<T>> shortestPaths<T>(
   minDistanceToSolution ??= _defaultMinDistanceToSolution;
 
   distances[start] = LinkedValue.empty();
+  final nodesByLength = <List<T>>[
+    [start],
+  ];
 
   final toVisit = HeapPriorityQueue(compare)..add(start);
 
@@ -88,7 +91,20 @@ Iterable<List<T>> shortestPaths<T>(
   void doCleanup() {
     print('CLEAN: start');
     debugPrint();
-    distances.removeWhere((k, v) => v.length >= bestOption!.length);
+    final bestLen = bestOption!.length;
+    for (var l = bestLen; l < nodesByLength.length; l++) {
+      final bucket = nodesByLength[l];
+      for (var i = 0; i < bucket.length; i++) {
+        final k = bucket[i];
+        final v = distances.remove(k);
+        if (v != null && v.length < bestLen) {
+          distances[k] = v;
+        }
+      }
+    }
+    if (nodesByLength.length > bestLen) {
+      nodesByLength.length = bestLen;
+    }
 
     debugPrint();
     print('CLEAN: end\n');
@@ -158,6 +174,11 @@ Iterable<List<T>> shortestPaths<T>(
           }
 
           distances[edge] = newPathToEdge;
+          final len = newPathToEdge.length;
+          while (nodesByLength.length <= len) {
+            nodesByLength.add([]);
+          }
+          nodesByLength[len].add(edge);
           toVisit.add(edge);
         }
       }
