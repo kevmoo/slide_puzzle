@@ -56,7 +56,10 @@ class PuzzleSolver {
       batchSize: batchSize,
       solverWatch: solverWatch,
     )) {
-      yield SolveResult(path: path, solverTime: solverWatch.elapsed);
+      yield SolveResult(
+        path: [puzzle, ...path],
+        solverTime: solverWatch.elapsed,
+      );
     }
   }
 }

@@ -290,5 +290,45 @@ void main() {
       // Verify solved state icon is rendered
       expect(find.byIcon(Icons.thumb_up), findsOneWidget);
     });
+
+    testWidgets(
+      '8. UI Solver Hint and Solve Controls Verification (Zero-Jank)',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const PuzzleApp());
+        await tester.pumpAndSettle();
+
+        final controls =
+            Provider.of<AppState>(
+                  tester.element(find.byIcon(Icons.refresh)),
+                  listen: false,
+                )
+                as PuzzleControls;
+
+        expect(controls.clickCount, 0);
+
+        // Click the Hint button
+        await tester.tap(
+          find.byIcon(Icons.lightbulb_outline),
+          warnIfMissed: false,
+        );
+
+        // Pump for 400ms to allow shortestPathsStream to discover the first
+        // optimal solution (~200ms in) and yield to _onSolveProgress.
+        await tester.pump(const Duration(milliseconds: 400));
+
+        // With instant hint responsiveness, exactly 1 move must have been
+        // performed without waiting seconds for toVisit.isEmpty!
+        expect(
+          controls.clickCount,
+          1,
+          reason: 'Hint did not perform 1 automated move within 400ms',
+        );
+        expect(
+          controls.isSolving,
+          isFalse,
+          reason: 'Hint remained stuck in isSolving == true',
+        );
+      },
+    );
   });
 }

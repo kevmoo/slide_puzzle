@@ -164,7 +164,20 @@ class PuzzleViewModel extends ChangeNotifier
     _lastSolveTime = result.solverTime;
     _lastSolveSteps = result.steps;
     _solutionPath = result.path;
-    notifyListeners();
+    if (_isHintMode) {
+      if (_solutionPath!.length > 1) {
+        _performAutomatedMove(_solutionPath![0], _solutionPath![1]);
+      }
+      _cancelSolveCore(clearStats: false);
+      notifyListeners();
+    } else {
+      _solverSubscription?.cancel();
+      _solverSubscription = null;
+      _solutionStepIndex = 0;
+      _timeSinceLastMove = const Duration(milliseconds: 250);
+      _ensureTicking();
+      notifyListeners();
+    }
   }
 
   void _onSolveDone() {
