@@ -150,24 +150,28 @@ sealed class Puzzle {
 
     var linearConflicts = 0;
     for (var r = 0; r < h; r++) {
-      final goals = <int>[];
+      var goalsMask = 0;
+      var goalsCount = 0;
       for (var c = 0; c < w; c++) {
         final val = this[c + r * w];
         if (val != openTile && val ~/ w == r) {
-          goals.add(val % w);
+          goalsMask |= (val % w) << (goalsCount << 2);
+          goalsCount++;
         }
       }
-      linearConflicts += countRemovals(goals);
+      linearConflicts += countRemovals(goalsMask, goalsCount);
     }
     for (var c = 0; c < w; c++) {
-      final goals = <int>[];
+      var goalsMask = 0;
+      var goalsCount = 0;
       for (var r = 0; r < h; r++) {
         final val = this[c + r * w];
         if (val != openTile && val % w == c) {
-          goals.add(val ~/ w);
+          goalsMask |= (val ~/ w) << (goalsCount << 2);
+          goalsCount++;
         }
       }
-      linearConflicts += countRemovals(goals);
+      linearConflicts += countRemovals(goalsMask, goalsCount);
     }
 
     _incorrectTilesCache = incorrect;

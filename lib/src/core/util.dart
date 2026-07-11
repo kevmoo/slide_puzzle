@@ -51,18 +51,22 @@ int _countInversions(List<int> items) {
   return score;
 }
 
-int countRemovals(List<int> goals) {
-  final n = goals.length;
-  if (n <= 1) return 0;
+int countRemovals(int goalsMask, int goalsCount) {
+  if (goalsCount <= 1) return 0;
   var maxLis = 1;
-  final dp = List<int>.filled(n, 1);
-  for (var i = 1; i < n; i++) {
+  var dpMask = 1;
+  for (var i = 1; i < goalsCount; i++) {
+    final goalI = (goalsMask >> (i << 2)) & 0xF;
+    var dpI = 1;
     for (var j = 0; j < i; j++) {
-      if (goals[j] < goals[i] && dp[j] + 1 > dp[i]) {
-        dp[i] = dp[j] + 1;
-        if (dp[i] > maxLis) maxLis = dp[i];
+      final goalJ = (goalsMask >> (j << 2)) & 0xF;
+      final dpJ = (dpMask >> (j << 2)) & 0xF;
+      if (goalJ < goalI && dpJ + 1 > dpI) {
+        dpI = dpJ + 1;
+        if (dpI > maxLis) maxLis = dpI;
       }
     }
+    dpMask |= dpI << (i << 2);
   }
-  return n - maxLis;
+  return goalsCount - maxLis;
 }
