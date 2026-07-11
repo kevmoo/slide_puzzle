@@ -14,4 +14,14 @@ abstract interface class PuzzleControls implements Listenable {
   bool get autoPlay;
 
   void Function(bool? newValue)? get setAutoPlayFunction;
+
+  bool get isSolving;
+
+  void solveOrCancel();
+
+  void hint();
+
+  Duration? get lastSolveTime;
+
+  int? get lastSolveSteps;
 }

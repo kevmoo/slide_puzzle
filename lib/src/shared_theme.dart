@@ -93,13 +93,48 @@ sealed class SharedTheme {
         activeColor: puzzleAccentColor,
       ),
     ),
+    Tooltip(
+      message: 'Hint',
+      child: IconButton(
+        onPressed: controls.hint,
+        icon: Icon(Icons.lightbulb_outline, color: puzzleAccentColor),
+      ),
+    ),
+    Tooltip(
+      message: controls.isSolving ? 'Cancel solving' : 'Solve',
+      child: IconButton(
+        onPressed: controls.solveOrCancel,
+        icon: Icon(
+          controls.isSolving ? Icons.stop_circle_outlined : Icons.auto_fix_high,
+          color: puzzleAccentColor,
+        ),
+      ),
+    ),
+    if (controls.lastSolveSteps != null && controls.lastSolveTime != null) ...[
+      Flexible(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            _formatSolveStats(
+              controls.lastSolveSteps!,
+              controls.lastSolveTime!,
+            ),
+            style: _infoStyle.copyWith(fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    ],
     const Spacer(),
-    RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(text: controls.clickCount.toString(), style: _infoStyle),
-          const TextSpan(text: ' Moves'),
-        ],
+    Flexible(
+      child: RichText(
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+          children: [
+            TextSpan(text: controls.clickCount.toString(), style: _infoStyle),
+            const TextSpan(text: ' Moves'),
+          ],
+        ),
       ),
     ),
     SizedBox(
@@ -126,4 +161,16 @@ sealed class SharedTheme {
 
     return tileButton(i, puzzle, small);
   }
+}
+
+String _formatSolveStats(int steps, Duration time) {
+  final String timeStr;
+  if (time.inMilliseconds >= 10) {
+    timeStr = '${time.inMilliseconds}ms';
+  } else if (time.inMicroseconds >= 1000) {
+    timeStr = '${(time.inMicroseconds / 1000).toStringAsFixed(1)}ms';
+  } else {
+    timeStr = '${time.inMicroseconds}µs';
+  }
+  return '$steps steps ($timeStr)';
 }

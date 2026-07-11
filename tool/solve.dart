@@ -1,7 +1,6 @@
 import 'dart:math' show Random;
 import 'package:slide_puzzle/src/core/puzzle.dart';
-
-import 'package:slide_puzzle/src/solver/shortest_path.dart';
+import 'package:slide_puzzle/src/solver/puzzle_solver.dart';
 
 void main(List<String> args) {
   int? seed;
@@ -24,20 +23,9 @@ void main(List<String> args) {
     throw UnsupportedError('must be solvable!');
   }
 
-  final solvedConfig = Puzzle.raw(
-    puzzle.width,
-    List.generate(puzzle.length, (i) => i),
-  );
-
   var count = 0;
   late List<Puzzle> bestSolution;
-  for (var solution in shortestPaths<Puzzle>(
-    puzzle,
-    solvedConfig,
-    _allMovable,
-    compare: _compare,
-    minDistanceToSolution: _minDistanceToSolution,
-  )) {
+  for (var solution in PuzzleSolver.solve(puzzle)) {
     count++;
     print('solution #$count - ${solution.length}');
     bestSolution = solution;
@@ -46,9 +34,3 @@ void main(List<String> args) {
 
   print(bestSolution.length);
 }
-
-Iterable<Puzzle> _allMovable(Puzzle entry) => entry.allMovable();
-
-int _compare(Puzzle a, Puzzle b) => a.fitness.compareTo(b.fitness);
-
-int _minDistanceToSolution(Puzzle p) => p.lowerBound;

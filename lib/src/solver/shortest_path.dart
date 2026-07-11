@@ -188,6 +188,129 @@ Iterable<List<T>> shortestPaths<T>(
   debugPrint();
 }
 
+Stream<List<T>> shortestPathsStream<T>(
+  T start,
+  T target,
+  Iterable<T> Function(T) edges, {
+  bool Function(T key1, T key2)? equals,
+  int Function(T key)? hashCode,
+  int Function(T, T)? compare,
+  int Function(T)? minDistanceToSolution,
+  Duration frameBudget = const Duration(milliseconds: 5),
+  int batchSize = 100,
+  Stopwatch? solverWatch,
+}) async* {
+  final watch = solverWatch ?? (Stopwatch()..start());
+  if (!watch.isRunning) {
+    watch.start();
+  }
+
+  final distances = (equals == null && hashCode == null)
+      ? HashMap<T, LinkedValue<T>>()
+      : HashMap<T, LinkedValue<T>>(equals: equals, hashCode: hashCode);
+
+  equals ??= _defaultEquals;
+  if (equals(start, target)) {
+    yield const [];
+    return;
+  }
+
+  minDistanceToSolution ??= _defaultMinDistanceToSolution;
+
+  distances[start] = LinkedValue.empty();
+  final nodesByLength = <List<T>>[
+    [start],
+  ];
+
+  final toVisit = _BucketQueue<T>(distances, minDistanceToSolution)..add(start);
+
+  List<T>? bestOption;
+
+  void doCleanup() {
+    final bestLen = bestOption!.length;
+    for (var l = bestLen; l < nodesByLength.length; l++) {
+      final bucket = nodesByLength[l];
+      for (var i = 0; i < bucket.length; i++) {
+        final k = bucket[i];
+        final v = distances.remove(k);
+        if (v != null && v.length < bestLen) {
+          distances[k] = v;
+        }
+      }
+    }
+    if (nodesByLength.length > bestLen) {
+      nodesByLength.length = bestLen;
+    }
+  }
+
+  var batchCount = 0;
+  final sliceWatch = Stopwatch()..start();
+
+  while (toVisit.isNotEmpty) {
+    batchCount++;
+    if (batchCount >= batchSize) {
+      batchCount = 0;
+      if (sliceWatch.elapsed >= frameBudget) {
+        watch.stop();
+        await Future<void>.delayed(Duration.zero);
+        watch.start();
+        sliceWatch.reset();
+      }
+    }
+
+    final current = toVisit.removeFirst();
+    final currentPath = distances[current];
+
+    if (currentPath == null) {
+      continue;
+    }
+    final currentPathMinDistanceToSolution =
+        currentPath.length + minDistanceToSolution(current);
+
+    if (bestOption != null &&
+        currentPathMinDistanceToSolution >= bestOption.length) {
+      distances.remove(current);
+      continue;
+    }
+
+    for (var edge in edges(current)) {
+      assert(edge != null, '`edges` cannot return null values.');
+
+      final pathToEdge = distances[edge];
+      if (pathToEdge == null ||
+          pathToEdge.length > currentPathMinDistanceToSolution) {
+        final newPathToEdge = currentPath.followedBy(edge);
+
+        if (equals(edge, target)) {
+          assert(
+            bestOption == null || bestOption.length > newPathToEdge.length,
+          );
+          bestOption = newPathToEdge.toList();
+
+          yield bestOption;
+
+          doCleanup();
+          break;
+        }
+
+        if (bestOption == null || bestOption.length > newPathToEdge.length) {
+          if (pathToEdge != null) {
+            assert(newPathToEdge.length < pathToEdge.length);
+          }
+
+          distances[edge] = newPathToEdge;
+          final len = newPathToEdge.length;
+          while (nodesByLength.length <= len) {
+            nodesByLength.add([]);
+          }
+          nodesByLength[len].add(edge);
+          toVisit.add(edge);
+        }
+      }
+    }
+  }
+}
+
 String _pct(int a, int b) => (100 * (a / b)).toStringAsFixed(1).padLeft(5);
 
 bool _defaultEquals(Object? a, Object? b) => a == b;

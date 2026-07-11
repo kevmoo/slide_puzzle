@@ -21,6 +21,8 @@ class PuzzleAnimator implements PuzzleProxy {
 
   bool get stable => _stable;
 
+  Puzzle get currentPuzzle => _puzzle;
+
   @override
   bool get solved => _puzzle.incorrectTiles == 0;
 
