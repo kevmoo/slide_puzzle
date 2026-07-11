@@ -1,3 +1,2 @@
 # Configuration for https://pub.dev/packages/peanut
-extra-args: "--base-href=/slide_puzzle/"
-
+extra-args: "--base-href=/slide_puzzle/ --wasm --source-maps --pwa-strategy none"
