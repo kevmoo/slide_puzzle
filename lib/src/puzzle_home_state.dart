@@ -17,6 +17,7 @@ import 'shared_theme.dart';
 import 'solver/puzzle_solver.dart';
 import 'themes.dart';
 import 'value_tab_controller.dart';
+import 'widgets/build_info_badge.dart';
 
 class PuzzleViewModel extends ChangeNotifier
     implements AppState, PuzzleControls {
@@ -377,6 +378,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
             ),
           ),
           LayoutBuilder(builder: _doBuild),
+          Positioned(bottom: 8, right: 8, child: BuildInfoBadge()),
         ],
       ),
     ),

@@ -1,7 +1,5 @@
 import 'dart:io';
 
-const _placeholder = '<!-- BUILD_INFO -->';
-
 Future<void> main(List<String> args) async {
   if (args.isEmpty) {
     print('No arguments passed to script.');
@@ -31,27 +29,18 @@ Future<void> main(List<String> args) async {
   }
 
   if (!_isWorkingTreeClean()) {
-    print('Skipping build info injection: working tree is dirty.');
+    print('Skipping build info generation: working tree is dirty.');
     return;
   }
 
   final currentBranch = _runGit(['branch', '--show-current']);
   if (currentBranch != 'master') {
     print(
-      'Skipping build info injection: '
+      'Skipping build info generation: '
       'current branch is "$currentBranch" (expected "master").',
     );
     return;
   }
-
-  final htmlFile = File.fromUri(stagingDir.uri.resolve('index.html'));
-
-  if (!htmlFile.existsSync()) {
-    print('index.html not found at ${htmlFile.path}');
-    return;
-  }
-
-  final contents = htmlFile.readAsStringSync();
 
   // Extract concise Flutter version (e.g. "Flutter 3.46.0-1.0.pre-530")
   final flutterVersion = _getFlutterVersion();
@@ -59,19 +48,20 @@ Future<void> main(List<String> args) async {
 
   // Shorten SHA for display
   final shortSha = gitInfo.substring(0, 7);
-  final replacement =
-      '<div class="build-info">$flutterVersion • <a href="https://github.com/kevmoo/slide_puzzle/commit/'
-      '$gitInfo" target="_blank" rel="noopener">$shortSha</a></div>';
+  final commitUrl = 'https://github.com/kevmoo/slide_puzzle/commit/$gitInfo';
 
-  // Replace placeholder
-  final newContent = contents.replaceAll(_placeholder, replacement);
+  final versionJsonFile = File.fromUri(stagingDir.uri.resolve('version.json'));
+  final jsonContent =
+      '''{
+  "flutter_version": "$flutterVersion",
+  "commit_sha": "$gitInfo",
+  "short_sha": "$shortSha",
+  "commit_url": "$commitUrl"
+}
+''';
 
-  if (newContent == contents) {
-    print('WARNING: $_placeholder placeholder not found in index.html');
-  } else {
-    print('Injected build info into index.html');
-    htmlFile.writeAsStringSync(newContent);
-  }
+  versionJsonFile.writeAsStringSync(jsonContent);
+  print('Wrote version.json to ${versionJsonFile.path}');
 }
 
 String _getFlutterVersion() {
