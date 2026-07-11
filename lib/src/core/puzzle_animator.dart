@@ -12,7 +12,7 @@ import 'puzzle_proxy.dart';
 class PuzzleAnimator implements PuzzleProxy {
   final _rnd = Random();
   final List<Body> _locations;
-  final _controller = StreamController<PuzzleEvent>();
+  final _controller = StreamController<PuzzleEvent>(sync: true);
   bool _nextRandomVertical = true;
   Puzzle _puzzle;
   int _clickCount = 0;

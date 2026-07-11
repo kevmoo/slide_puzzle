@@ -330,5 +330,37 @@ void main() {
         );
       },
     );
+
+    testWidgets('9. UI Solver Auto-Solve Continuous Playback Verification', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const PuzzleApp());
+      await tester.pumpAndSettle();
+
+      final controls =
+          Provider.of<AppState>(
+                tester.element(find.byIcon(Icons.refresh)),
+                listen: false,
+              )
+              as PuzzleControls;
+
+      expect(controls.clickCount, 0);
+
+      // Click the Solve button
+      await tester.tap(find.byIcon(Icons.auto_fix_high), warnIfMissed: false);
+
+      // Pump 400ms for path delivery + 50ms for first non-zero Ticker frame
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controls.clickCount, 1, reason: 'Step 0 did not move');
+
+      // Pump forward 260ms (crossing 250ms move threshold) for step 1
+      await tester.pump(const Duration(milliseconds: 260));
+      expect(controls.clickCount, 2, reason: 'Step 1 did not move');
+
+      // Pump forward 260ms for step 2
+      await tester.pump(const Duration(milliseconds: 260));
+      expect(controls.clickCount, 3, reason: 'Step 2 did not move');
+    });
   });
 }

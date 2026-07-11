@@ -204,19 +204,6 @@ class PuzzleViewModel extends ChangeNotifier
     }
   }
 
-  void _performAutomatedMove(Puzzle current, Puzzle next) {
-    final open = current.openPosition();
-    final tileValue = next.valueAt(open.x, open.y);
-    if (tileValue != puzzle.tileCount) {
-      _isAutomatedMove = true;
-      try {
-        puzzle.clickOrShake(tileValue);
-      } finally {
-        _isAutomatedMove = false;
-      }
-    }
-  }
-
   void _cancelSolveCore({bool clearStats = false}) {
     _solverSubscription?.cancel();
     _solverSubscription = null;
@@ -259,6 +246,19 @@ class PuzzleViewModel extends ChangeNotifier
   void _ensureTicking() {
     if (_ticker != null && !_ticker!.isTicking) {
       _ticker!.start();
+    }
+  }
+
+  void _performAutomatedMove(Puzzle current, Puzzle next) {
+    final newOpen = next.openPosition();
+    final tileValue = current.valueAt(newOpen.x, newOpen.y);
+    if (tileValue != puzzle.tileCount) {
+      _isAutomatedMove = true;
+      try {
+        puzzle.clickOrShake(tileValue);
+      } finally {
+        _isAutomatedMove = false;
+      }
     }
   }
 
