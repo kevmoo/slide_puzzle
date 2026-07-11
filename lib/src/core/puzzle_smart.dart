@@ -78,7 +78,7 @@ class _SliceList with ListMixin<int>, _SliceListMixin {
   }
 }
 
-class _PuzzleSmart extends Puzzle with ListMixin<int>, _SliceListMixin {
+final class _PuzzleSmart extends Puzzle with ListMixin<int>, _SliceListMixin {
   static const _bitsPerValue = 4;
   static const _maxShift = _valuesPerCell - 1;
 

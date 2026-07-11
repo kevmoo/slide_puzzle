@@ -4,7 +4,7 @@
 
 part of 'puzzle.dart';
 
-class _PuzzleSimple extends Puzzle {
+final class _PuzzleSimple extends Puzzle {
   @override
   final int width;
   final Uint8List _source;

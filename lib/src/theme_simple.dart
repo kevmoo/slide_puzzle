@@ -2,13 +2,11 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'core/puzzle_proxy.dart';
-import 'flutter.dart';
-import 'shared_theme.dart';
+part of 'shared_theme.dart';
 
 const _accentBlue = Color(0xff000579);
 
-class ThemeSimple extends SharedTheme {
+final class ThemeSimple extends SharedTheme {
   @override
   String get name => 'Simple';
 
@@ -47,7 +45,7 @@ class ThemeSimple extends SharedTheme {
           (i + 1).toString(),
           style: TextStyle(
             color: Colors.white,
-            fontWeight: correctPosition ? FontWeight.bold : FontWeight.normal,
+            fontWeight: correctPosition ? .bold : .normal,
             fontSize: small ? 30 : 49,
           ),
         ),

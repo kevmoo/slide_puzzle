@@ -6,7 +6,7 @@ import 'dart:math' show Point;
 
 enum PuzzleEvent { click, random, reset, noop }
 
-abstract class PuzzleProxy {
+abstract interface class PuzzleProxy {
   int get width;
 
   int get height;

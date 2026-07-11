@@ -2,15 +2,13 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'core/puzzle_proxy.dart';
-import 'flutter.dart';
-import 'shared_theme.dart';
+part of 'shared_theme.dart';
 
 const _yellowIsh = Color.fromARGB(255, 248, 244, 233);
 const _chocolate = Color.fromARGB(255, 66, 66, 68);
 const _orangeIsh = Color.fromARGB(255, 224, 107, 83);
 
-class ThemePlaster extends SharedTheme {
+final class ThemePlaster extends SharedTheme {
   @override
   String get name => 'Plaster';
 
@@ -33,8 +31,7 @@ class ThemePlaster extends SharedTheme {
 
   @override
   Widget tileButton(int i, PuzzleProxy puzzle, bool small) {
-    final correctColumn = i % puzzle.width;
-    final correctRow = i ~/ puzzle.width;
+    final (correctColumn, correctRow) = (i % puzzle.width, i ~/ puzzle.width);
 
     final primary = (correctColumn + correctRow).isEven;
 

@@ -174,7 +174,7 @@ class DecorationImagePlus implements DecorationImage {
   };
 
   @override
-  FilterQuality get filterQuality => FilterQuality.medium;
+  FilterQuality get filterQuality => .medium;
 
   @override
   bool get invertColors => false;
@@ -227,7 +227,7 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
     Path? clipPath,
     ImageConfiguration configuration, {
     double blend = 1.0,
-    BlendMode blendMode = BlendMode.srcOver,
+    BlendMode blendMode = .srcOver,
   }) {
     if (_details.matchTextDirection) {
       assert(() {
@@ -313,14 +313,14 @@ void _paintImage({
   double scale = 1.0,
   ColorFilter? colorFilter,
   BoxFit? fit,
-  Alignment alignment = Alignment.center,
+  Alignment alignment = .center,
   double blend = 1.0,
-  BlendMode blendMode = BlendMode.srcOver,
+  BlendMode blendMode = .srcOver,
 }) {
   if (rect.isEmpty) return;
   final outputSize = rect.size;
   final inputSize = Size(image.width.toDouble(), image.height.toDouble());
-  fit ??= BoxFit.scaleDown;
+  fit ??= .scaleDown;
   final FittedSizes fittedSizes = applyBoxFit(
     fit,
     inputSize / scale,
@@ -330,7 +330,7 @@ void _paintImage({
   final destinationSize = fittedSizes.destination;
   final Paint paint = Paint()
     ..isAntiAlias = false
-    ..filterQuality = FilterQuality.medium
+    ..filterQuality = .medium
     ..blendMode = blendMode;
   if (blend != 1.0) {
     paint.color = Color.fromRGBO(0, 0, 0, blend);

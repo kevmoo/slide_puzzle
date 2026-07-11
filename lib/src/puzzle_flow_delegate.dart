@@ -20,7 +20,7 @@ class PuzzleFlowDelegate extends FlowDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) =>
-      BoxConstraints.tight(_tileSize);
+      .tight(_tileSize);
 
   @override
   void paintChildren(FlowPaintingContext context) {

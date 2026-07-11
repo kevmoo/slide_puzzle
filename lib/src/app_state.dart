@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'core/puzzle_proxy.dart';
 
-abstract mixin class AppState {
+abstract interface class AppState implements Listenable {
   PuzzleProxy get puzzle;
 
   Listenable get animationNotifier;

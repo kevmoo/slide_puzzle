@@ -45,6 +45,10 @@ class ValueTabControllerState<T> extends State<ValueTabController<T>>
 
   late final TabController _controller;
 
+  void _onTabChanged() {
+    _notifier.value = widget.values[_controller.index];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,14 +59,14 @@ class ValueTabControllerState<T> extends State<ValueTabController<T>>
       initialIndex: 0,
     );
 
-    _controller.addListener(() {
-      _notifier.value = widget.values[_controller.index];
-    });
+    _controller.addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onTabChanged);
     _controller.dispose();
+    _notifier.dispose();
     super.dispose();
   }
 

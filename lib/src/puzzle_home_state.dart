@@ -16,36 +16,8 @@ import 'shared_theme.dart';
 import 'themes.dart';
 import 'value_tab_controller.dart';
 
-class _PuzzleControls extends ChangeNotifier implements PuzzleControls {
-  final PuzzleHomeState _parent;
-
-  _PuzzleControls(this._parent);
-
-  @override
-  bool get autoPlay => _parent._autoPlay;
-
-  void _notify() => notifyListeners();
-
-  @override
-  void Function(bool? newValue)? get setAutoPlayFunction {
-    if (_parent.puzzle.solved) {
-      return null;
-    }
-    return _parent._setAutoPlay;
-  }
-
-  @override
-  int get clickCount => _parent.puzzle.clickCount;
-
-  @override
-  int get incorrectTiles => _parent.puzzle.incorrectTiles;
-
-  @override
-  void reset() => _parent.puzzle.reset();
-}
-
-class PuzzleHomeState extends State
-    with SingleTickerProviderStateMixin, AppState {
+class PuzzleViewModel extends ChangeNotifier
+    implements AppState, PuzzleControls {
   @override
   final PuzzleAnimator puzzle;
 
@@ -53,44 +25,137 @@ class PuzzleHomeState extends State
   final AnimationNotifier animationNotifier = AnimationNotifier();
 
   Duration _tickerTimeSinceLastEvent = Duration.zero;
-  late Ticker _ticker;
+  Ticker? _ticker;
   late Duration _lastElapsed;
-  late StreamSubscription _puzzleEventSubscription;
+  late StreamSubscription<PuzzleEvent> _puzzleEventSubscription;
 
   bool _autoPlay = false;
-  late _PuzzleControls _autoPlayListenable;
 
-  PuzzleHomeState(this.puzzle) {
+  PuzzleViewModel(this.puzzle) {
     _puzzleEventSubscription = puzzle.onEvent.listen(_onPuzzleEvent);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _autoPlayListenable = _PuzzleControls(this);
-    _ticker = createTicker(_onTick);
+  void initTicker(TickerProvider vsync) {
+    _ticker = vsync.createTicker(_onTick);
     _lastElapsed = Duration.zero;
     _ensureTicking();
   }
 
-  void _setAutoPlay(bool? newValue) {
-    if (newValue != _autoPlay) {
-      setState(() {
-        // Only allow enabling autoPlay if the puzzle is not solved
-        _autoPlayListenable._notify();
-        _autoPlay = newValue! && !puzzle.solved;
-        if (_autoPlay) {
-          _ensureTicking();
-        }
-      });
+  @override
+  bool get autoPlay => _autoPlay;
+
+  @override
+  void Function(bool? newValue)? get setAutoPlayFunction {
+    if (puzzle.solved) {
+      return null;
     }
+    return setAutoPlay;
+  }
+
+  @override
+  int get clickCount => puzzle.clickCount;
+
+  @override
+  int get incorrectTiles => puzzle.incorrectTiles;
+
+  @override
+  void reset() {
+    puzzle.reset();
+    notifyListeners();
+  }
+
+  void setAutoPlay(bool? newValue) {
+    if (newValue != _autoPlay && newValue != null) {
+      _autoPlay = newValue && !puzzle.solved;
+      if (_autoPlay) {
+        _ensureTicking();
+      }
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    animationNotifier.dispose();
+    _ticker?.dispose();
+    _puzzleEventSubscription.cancel();
+    super.dispose();
+  }
+
+  void _onPuzzleEvent(PuzzleEvent e) {
+    if (e != PuzzleEvent.random) {
+      _autoPlay = false;
+    }
+    _tickerTimeSinceLastEvent = Duration.zero;
+    _ensureTicking();
+    notifyListeners();
+  }
+
+  void _ensureTicking() {
+    if (_ticker != null && !_ticker!.isTicking) {
+      _ticker!.start();
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    if (elapsed == Duration.zero) {
+      _lastElapsed = elapsed;
+    }
+    final delta = elapsed - _lastElapsed;
+    _lastElapsed = elapsed;
+
+    if (delta.inMilliseconds <= 0) {
+      return;
+    }
+
+    _tickerTimeSinceLastEvent += delta;
+    puzzle.update(delta > _maxFrameDuration ? _maxFrameDuration : delta);
+
+    if (!puzzle.stable) {
+      animationNotifier.animate();
+    } else {
+      if (!_autoPlay) {
+        _ticker?.stop();
+        _lastElapsed = Duration.zero;
+      }
+    }
+
+    if (_autoPlay &&
+        _tickerTimeSinceLastEvent > const Duration(milliseconds: 200)) {
+      puzzle.playRandom();
+
+      if (puzzle.solved) {
+        _autoPlay = false;
+      }
+      notifyListeners();
+    }
+  }
+}
+
+class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
+  final PuzzleAnimator puzzleAnimator;
+  late final PuzzleViewModel viewModel;
+
+  PuzzleHomeState(this.puzzleAnimator);
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = PuzzleViewModel(puzzleAnimator);
+    viewModel.initTicker(this);
+  }
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => MultiProvider(
     providers: [
-      Provider<AppState>.value(value: this),
-      ListenableProvider<PuzzleControls>.value(value: _autoPlayListenable),
+      ListenableProvider<AppState>.value(value: viewModel),
+      ListenableProvider<PuzzleControls>.value(value: viewModel),
     ],
     child: const Material(
       child: Stack(
@@ -106,68 +171,6 @@ class PuzzleHomeState extends State
       ),
     ),
   );
-
-  @override
-  void dispose() {
-    animationNotifier.dispose();
-    _ticker.dispose();
-    _autoPlayListenable.dispose();
-    _puzzleEventSubscription.cancel();
-    super.dispose();
-  }
-
-  void _onPuzzleEvent(PuzzleEvent e) {
-    _autoPlayListenable._notify();
-    if (e != PuzzleEvent.random) {
-      _setAutoPlay(false);
-    }
-    _tickerTimeSinceLastEvent = Duration.zero;
-    _ensureTicking();
-    setState(() {
-      // noop
-    });
-  }
-
-  void _ensureTicking() {
-    if (!_ticker.isTicking) {
-      _ticker.start();
-    }
-  }
-
-  void _onTick(Duration elapsed) {
-    if (elapsed == Duration.zero) {
-      _lastElapsed = elapsed;
-    }
-    final delta = elapsed - _lastElapsed;
-    _lastElapsed = elapsed;
-
-    if (delta.inMilliseconds <= 0) {
-      // `_delta` may be negative or zero if `elapsed` is zero (first tick)
-      // or during a restart. Just ignore this case.
-      return;
-    }
-
-    _tickerTimeSinceLastEvent += delta;
-    puzzle.update(delta > _maxFrameDuration ? _maxFrameDuration : delta);
-
-    if (!puzzle.stable) {
-      animationNotifier.animate();
-    } else {
-      if (!_autoPlay) {
-        _ticker.stop();
-        _lastElapsed = Duration.zero;
-      }
-    }
-
-    if (_autoPlay &&
-        _tickerTimeSinceLastEvent > const Duration(milliseconds: 200)) {
-      puzzle.playRandom();
-
-      if (puzzle.solved) {
-        _setAutoPlay(false);
-      }
-    }
-  }
 }
 
 class AnimationNotifier extends ChangeNotifier {
@@ -179,6 +182,7 @@ class AnimationNotifier extends ChangeNotifier {
 const _maxFrameDuration = Duration(milliseconds: 34);
 
 Widget _updateConstraints(
+  BuildContext context,
   BoxConstraints constraints,
   Widget Function(bool small) builder,
 ) {
@@ -186,17 +190,17 @@ Widget _updateConstraints(
 
   final constraintWidth = constraints.hasBoundedWidth
       ? constraints.maxWidth
-      : 1000.0;
+      : MediaQuery.sizeOf(context).width;
 
   final constraintHeight = constraints.hasBoundedHeight
       ? constraints.maxHeight
-      : 1000.0;
+      : MediaQuery.sizeOf(context).height;
 
   return builder(constraintWidth < smallWidth || constraintHeight < 690);
 }
 
-Widget _doBuild(BuildContext _, BoxConstraints constraints) =>
-    _updateConstraints(constraints, _doBuildCore);
+Widget _doBuild(BuildContext context, BoxConstraints constraints) =>
+    _updateConstraints(context, constraints, _doBuildCore);
 
 Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
   values: themes,
@@ -207,8 +211,8 @@ Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
       child: Center(
         child: theme.styledWrapper(
           small,
-          SizedBox(
-            width: 580,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 580),
             child: Consumer<AppState>(
               builder: (context, appState, _) => Column(
                 mainAxisSize: MainAxisSize.min,

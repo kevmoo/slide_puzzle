@@ -17,7 +17,7 @@ final _rnd = Random();
 
 final _spacesRegexp = RegExp(' +');
 
-abstract class Puzzle {
+sealed class Puzzle {
   int get width;
 
   int get length;
@@ -114,12 +114,10 @@ abstract class Puzzle {
     var value = 0;
     for (var i = 0; i < tileCount; i++) {
       if (!isCorrectPosition(i)) {
-        final correctColumn = i % width;
-        final correctRow = i ~/ width;
+        final (correctColumn, correctRow) = (i % width, i ~/ width);
 
         final index = indexOf(i);
-        final x = index % width;
-        final y = index ~/ width;
+        final (x, y) = (index % width, index ~/ width);
 
         final delta = (correctColumn - x).abs() + (correctRow - y).abs();
 
@@ -198,12 +196,13 @@ abstract class Puzzle {
 
   void _shift(List<int> source, int targetX, int targetY) {
     final lastCoord = openPosition();
-    final deltaX = lastCoord.x - targetX;
-    final deltaY = lastCoord.y - targetY;
+    final (deltaX, deltaY) = (lastCoord.x - targetX, lastCoord.y - targetY);
 
     if ((deltaX.abs() + deltaY.abs()) > 1) {
-      final shiftPointX = targetX + deltaX.sign;
-      final shiftPointY = targetY + deltaY.sign;
+      final (shiftPointX, shiftPointY) = (
+        targetX + deltaX.sign,
+        targetY + deltaY.sign,
+      );
       _shift(source, shiftPointX, shiftPointY);
       _staticSwap(source, targetX, targetY, shiftPointX, shiftPointY);
     } else {
@@ -213,17 +212,15 @@ abstract class Puzzle {
 
   void _staticSwap(List<int> source, int ax, int ay, int bx, int by) {
     final aIndex = ax + ay * width;
-    final aValue = source[aIndex];
     final bIndex = bx + by * width;
-
+    final temp = source[aIndex];
     source[aIndex] = source[bIndex];
-    source[bIndex] = aValue;
+    source[bIndex] = temp;
   }
 
   Point coordinatesOf(int value) {
     final index = indexOf(value);
-    final x = index % width;
-    final y = index ~/ width;
+    final (x, y) = (index % width, index ~/ width);
     assert(_getIndex(x, y) == index);
     return Point(x, y);
   }

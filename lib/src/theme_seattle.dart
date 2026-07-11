@@ -2,12 +2,9 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'core/puzzle_proxy.dart';
-import 'flutter.dart';
-import 'shared_theme.dart';
-import 'widgets/decoration_image_plus.dart';
+part of 'shared_theme.dart';
 
-class ThemeSeattle extends SharedTheme {
+final class ThemeSeattle extends SharedTheme {
   @override
   String get name => 'Seattle';
 
@@ -42,7 +39,7 @@ class ThemeSeattle extends SharedTheme {
       puzzleWidth: puzzle.width,
       puzzleHeight: puzzle.height,
       pieceIndex: i,
-      fit: BoxFit.cover,
+      fit: .cover,
       image: const AssetImage('asset/seattle.jpg'),
     );
 
@@ -55,11 +52,11 @@ class ThemeSeattle extends SharedTheme {
                 shape: const CircleBorder(),
                 color: correctPosition ? Colors.black38 : Colors.white54,
               ),
-              alignment: Alignment.center,
+              alignment: .center,
               child: Text(
                 (i + 1).toString(),
                 style: TextStyle(
-                  fontWeight: FontWeight.normal,
+                  fontWeight: .normal,
                   color: correctPosition ? Colors.white : Colors.black,
                   fontSize: small ? 25 : 42,
                 ),

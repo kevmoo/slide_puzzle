@@ -5,11 +5,16 @@
 import 'core/puzzle_proxy.dart';
 import 'flutter.dart';
 import 'puzzle_controls.dart';
+import 'widgets/decoration_image_plus.dart';
 import 'widgets/material_interior_alt.dart';
+
+part 'theme_plaster.dart';
+part 'theme_seattle.dart';
+part 'theme_simple.dart';
 
 final puzzleAnimationDuration = kThemeAnimationDuration * 3;
 
-abstract class SharedTheme {
+sealed class SharedTheme {
   const SharedTheme();
 
   String get name;
@@ -70,7 +75,7 @@ abstract class SharedTheme {
   );
 
   TextStyle get _infoStyle =>
-      TextStyle(color: puzzleAccentColor, fontWeight: FontWeight.bold);
+      TextStyle(color: puzzleAccentColor, fontWeight: .bold);
 
   List<Widget> bottomControls(PuzzleControls controls) => <Widget>[
     Tooltip(
@@ -88,7 +93,7 @@ abstract class SharedTheme {
         activeColor: puzzleAccentColor,
       ),
     ),
-    Expanded(child: Container()),
+    const Spacer(),
     RichText(
       text: TextSpan(
         children: [
@@ -100,7 +105,7 @@ abstract class SharedTheme {
     SizedBox(
       width: 90,
       child: RichText(
-        textAlign: TextAlign.right,
+        textAlign: .right,
         text: TextSpan(
           children: [
             TextSpan(

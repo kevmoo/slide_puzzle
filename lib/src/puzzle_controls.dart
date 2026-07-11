@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-abstract class PuzzleControls implements Listenable {
+abstract interface class PuzzleControls implements Listenable {
   void reset();
 
   int get clickCount;
