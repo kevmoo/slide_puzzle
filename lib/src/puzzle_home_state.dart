@@ -88,28 +88,24 @@ class PuzzleHomeState extends State
 
   @override
   Widget build(BuildContext context) => MultiProvider(
-        providers: [
-          Provider<AppState>.value(value: this),
-          ListenableProvider<PuzzleControls>.value(
-            value: _autoPlayListenable,
-          )
-        ],
-        child: Material(
-          child: Stack(
-            children: const <Widget>[
-              SizedBox.expand(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: Image(
-                    image: AssetImage('asset/seattle.jpg'),
-                  ),
-                ),
-              ),
-              LayoutBuilder(builder: _doBuild),
-            ],
+    providers: [
+      Provider<AppState>.value(value: this),
+      ListenableProvider<PuzzleControls>.value(value: _autoPlayListenable),
+    ],
+    child: const Material(
+      child: Stack(
+        children: <Widget>[
+          SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: Image(image: AssetImage('asset/seattle.jpg')),
+            ),
           ),
-        ),
-      );
+          LayoutBuilder(builder: _doBuild),
+        ],
+      ),
+    ),
+  );
 
   @override
   void dispose() {
@@ -183,14 +179,18 @@ class _AnimationNotifier extends ChangeNotifier {
 const _maxFrameDuration = Duration(milliseconds: 34);
 
 Widget _updateConstraints(
-    BoxConstraints constraints, Widget Function(bool small) builder) {
+  BoxConstraints constraints,
+  Widget Function(bool small) builder,
+) {
   const _smallWidth = 580;
 
-  final constraintWidth =
-      constraints.hasBoundedWidth ? constraints.maxWidth : 1000.0;
+  final constraintWidth = constraints.hasBoundedWidth
+      ? constraints.maxWidth
+      : 1000.0;
 
-  final constraintHeight =
-      constraints.hasBoundedHeight ? constraints.maxHeight : 1000.0;
+  final constraintHeight = constraints.hasBoundedHeight
+      ? constraints.maxHeight
+      : 1000.0;
 
   return builder(constraintWidth < _smallWidth || constraintHeight < 690);
 }
@@ -199,88 +199,85 @@ Widget _doBuild(BuildContext _, BoxConstraints constraints) =>
     _updateConstraints(constraints, _doBuildCore);
 
 Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
-      values: themes,
-      child: Consumer<SharedTheme>(
-        builder: (_, theme, __) => AnimatedContainer(
-          duration: puzzleAnimationDuration,
-          color: theme.puzzleThemeBackground,
-          child: Center(
-            child: theme.styledWrapper(
-              small,
-              SizedBox(
-                width: 580,
-                child: Consumer<AppState>(
-                  builder: (context, appState, _) => Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.black26,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        child: TabBar(
-                          controller: ValueTabController.of(context),
-                          labelPadding: const EdgeInsets.fromLTRB(0, 20, 0, 12),
-                          labelColor: theme.puzzleAccentColor,
-                          indicatorColor: theme.puzzleAccentColor,
-                          indicatorWeight: 1.5,
-                          unselectedLabelColor: Colors.black.withOpacity(0.6),
-                          tabs: themes
-                              .map((st) => Text(
-                                    st.name.toUpperCase(),
-                                    style: const TextStyle(
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
+  values: themes,
+  child: Consumer<SharedTheme>(
+    builder: (_, theme, __) => AnimatedContainer(
+      duration: puzzleAnimationDuration,
+      color: theme.puzzleThemeBackground,
+      child: Center(
+        child: theme.styledWrapper(
+          small,
+          SizedBox(
+            width: 580,
+            child: Consumer<AppState>(
+              builder: (context, appState, _) => Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.black26, width: 1),
                       ),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          child: Flow(
-                            delegate: PuzzleFlowDelegate(
-                              small ? const Size(90, 90) : const Size(140, 140),
-                              appState.puzzle,
-                              appState.animationNotifier,
+                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TabBar(
+                      controller: ValueTabController.of(context),
+                      labelPadding: const EdgeInsets.fromLTRB(0, 20, 0, 12),
+                      labelColor: theme.puzzleAccentColor,
+                      indicatorColor: theme.puzzleAccentColor,
+                      indicatorWeight: 1.5,
+                      unselectedLabelColor: Colors.black.withValues(alpha: 0.6),
+                      tabs: themes
+                          .map(
+                            (st) => Text(
+                              st.name.toUpperCase(),
+                              style: const TextStyle(letterSpacing: 0.5),
                             ),
-                            children: List<Widget>.generate(
-                              appState.puzzle.length,
-                              (i) => theme.tileButtonCore(
-                                  i, appState.puzzle, small),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: Colors.black26, width: 1),
-                          ),
-                        ),
-                        padding: const EdgeInsets.only(
-                          left: 10,
-                          bottom: 6,
-                          top: 2,
-                          right: 10,
-                        ),
-                        child: Consumer<PuzzleControls>(
-                          builder: (_, controls, __) =>
-                              Row(children: theme.bottomControls(controls)),
-                        ),
-                      )
-                    ],
+                          )
+                          .toList(),
+                    ),
                   ),
-                ),
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      child: Flow(
+                        delegate: PuzzleFlowDelegate(
+                          small ? const Size(90, 90) : const Size(140, 140),
+                          appState.puzzle,
+                          appState.animationNotifier,
+                        ),
+                        children: List<Widget>.generate(
+                          appState.puzzle.length,
+                          (i) =>
+                              theme.tileButtonCore(i, appState.puzzle, small),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Colors.black26, width: 1),
+                      ),
+                    ),
+                    padding: const EdgeInsets.only(
+                      left: 10,
+                      bottom: 6,
+                      top: 2,
+                      right: 10,
+                    ),
+                    child: Consumer<PuzzleControls>(
+                      builder: (_, controls, __) =>
+                          Row(children: theme.bottomControls(controls)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
-    );
+    ),
+  ),
+);

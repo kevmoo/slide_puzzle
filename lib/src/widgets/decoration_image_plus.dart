@@ -30,10 +30,12 @@ class DecorationImagePlus implements DecorationImage {
     this.centerSlice,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-  }) : assert(puzzleHeight > 1 &&
-            puzzleHeight > 1 &&
-            pieceIndex >= 0 &&
-            pieceIndex < (puzzleHeight * puzzleWidth));
+  }) : assert(
+         puzzleHeight > 1 &&
+             puzzleHeight > 1 &&
+             pieceIndex >= 0 &&
+             pieceIndex < (puzzleHeight * puzzleWidth),
+       );
 
   /// The image to be painted into the decoration.
   ///
@@ -120,7 +122,7 @@ class DecorationImagePlus implements DecorationImage {
       DecorationImagePainterPlus._(this, onChanged);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is DecorationImagePlus &&
         other.runtimeType == runtimeType &&
@@ -134,8 +136,15 @@ class DecorationImagePlus implements DecorationImage {
   }
 
   @override
-  int get hashCode => hashValues(image, colorFilter, fit, alignment,
-      centerSlice, repeat, matchTextDirection);
+  int get hashCode => Object.hash(
+    image,
+    colorFilter,
+    fit,
+    alignment,
+    centerSlice,
+    repeat,
+    matchTextDirection,
+  );
 
   @override
   String toString() {
@@ -156,28 +165,25 @@ class DecorationImagePlus implements DecorationImage {
 
   @override
   ImageErrorListener get onError => (error, stackTrace) {
-        developer.log(
-            'Failed to load image.\n'
-            '$error\n'
-            '$stackTrace',
-            name: 'slide_puzzle.decoration_image_plus');
-      };
+    developer.log(
+      'Failed to load image.\n'
+      '$error\n'
+      '$stackTrace',
+      name: 'slide_puzzle.decoration_image_plus',
+    );
+  };
 
   @override
-  // TODO: implement filterQuality
-  FilterQuality get filterQuality => throw UnimplementedError();
+  FilterQuality get filterQuality => FilterQuality.medium;
 
   @override
-  // TODO: implement invertColors
-  bool get invertColors => throw UnimplementedError();
+  bool get invertColors => false;
 
   @override
-  // TODO: implement isAntiAlias
-  bool get isAntiAlias => throw UnimplementedError();
+  bool get isAntiAlias => false;
 
   @override
-  // TODO: implement opacity
-  double get opacity => throw UnimplementedError();
+  double get opacity => 1.0;
 }
 
 /// The painter for a [DecorationImagePlus].
@@ -214,21 +220,29 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   /// because it had not yet been loaded the first time this method was called,
   /// then the `onChanged` callback passed to [DecorationImagePlus.createPainter]
   /// will be called.
-  void paint(Canvas canvas, Rect rect, Path? clipPath,
-      ImageConfiguration configuration) {
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect,
+    Path? clipPath,
+    ImageConfiguration configuration, {
+    double blend = 1.0,
+    BlendMode blendMode = BlendMode.srcOver,
+  }) {
     if (_details.matchTextDirection) {
       assert(() {
         // We check this first so that the assert will fire immediately, not just
         // when the image is ready.
         if (configuration.textDirection == null) {
           throw FlutterError(
-              'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
-              'When DecorationImagePainter.paint() was called, there was no text direction provided '
-              'in the ImageConfiguration object to match.\n'
-              'The DecorationImage was:\n'
-              '  $_details\n'
-              'The ImageConfiguration was:\n'
-              '  $configuration');
+            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
+            'When DecorationImagePainter.paint() was called, there was no text direction provided '
+            'in the ImageConfiguration object to match.\n'
+            'The DecorationImage was:\n'
+            '  $_details\n'
+            'The ImageConfiguration was:\n'
+            '  $configuration',
+          );
         }
         return true;
       }());
@@ -259,6 +273,8 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
+      blend: blend,
+      blendMode: blendMode,
     );
 
     if (clipPath != null) canvas.restore();
@@ -285,28 +301,38 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
       '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
 }
 
-void _paintImage(
-    {required Canvas canvas,
-    required Rect rect,
-    required ui.Image image,
-    required int puzzleWidth,
-    required int puzzleHeight,
-    required int pieceIndex,
-    double scale = 1.0,
-    ColorFilter? colorFilter,
-    BoxFit? fit,
-    Alignment alignment = Alignment.center}) {
+void _paintImage({
+  required Canvas canvas,
+  required Rect rect,
+  required ui.Image image,
+  required int puzzleWidth,
+  required int puzzleHeight,
+  required int pieceIndex,
+  double scale = 1.0,
+  ColorFilter? colorFilter,
+  BoxFit? fit,
+  Alignment alignment = Alignment.center,
+  double blend = 1.0,
+  BlendMode blendMode = BlendMode.srcOver,
+}) {
   if (rect.isEmpty) return;
   final outputSize = rect.size;
   final inputSize = Size(image.width.toDouble(), image.height.toDouble());
   fit ??= BoxFit.scaleDown;
-  final FittedSizes fittedSizes =
-      applyBoxFit(fit, inputSize / scale, outputSize);
+  final FittedSizes fittedSizes = applyBoxFit(
+    fit,
+    inputSize / scale,
+    outputSize,
+  );
   final Size sourceSize = fittedSizes.source * scale;
   final destinationSize = fittedSizes.destination;
   final Paint paint = Paint()
     ..isAntiAlias = false
-    ..filterQuality = FilterQuality.medium;
+    ..filterQuality = FilterQuality.medium
+    ..blendMode = blendMode;
+  if (blend != 1.0) {
+    paint.color = Color.fromRGBO(0, 0, 0, blend);
+  }
   if (colorFilter != null) paint.colorFilter = colorFilter;
   final double halfWidthDelta =
       (outputSize.width - destinationSize.width) / 2.0;
@@ -316,20 +342,25 @@ void _paintImage(
   final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
-  final Rect sourceRect =
-      alignment.inscribe(sourceSize, Offset.zero & inputSize);
+  final Rect sourceRect = alignment.inscribe(
+    sourceSize,
+    Offset.zero & inputSize,
+  );
 
-  final sliceSize =
-      Size(sourceRect.width / puzzleWidth, sourceRect.height / puzzleHeight);
+  final sliceSize = Size(
+    sourceRect.width / puzzleWidth,
+    sourceRect.height / puzzleHeight,
+  );
 
   final col = pieceIndex % puzzleWidth;
   final row = pieceIndex ~/ puzzleWidth;
 
   final sliceRect = Rect.fromLTWH(
-      sourceRect.left + col * sliceSize.width,
-      sourceRect.top + row * sliceSize.height,
-      sliceSize.width,
-      sliceSize.height);
+    sourceRect.left + col * sliceSize.width,
+    sourceRect.top + row * sliceSize.height,
+    sliceSize.width,
+    sliceSize.height,
+  );
 
   canvas.drawImageRect(image, sliceRect, destinationRect, paint);
 }

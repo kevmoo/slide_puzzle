@@ -30,9 +30,9 @@ class ValueTabController<T> extends StatefulWidget {
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
   static TabController? of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<_ValueTabControllerScope>();
-    return scope!.controller;
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_ValueTabControllerScope>();
+    return scope?.controller;
   }
 
   @override
@@ -68,13 +68,13 @@ class _ValueTabControllerState<T> extends State<ValueTabController<T>>
 
   @override
   Widget build(BuildContext context) => _ValueTabControllerScope(
-        controller: _controller,
-        enabled: TickerMode.of(context),
-        child: ValueListenableProvider<T>.value(
-          value: _notifier,
-          child: widget.child,
-        ),
-      );
+    controller: _controller,
+    enabled: TickerMode.valuesOf(context).enabled,
+    child: ValueListenableProvider<T>.value(
+      value: _notifier,
+      child: widget.child,
+    ),
+  );
 }
 
 class _ValueTabControllerScope extends InheritedWidget {

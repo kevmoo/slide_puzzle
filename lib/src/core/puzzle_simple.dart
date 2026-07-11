@@ -10,8 +10,8 @@ class _PuzzleSimple extends Puzzle {
   final Uint8List _source;
 
   _PuzzleSimple(this.width, List<int> source)
-      : _source = UnmodifiableUint8ListView(Uint8List.fromList(source)),
-        super._();
+    : _source = Uint8List.fromList(source).asUnmodifiableView(),
+      super._();
 
   @override
   int indexOf(int value) => _source.indexOf(value);
