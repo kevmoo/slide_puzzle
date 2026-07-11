@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:collection/collection.dart' show HeapPriorityQueue;
-
 import 'linked_value.dart';
 
 Iterable<List<T>> shortestPaths<T>(
@@ -35,7 +33,7 @@ Iterable<List<T>> shortestPaths<T>(
     [start],
   ];
 
-  final toVisit = HeapPriorityQueue(compare)..add(start);
+  final toVisit = _BucketQueue<T>(distances, minDistanceToSolution)..add(start);
 
   List<T>? bestOption;
   Duration? bestOptionTime;
@@ -195,3 +193,37 @@ String _pct(int a, int b) => (100 * (a / b)).toStringAsFixed(1).padLeft(5);
 bool _defaultEquals(Object? a, Object? b) => a == b;
 
 int _defaultMinDistanceToSolution(Object? a) => 1;
+
+class _BucketQueue<T> {
+  final Map<T, LinkedValue<T>> _distances;
+  final int Function(T) _minDistanceToSolution;
+  final List<Queue<T>> _buckets = List.generate(256, (_) => Queue<T>());
+  int _minBucket = 0;
+  int _length = 0;
+
+  _BucketQueue(this._distances, this._minDistanceToSolution);
+
+  int get length => _length;
+  bool get isNotEmpty => _length > 0;
+  bool get isEmpty => _length == 0;
+
+  void add(T element) {
+    final fn = _distances[element]!.length + _minDistanceToSolution(element);
+    while (_buckets.length <= fn) {
+      _buckets.add(Queue<T>());
+    }
+    _buckets[fn].add(element);
+    if (_length == 0 || fn < _minBucket) {
+      _minBucket = fn;
+    }
+    _length++;
+  }
+
+  T removeFirst() {
+    while (_minBucket < _buckets.length && _buckets[_minBucket].isEmpty) {
+      _minBucket++;
+    }
+    _length--;
+    return _buckets[_minBucket].removeFirst();
+  }
+}

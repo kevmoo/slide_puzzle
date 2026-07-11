@@ -9,9 +9,15 @@ final class _PuzzleSimple extends Puzzle {
   final int width;
   final Uint8List _source;
 
-  _PuzzleSimple(this.width, List<int> source)
-    : _source = Uint8List.fromList(source).asUnmodifiableView(),
-      super._();
+  _PuzzleSimple(
+    this.width,
+    List<int> source, {
+    super.incorrect,
+    super.deltaSumSq,
+    super.manhattan,
+    super.linearConflicts,
+  }) : _source = Uint8List.fromList(source).asUnmodifiableView(),
+       super._optionalStats();
 
   @override
   int indexOf(int value) => _source.indexOf(value);
@@ -29,7 +35,14 @@ final class _PuzzleSimple extends Puzzle {
   int operator [](int index) => _source[index];
 
   @override
-  Puzzle clone() => _PuzzleSimple(width, _source);
+  Puzzle clone() => _PuzzleSimple(
+    width,
+    _source,
+    incorrect: _incorrect,
+    deltaSumSq: _deltaSumSq,
+    manhattan: _manhattan,
+    linearConflicts: _linearConflicts,
+  );
 
   @override
   int get length => _source.length;

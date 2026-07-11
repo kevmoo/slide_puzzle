@@ -76,7 +76,15 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
       _data = _create(source),
       super._();
 
-  _PuzzleSmart._direct(this.width, this.length, this._data) : super._();
+  _PuzzleSmart._direct(
+    this.width,
+    this.length,
+    this._data, {
+    super.incorrect,
+    super.deltaSumSq,
+    super.manhattan,
+    super.linearConflicts,
+  }) : super._optionalStats();
 
   _SliceList get _slice => _SliceList(_data);
 
@@ -115,18 +123,142 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
   Puzzle _newWithValues(List<int> values) => _PuzzleSmart(width, values);
 
   @override
-  Puzzle clone() =>
-      _PuzzleSmart._direct(width, length, Uint32List.fromList(_data));
+  Puzzle clone() => _PuzzleSmart._direct(
+    width,
+    length,
+    Uint32List.fromList(_data),
+    incorrect: _incorrect,
+    deltaSumSq: _deltaSumSq,
+    manhattan: _manhattan,
+    linearConflicts: _linearConflicts,
+  );
 
   @override
   Puzzle _clickValue(int tileValue) {
     assert(_movable(tileValue));
     final target = coordinatesOf(tileValue);
 
-    final newStore = _SliceList(Uint32List.fromList(_data));
+    if (_incorrect == null) {
+      _computeStats();
+    }
 
-    _shiftSlice(newStore, target.x, target.y);
-    return _PuzzleSmart._direct(width, length, newStore._data);
+    final newStore = _SliceList(Uint32List.fromList(_data));
+    final slice = _slice;
+    final lastCoord = openPosition();
+    final (deltaX, deltaY) = (lastCoord.x - target.x, lastCoord.y - target.y);
+
+    final w = width;
+    final h = (w == 4) ? length >> 2 : length ~/ w;
+    final openTile = length - 1;
+
+    var newIncorrect = _incorrect!;
+    var newDeltaSumSq = _deltaSumSq!;
+    var newManhattan = _manhattan!;
+
+    final stepX = deltaX.sign;
+    final stepY = deltaY.sign;
+    var currX = target.x;
+    var currY = target.y;
+    while (currX != lastCoord.x || currY != lastCoord.y) {
+      final oldPos = (w == 4) ? currX + (currY << 2) : currX + currY * w;
+      final val = slice[oldPos];
+      if (val != openTile) {
+        final correctCol = (w == 4) ? val & 3 : val % w;
+        final correctRow = (w == 4) ? val >> 2 : val ~/ w;
+
+        final oldColDelta = (correctCol - currX).abs();
+        final oldRowDelta = (correctRow - currY).abs();
+        final oldDelta = oldColDelta + oldRowDelta;
+        final oldInc = (val != oldPos) ? 1 : 0;
+        final oldSq = oldInc * (oldDelta * oldDelta);
+        final oldMan = oldInc * oldDelta;
+
+        final newX = currX + stepX;
+        final newY = currY + stepY;
+        final newPos = (w == 4) ? newX + (newY << 2) : newX + newY * w;
+        final newColDelta = (correctCol - newX).abs();
+        final newRowDelta = (correctRow - newY).abs();
+        final newDelta = newColDelta + newRowDelta;
+        final newInc = (val != newPos) ? 1 : 0;
+        final newSq = newInc * (newDelta * newDelta);
+        final newMan = newInc * newDelta;
+
+        newIncorrect += newInc - oldInc;
+        newDeltaSumSq += newSq - oldSq;
+        newManhattan += newMan - oldMan;
+      }
+      currX += stepX;
+      currY += stepY;
+    }
+
+    var newLinearConflicts = _linearConflicts!;
+    if (target.y == lastCoord.y) {
+      final r = target.y;
+      final oldRowConflicts = (w == 4)
+          ? Puzzle._rowConflictsCore4(r, openTile, (i) => slice[i])
+          : Puzzle._rowConflictsCore(w, r, w, openTile, (i) => slice[i]);
+      var oldColConflicts = 0;
+      final minC = (target.x < lastCoord.x) ? target.x : lastCoord.x;
+      final maxC = (target.x > lastCoord.x) ? target.x : lastCoord.x;
+      for (var c = minC; c <= maxC; c++) {
+        oldColConflicts += (w == 4)
+            ? Puzzle._colConflictsCore4(c, openTile, (i) => slice[i])
+            : Puzzle._colConflictsCore(w, h, c, openTile, (i) => slice[i]);
+      }
+
+      _shiftSlice(newStore, target.x, target.y);
+
+      final newRowConflicts = (w == 4)
+          ? Puzzle._rowConflictsCore4(r, openTile, (i) => newStore[i])
+          : Puzzle._rowConflictsCore(w, r, w, openTile, (i) => newStore[i]);
+      var newColConflicts = 0;
+      for (var c = minC; c <= maxC; c++) {
+        newColConflicts += (w == 4)
+            ? Puzzle._colConflictsCore4(c, openTile, (i) => newStore[i])
+            : Puzzle._colConflictsCore(w, h, c, openTile, (i) => newStore[i]);
+      }
+      newLinearConflicts +=
+          (newRowConflicts - oldRowConflicts) +
+          (newColConflicts - oldColConflicts);
+    } else {
+      final c = target.x;
+      final oldColConflicts = (w == 4)
+          ? Puzzle._colConflictsCore4(c, openTile, (i) => slice[i])
+          : Puzzle._colConflictsCore(w, h, c, openTile, (i) => slice[i]);
+      var oldRowConflicts = 0;
+      final minR = (target.y < lastCoord.y) ? target.y : lastCoord.y;
+      final maxR = (target.y > lastCoord.y) ? target.y : lastCoord.y;
+      for (var r = minR; r <= maxR; r++) {
+        oldRowConflicts += (w == 4)
+            ? Puzzle._rowConflictsCore4(r, openTile, (i) => slice[i])
+            : Puzzle._rowConflictsCore(w, r, w, openTile, (i) => slice[i]);
+      }
+
+      _shiftSlice(newStore, target.x, target.y);
+
+      final newColConflicts = (w == 4)
+          ? Puzzle._colConflictsCore4(c, openTile, (i) => newStore[i])
+          : Puzzle._colConflictsCore(w, h, c, openTile, (i) => newStore[i]);
+      var newRowConflicts = 0;
+      for (var r = minR; r <= maxR; r++) {
+        newRowConflicts += (w == 4)
+            ? Puzzle._rowConflictsCore4(r, openTile, (i) => newStore[i])
+            : Puzzle._rowConflictsCore(w, r, w, openTile, (i) => newStore[i]);
+      }
+      newLinearConflicts +=
+          (newColConflicts - oldColConflicts) +
+          (newRowConflicts - oldRowConflicts);
+    }
+
+    return _PuzzleSmart._direct(
+      width,
+      length,
+      newStore._data,
+      incorrect: newIncorrect,
+      deltaSumSq: newDeltaSumSq,
+      manhattan: newManhattan,
+      linearConflicts: newLinearConflicts,
+    );
   }
 
   void _shiftSlice(_SliceList source, int targetX, int targetY) {
@@ -209,9 +341,7 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
         linearConflicts += countRemovals(goalsMask, goalsCount);
       }
 
-      _incorrectTilesCache = incorrect;
-      _fitnessCache = deltaSumSq * incorrect;
-      _lowerBoundCache = manhattan + 2 * linearConflicts;
+      _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
       return;
     }
 
@@ -259,9 +389,7 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
       linearConflicts += countRemovals(goalsMask, goalsCount);
     }
 
-    _incorrectTilesCache = incorrect;
-    _fitnessCache = deltaSumSq * incorrect;
-    _lowerBoundCache = manhattan + 2 * linearConflicts;
+    _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
   }
 
   @override

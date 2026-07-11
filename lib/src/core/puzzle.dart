@@ -100,6 +100,43 @@ sealed class Puzzle {
   int? _incorrectTilesCache;
   int? _lowerBoundCache;
 
+  int? _incorrect;
+  int? _deltaSumSq;
+  int? _manhattan;
+  int? _linearConflicts;
+
+  Puzzle._optionalStats({
+    int? incorrect,
+    int? deltaSumSq,
+    int? manhattan,
+    int? linearConflicts,
+  }) : _incorrect = incorrect,
+       _deltaSumSq = deltaSumSq,
+       _manhattan = manhattan,
+       _linearConflicts = linearConflicts,
+       _incorrectTilesCache = incorrect,
+       _fitnessCache = (deltaSumSq != null && incorrect != null)
+           ? deltaSumSq * incorrect
+           : null,
+       _lowerBoundCache = (manhattan != null && linearConflicts != null)
+           ? manhattan + 2 * linearConflicts
+           : null;
+
+  void _setStats(
+    int incorrect,
+    int deltaSumSq,
+    int manhattan,
+    int linearConflicts,
+  ) {
+    _incorrect = incorrect;
+    _deltaSumSq = deltaSumSq;
+    _manhattan = manhattan;
+    _linearConflicts = linearConflicts;
+    _incorrectTilesCache = incorrect;
+    _fitnessCache = deltaSumSq * incorrect;
+    _lowerBoundCache = manhattan + 2 * linearConflicts;
+  }
+
   int get incorrectTiles {
     if (_incorrectTilesCache != null) return _incorrectTilesCache!;
     _computeStats();
@@ -180,9 +217,7 @@ sealed class Puzzle {
         linearConflicts += countRemovals(goalsMask, goalsCount);
       }
 
-      _incorrectTilesCache = incorrect;
-      _fitnessCache = deltaSumSq * incorrect;
-      _lowerBoundCache = manhattan + 2 * linearConflicts;
+      _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
       return;
     }
 
@@ -230,9 +265,7 @@ sealed class Puzzle {
       linearConflicts += countRemovals(goalsMask, goalsCount);
     }
 
-    _incorrectTilesCache = incorrect;
-    _fitnessCache = deltaSumSq * incorrect;
-    _lowerBoundCache = manhattan + 2 * linearConflicts;
+    _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
   }
 
   Puzzle? clickRandom({bool? vertical}) {
@@ -296,9 +329,127 @@ sealed class Puzzle {
     assert(_movable(tileValue));
     final target = coordinatesOf(tileValue);
 
-    final newStore = _copyData();
+    if (_incorrect == null) {
+      _computeStats();
+    }
 
-    _shift(newStore, target.x, target.y);
+    final newStore = _copyData();
+    final lastCoord = openPosition();
+    final (deltaX, deltaY) = (lastCoord.x - target.x, lastCoord.y - target.y);
+
+    final w = width;
+    final h = height;
+    final openTile = length - 1;
+
+    var newIncorrect = _incorrect!;
+    var newDeltaSumSq = _deltaSumSq!;
+    var newManhattan = _manhattan!;
+
+    final stepX = deltaX.sign;
+    final stepY = deltaY.sign;
+    var currX = target.x;
+    var currY = target.y;
+    while (currX != lastCoord.x || currY != lastCoord.y) {
+      final oldPos = (w == 4) ? currX + (currY << 2) : currX + currY * w;
+      final val = this[oldPos];
+      if (val != openTile) {
+        final correctCol = (w == 4) ? val & 3 : val % w;
+        final correctRow = (w == 4) ? val >> 2 : val ~/ w;
+
+        final oldColDelta = (correctCol - currX).abs();
+        final oldRowDelta = (correctRow - currY).abs();
+        final oldDelta = oldColDelta + oldRowDelta;
+        final oldInc = (val != oldPos) ? 1 : 0;
+        final oldSq = oldInc * (oldDelta * oldDelta);
+        final oldMan = oldInc * oldDelta;
+
+        final newX = currX + stepX;
+        final newY = currY + stepY;
+        final newPos = (w == 4) ? newX + (newY << 2) : newX + newY * w;
+        final newColDelta = (correctCol - newX).abs();
+        final newRowDelta = (correctRow - newY).abs();
+        final newDelta = newColDelta + newRowDelta;
+        final newInc = (val != newPos) ? 1 : 0;
+        final newSq = newInc * (newDelta * newDelta);
+        final newMan = newInc * newDelta;
+
+        newIncorrect += newInc - oldInc;
+        newDeltaSumSq += newSq - oldSq;
+        newManhattan += newMan - oldMan;
+      }
+      currX += stepX;
+      currY += stepY;
+    }
+
+    var newLinearConflicts = _linearConflicts!;
+    if (target.y == lastCoord.y) {
+      final r = target.y;
+      final oldRowConflicts = (w == 4)
+          ? _rowConflictsCore4(r, openTile, (i) => this[i])
+          : _rowConflictsCore(w, r, w, openTile, (i) => this[i]);
+      var oldColConflicts = 0;
+      final minC = (target.x < lastCoord.x) ? target.x : lastCoord.x;
+      final maxC = (target.x > lastCoord.x) ? target.x : lastCoord.x;
+      for (var c = minC; c <= maxC; c++) {
+        oldColConflicts += (w == 4)
+            ? _colConflictsCore4(c, openTile, (i) => this[i])
+            : _colConflictsCore(w, h, c, openTile, (i) => this[i]);
+      }
+
+      _shift(newStore, target.x, target.y);
+
+      final newRowConflicts = (w == 4)
+          ? _rowConflictsCore4(r, openTile, (i) => newStore[i])
+          : _rowConflictsCore(w, r, w, openTile, (i) => newStore[i]);
+      var newColConflicts = 0;
+      for (var c = minC; c <= maxC; c++) {
+        newColConflicts += (w == 4)
+            ? _colConflictsCore4(c, openTile, (i) => newStore[i])
+            : _colConflictsCore(w, h, c, openTile, (i) => newStore[i]);
+      }
+      newLinearConflicts +=
+          (newRowConflicts - oldRowConflicts) +
+          (newColConflicts - oldColConflicts);
+    } else {
+      final c = target.x;
+      final oldColConflicts = (w == 4)
+          ? _colConflictsCore4(c, openTile, (i) => this[i])
+          : _colConflictsCore(w, h, c, openTile, (i) => this[i]);
+      var oldRowConflicts = 0;
+      final minR = (target.y < lastCoord.y) ? target.y : lastCoord.y;
+      final maxR = (target.y > lastCoord.y) ? target.y : lastCoord.y;
+      for (var r = minR; r <= maxR; r++) {
+        oldRowConflicts += (w == 4)
+            ? _rowConflictsCore4(r, openTile, (i) => this[i])
+            : _rowConflictsCore(w, r, w, openTile, (i) => this[i]);
+      }
+
+      _shift(newStore, target.x, target.y);
+
+      final newColConflicts = (w == 4)
+          ? _colConflictsCore4(c, openTile, (i) => newStore[i])
+          : _colConflictsCore(w, h, c, openTile, (i) => newStore[i]);
+      var newRowConflicts = 0;
+      for (var r = minR; r <= maxR; r++) {
+        newRowConflicts += (w == 4)
+            ? _rowConflictsCore4(r, openTile, (i) => newStore[i])
+            : _rowConflictsCore(w, r, w, openTile, (i) => newStore[i]);
+      }
+      newLinearConflicts +=
+          (newColConflicts - oldColConflicts) +
+          (newRowConflicts - oldRowConflicts);
+    }
+
+    if (this is _PuzzleSimple) {
+      return _PuzzleSimple(
+        width,
+        newStore,
+        incorrect: newIncorrect,
+        deltaSumSq: newDeltaSumSq,
+        manhattan: newManhattan,
+        linearConflicts: newLinearConflicts,
+      );
+    }
     return _newWithValues(newStore);
   }
 
@@ -324,6 +475,80 @@ sealed class Puzzle {
     final temp = source[aIndex];
     source[aIndex] = source[bIndex];
     source[bIndex] = temp;
+  }
+
+  static int _rowConflictsCore4(
+    int r,
+    int openTile,
+    int Function(int index) getVal,
+  ) {
+    var goalsMask = 0;
+    var goalsCount = 0;
+    final rowOffset = r << 2;
+    for (var c = 0; c < 4; c++) {
+      final val = getVal(c + rowOffset);
+      if (val != openTile && (val >> 2) == r) {
+        goalsMask |= (val & 3) << (goalsCount << 2);
+        goalsCount++;
+      }
+    }
+    return countRemovals(goalsMask, goalsCount);
+  }
+
+  static int _colConflictsCore4(
+    int c,
+    int openTile,
+    int Function(int index) getVal,
+  ) {
+    var goalsMask = 0;
+    var goalsCount = 0;
+    for (var r = 0; r < 4; r++) {
+      final val = getVal(c + (r << 2));
+      if (val != openTile && (val & 3) == c) {
+        goalsMask |= (val >> 2) << (goalsCount << 2);
+        goalsCount++;
+      }
+    }
+    return countRemovals(goalsMask, goalsCount);
+  }
+
+  static int _rowConflictsCore(
+    int w,
+    int r,
+    int rowLen,
+    int openTile,
+    int Function(int index) getVal,
+  ) {
+    var goalsMask = 0;
+    var goalsCount = 0;
+    final rowOffset = r * rowLen;
+    for (var c = 0; c < rowLen; c++) {
+      final val = getVal(c + rowOffset);
+      if (val != openTile && val ~/ w == r) {
+        goalsMask |= (val % w) << (goalsCount << 2);
+        goalsCount++;
+      }
+    }
+    return countRemovals(goalsMask, goalsCount);
+  }
+
+  static int _colConflictsCore(
+    int w,
+    int h,
+    int c,
+    int openTile,
+    int Function(int index) getVal,
+  ) {
+    var goalsMask = 0;
+    var goalsCount = 0;
+    for (var r = 0; r < h; r++) {
+      final val = getVal(c + r * w);
+      if (val != openTile && val % w == c) {
+        goalsMask |= (val ~/ w) << (goalsCount << 2);
+        goalsCount++;
+      }
+    }
+    return countRemovals(goalsMask, goalsCount);
   }
 
   Point coordinatesOf(int value) {
