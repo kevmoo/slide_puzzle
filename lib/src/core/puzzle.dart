@@ -53,8 +53,8 @@ sealed class Puzzle {
     return Puzzle._raw(width, source);
   }
 
-  factory Puzzle(int width, int height) =>
-      Puzzle.raw(width, _randomList(width, height));
+  factory Puzzle(int width, int height, {Random? random, bool easy = false}) =>
+      Puzzle.raw(width, _randomList(width, height, random: random, easy: easy));
 
   factory Puzzle.parse(String input) {
     final rows = LineSplitter.split(input).map((line) {
@@ -92,14 +92,14 @@ sealed class Puzzle {
     return _newWithValues(data);
   }
 
+  int? _fitnessCache;
+  int? _incorrectTilesCache;
+  int? _lowerBoundCache;
+
   int get incorrectTiles {
-    var count = tileCount;
-    for (var i = 0; i < tileCount; i++) {
-      if (isCorrectPosition(i)) {
-        count--;
-      }
-    }
-    return count;
+    if (_incorrectTilesCache != null) return _incorrectTilesCache!;
+    _computeStats();
+    return _incorrectTilesCache!;
   }
 
   Point openPosition() => coordinatesOf(tileCount);
@@ -111,20 +111,68 @@ sealed class Puzzle {
   ///
   /// `0` - you've won!
   int get fitness {
-    var value = 0;
-    for (var i = 0; i < tileCount; i++) {
-      if (!isCorrectPosition(i)) {
-        final (correctColumn, correctRow) = (i % width, i ~/ width);
+    if (_fitnessCache != null) return _fitnessCache!;
+    _computeStats();
+    return _fitnessCache!;
+  }
 
-        final index = indexOf(i);
-        final (x, y) = (index % width, index ~/ width);
+  int get lowerBound {
+    if (_lowerBoundCache != null) return _lowerBoundCache!;
+    _computeStats();
+    return _lowerBoundCache!;
+  }
 
-        final delta = (correctColumn - x).abs() + (correctRow - y).abs();
+  void _computeStats() {
+    var deltaSumSq = 0;
+    var incorrect = 0;
+    var manhattan = 0;
+    final openTile = length - 1;
+    final w = width;
+    final h = height;
 
-        value += delta * delta;
+    for (var pos = 0; pos < length; pos++) {
+      final val = this[pos];
+      if (val != pos && val != openTile) {
+        incorrect++;
+        final correctCol = val % w;
+        final correctRow = val ~/ w;
+        final currentCol = pos % w;
+        final currentRow = pos ~/ w;
+
+        final colDelta = (correctCol - currentCol).abs();
+        final rowDelta = (correctRow - currentRow).abs();
+        final delta = colDelta + rowDelta;
+
+        deltaSumSq += delta * delta;
+        manhattan += delta;
       }
     }
-    return value * incorrectTiles;
+
+    var linearConflicts = 0;
+    for (var r = 0; r < h; r++) {
+      final goals = <int>[];
+      for (var c = 0; c < w; c++) {
+        final val = this[c + r * w];
+        if (val != openTile && val ~/ w == r) {
+          goals.add(val % w);
+        }
+      }
+      linearConflicts += countRemovals(goals);
+    }
+    for (var c = 0; c < w; c++) {
+      final goals = <int>[];
+      for (var r = 0; r < h; r++) {
+        final val = this[c + r * w];
+        if (val != openTile && val % w == c) {
+          goals.add(val ~/ w);
+        }
+      }
+      linearConflicts += countRemovals(goals);
+    }
+
+    _incorrectTilesCache = incorrect;
+    _fitnessCache = deltaSumSq * incorrect;
+    _lowerBoundCache = manhattan + 2 * linearConflicts;
   }
 
   Puzzle? clickRandom({bool? vertical}) {
@@ -251,17 +299,47 @@ sealed class Puzzle {
   }
 }
 
-Uint8List _randomList(int width, int height) => _randomizeList(
+Uint8List _randomList(
+  int width,
+  int height, {
+  Random? random,
+  bool easy = false,
+}) => _randomizeList(
   width,
   List<int>.generate(width * height, (i) => i, growable: false),
+  random: random,
+  easy: easy,
 );
 
-Uint8List _randomizeList(int width, List<int> existing) {
+Uint8List _randomizeList(
+  int width,
+  List<int> existing, {
+  Random? random,
+  bool easy = false,
+}) {
   final copy = Uint8List.fromList(existing);
+  final rnd = random ?? _rnd;
+  final height = existing.length ~/ width;
   do {
-    copy.shuffle(_rnd);
+    if (easy && width > 2 && height > 2) {
+      final activeIndices = <int>[];
+      for (var r = 0; r < height - 1; r++) {
+        for (var c = 0; c < width - 1; c++) {
+          activeIndices.add(r * width + c);
+        }
+      }
+      final activeValues = activeIndices.map((i) => copy[i]).toList();
+      activeValues.shuffle(rnd);
+      for (var i = 0; i < activeIndices.length; i++) {
+        copy[activeIndices[i]] = activeValues[i];
+      }
+    } else {
+      copy.shuffle(rnd);
+    }
   } while (!isSolvable(width, copy) ||
-      copy.any((v) => copy[v] == v || copy[v] == existing[v]));
+      (easy && width > 2 && height > 2
+          ? copy[0] == 0 && copy[1] == 1 && copy[width] == width
+          : copy.any((v) => copy[v] == v || copy[v] == existing[v])));
   return copy;
 }
 

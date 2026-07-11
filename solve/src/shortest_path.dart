@@ -18,10 +18,9 @@ Iterable<List<T>> shortestPaths<T>(
   int Function(T, T)? compare,
   int Function(T)? minDistanceToSolution,
 }) sync* {
-  final distances = HashMap<T, LinkedValue<T>>(
-    equals: equals,
-    hashCode: hashCode,
-  );
+  final distances = (equals == null && hashCode == null)
+      ? HashMap<T, LinkedValue<T>>()
+      : HashMap<T, LinkedValue<T>>(equals: equals, hashCode: hashCode);
 
   equals ??= _defaultEquals;
   if (equals(start, target)) {

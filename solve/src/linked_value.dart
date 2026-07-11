@@ -1,25 +1,29 @@
-abstract class LinkedValue<T> {
+sealed class LinkedValue<T> {
+  const LinkedValue._();
+
   int get length;
 
-  factory LinkedValue.empty() => _EmptyLinkedThing();
+  factory LinkedValue.empty() => _EmptyLinkedThing<T>();
 
   LinkedValue<T> followedBy(T value);
 
   List<T> toList();
 }
 
-class _EmptyLinkedThing<T> implements LinkedValue<T> {
+final class _EmptyLinkedThing<T> extends LinkedValue<T> {
+  const _EmptyLinkedThing() : super._();
+
   @override
   int get length => 0;
 
   @override
-  LinkedValue<T> followedBy(T value) => _LinkedThing(null, value);
+  LinkedValue<T> followedBy(T value) => _LinkedThing<T>(null, value);
 
   @override
   List<T> toList() => const [];
 }
 
-class _LinkedThing<T> implements LinkedValue<T> {
+final class _LinkedThing<T> extends LinkedValue<T> {
   final _LinkedThing<T>? _previous;
   final T _value;
 
@@ -27,10 +31,11 @@ class _LinkedThing<T> implements LinkedValue<T> {
   final int length;
 
   _LinkedThing(this._previous, this._value)
-    : length = 1 + (_previous?.length ?? 0);
+    : length = 1 + (_previous?.length ?? 0),
+      super._();
 
   @override
-  LinkedValue<T> followedBy(T value) => _LinkedThing(this, value);
+  LinkedValue<T> followedBy(T value) => _LinkedThing<T>(this, value);
 
   @override
   List<T> toList() {

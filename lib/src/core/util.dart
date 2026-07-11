@@ -50,3 +50,19 @@ int _countInversions(List<int> items) {
   }
   return score;
 }
+
+int countRemovals(List<int> goals) {
+  final n = goals.length;
+  if (n <= 1) return 0;
+  var maxLis = 1;
+  final dp = List<int>.filled(n, 1);
+  for (var i = 1; i < n; i++) {
+    for (var j = 0; j < i; j++) {
+      if (goals[j] < goals[i] && dp[j] + 1 > dp[i]) {
+        dp[i] = dp[j] + 1;
+        if (dp[i] > maxLis) maxLis = dp[i];
+      }
+    }
+  }
+  return n - maxLis;
+}
