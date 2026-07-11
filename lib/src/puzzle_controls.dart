@@ -19,7 +19,13 @@ abstract interface class PuzzleControls implements Listenable {
 
   void solveOrCancel();
 
+  VoidCallback? get solveFunction;
+
+  VoidCallback? get solveOrCancelFunction;
+
   void hint();
+
+  VoidCallback? get hintFunction;
 
   Duration? get lastSolveTime;
 

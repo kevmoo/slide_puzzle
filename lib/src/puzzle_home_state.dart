@@ -118,6 +118,14 @@ class PuzzleViewModel extends ChangeNotifier
   }
 
   @override
+  VoidCallback? get hintFunction {
+    if (puzzle.solved || _isSolving) {
+      return null;
+    }
+    return hint;
+  }
+
+  @override
   void solveOrCancel() {
     if (puzzle.solved) {
       return;
@@ -142,6 +150,17 @@ class PuzzleViewModel extends ChangeNotifier
 
     _startSolverStream();
   }
+
+  @override
+  VoidCallback? get solveFunction {
+    if (puzzle.solved) {
+      return null;
+    }
+    return solveOrCancel;
+  }
+
+  @override
+  VoidCallback? get solveOrCancelFunction => solveFunction;
 
   void _startSolverStream() {
     _solverSubscription?.cancel();

@@ -362,5 +362,103 @@ void main() {
       await tester.pump(const Duration(milliseconds: 260));
       expect(controls.clickCount, 3, reason: 'Step 2 did not move');
     });
+
+    testWidgets('10. Hint and Solve Buttons Disabled When Puzzle Solved', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const PuzzleApp());
+      await tester.pumpAndSettle();
+
+      // Initially not solved, so onPressed should not be null
+      final hintButtonInitial = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.lightbulb_outline),
+          matching: find.byType(IconButton),
+        ),
+      );
+      final solveButtonInitial = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.auto_fix_high),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(hintButtonInitial.onPressed, isNotNull);
+      expect(solveButtonInitial.onPressed, isNotNull);
+
+      // Trigger easter egg and solve
+      final appState = Provider.of<AppState>(
+        tester.element(find.byType(TabBar)),
+        listen: false,
+      );
+      final puzzle = appState.puzzle;
+      final openLoc = puzzle.location(puzzle.tileCount);
+      final unmovableIndices = <int>[];
+      for (var i = 0; i < puzzle.tileCount; i++) {
+        final tileLoc = puzzle.location(i);
+        if (tileLoc.x != openLoc.x && tileLoc.y != openLoc.y) {
+          unmovableIndices.add(i);
+        }
+      }
+      final bad1 = unmovableIndices[0];
+      final bad2 = unmovableIndices[1];
+      final sequence = [bad1, bad2, bad1, bad2, bad1];
+      for (final idx in sequence) {
+        await tester.tap(find.text('${idx + 1}').first, warnIfMissed: false);
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pumpAndSettle();
+
+      // Click tile 15 to solve
+      await tester.tap(find.text('15').first, warnIfMissed: false);
+      await tester.pumpAndSettle();
+      expect(puzzle.solved, isTrue);
+
+      for (final element in tester.allElements) {
+        if (element.widget.runtimeType.toString().contains('Consumer<')) {
+          element.markNeedsBuild();
+        }
+      }
+      await tester.pumpAndSettle();
+
+      final hintButtonSolved = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.lightbulb_outline),
+          matching: find.byType(IconButton),
+        ),
+      );
+      final solveButtonSolved = tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byIcon(Icons.auto_fix_high),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(hintButtonSolved.onPressed, isNull);
+      expect(solveButtonSolved.onPressed, isNull);
+    });
+
+    testWidgets('11. RichText Spans For Moves and Tiles Left Inherit Styling', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const PuzzleApp());
+      await tester.pumpAndSettle();
+
+      final movesFinder = find.byWidgetPredicate((widget) {
+        if (widget is! RichText) return false;
+        return widget.text.toPlainText().contains('Moves');
+      });
+      final tilesLeftFinder = find.byWidgetPredicate((widget) {
+        if (widget is! RichText) return false;
+        return widget.text.toPlainText().contains('Tiles left');
+      });
+
+      expect(movesFinder, findsOneWidget);
+      expect(tilesLeftFinder, findsOneWidget);
+
+      final movesRichText = tester.widget<RichText>(movesFinder);
+      final tilesLeftRichText = tester.widget<RichText>(tilesLeftFinder);
+
+      expect(movesRichText.text.style, isNotNull);
+      expect(tilesLeftRichText.text.style, isNotNull);
+    });
   });
 }

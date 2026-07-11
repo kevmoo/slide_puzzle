@@ -82,7 +82,8 @@ sealed class SharedTheme {
       message: 'Reset',
       child: IconButton(
         onPressed: controls.reset,
-        icon: Icon(Icons.refresh, color: puzzleAccentColor),
+        color: puzzleAccentColor,
+        icon: const Icon(Icons.refresh),
       ),
     ),
     Tooltip(
@@ -96,22 +97,24 @@ sealed class SharedTheme {
     Tooltip(
       message: 'Hint',
       child: IconButton(
-        onPressed: controls.hint,
-        icon: Icon(Icons.lightbulb_outline, color: puzzleAccentColor),
+        onPressed: controls.hintFunction,
+        color: puzzleAccentColor,
+        icon: const Icon(Icons.lightbulb_outline),
       ),
     ),
     Tooltip(
       message: controls.isSolving ? 'Cancel solving' : 'Solve',
       child: IconButton(
-        onPressed: controls.solveOrCancel,
+        onPressed: controls.solveFunction,
+        color: puzzleAccentColor,
         icon: Icon(
           controls.isSolving ? Icons.stop_circle_outlined : Icons.auto_fix_high,
-          color: puzzleAccentColor,
         ),
       ),
     ),
     if (controls.lastSolveSteps != null && controls.lastSolveTime != null) ...[
       Flexible(
+        flex: 4,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
@@ -127,11 +130,13 @@ sealed class SharedTheme {
     ],
     const Spacer(),
     Flexible(
+      flex: 2,
       child: RichText(
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
+          style: _infoStyle,
           children: [
-            TextSpan(text: controls.clickCount.toString(), style: _infoStyle),
+            TextSpan(text: controls.clickCount.toString()),
             const TextSpan(text: ' Moves'),
           ],
         ),
@@ -142,11 +147,9 @@ sealed class SharedTheme {
       child: RichText(
         textAlign: .right,
         text: TextSpan(
+          style: _infoStyle,
           children: [
-            TextSpan(
-              text: controls.incorrectTiles.toString(),
-              style: _infoStyle,
-            ),
+            TextSpan(text: controls.incorrectTiles.toString()),
             const TextSpan(text: ' Tiles left'),
           ],
         ),
