@@ -29,7 +29,9 @@ void main() {
 
   test('initial values must be correct', () {
     expect(
-        () => Puzzle.raw(3, [0, 1, 2, 3, 4, 5, 6, 7, 7]), throwsArgumentError);
+      () => Puzzle.raw(3, [0, 1, 2, 3, 4, 5, 6, 7, 7]),
+      throwsArgumentError,
+    );
 
     const width = 3, height = 3;
 
@@ -79,8 +81,11 @@ void main() {
 
       for (var i = 0; i < 10; i++) {
         puzzle = Puzzle(5, 5);
-        expect(doClick(puzzle, 24), isNull,
-            reason: 'clicking on the sliding tile is a no-op');
+        expect(
+          doClick(puzzle, 24),
+          isNull,
+          reason: 'clicking on the sliding tile is a no-op',
+        );
       }
     });
 
@@ -101,12 +106,16 @@ void main() {
           math.Point<int> randomPoint;
           do {
             randomPoint = math.Point(
-                _rnd.nextInt(puzzle.width), _rnd.nextInt(puzzle.height));
+              _rnd.nextInt(puzzle.width),
+              _rnd.nextInt(puzzle.height),
+            );
           } while (randomPoint.x == zeroLocation.x ||
               randomPoint.y == zeroLocation.y);
 
-          expect(doClick(puzzle, puzzle.valueAt(randomPoint.x, randomPoint.y)),
-              isNull);
+          expect(
+            doClick(puzzle, puzzle.valueAt(randomPoint.x, randomPoint.y)),
+            isNull,
+          );
         }
       }
     });
@@ -187,9 +196,13 @@ void main() {
 
       expect(puzzle.clickableValues(), unorderedEquals([0, 3, 7, 1, 2, 6]));
       expect(
-          puzzle.clickableValues(vertical: true), unorderedEquals([0, 3, 7]));
+        puzzle.clickableValues(vertical: true),
+        unorderedEquals([0, 3, 7]),
+      );
       expect(
-          puzzle.clickableValues(vertical: false), unorderedEquals([1, 2, 6]));
+        puzzle.clickableValues(vertical: false),
+        unorderedEquals([1, 2, 6]),
+      );
 
       expect(puzzle.incorrectTiles, 13);
     });

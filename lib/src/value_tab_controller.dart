@@ -8,10 +8,10 @@ import 'package:provider/provider.dart';
 class ValueTabController<T> extends StatefulWidget {
   /// Creates a default tab controller for the given [child] widget.
   const ValueTabController({
-    Key? key,
+    super.key,
     required this.child,
     required this.values,
-  }) : super(key: key);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -36,10 +36,10 @@ class ValueTabController<T> extends StatefulWidget {
   }
 
   @override
-  _ValueTabControllerState<T> createState() => _ValueTabControllerState<T>();
+  ValueTabControllerState<T> createState() => ValueTabControllerState<T>();
 }
 
-class _ValueTabControllerState<T> extends State<ValueTabController<T>>
+class ValueTabControllerState<T> extends State<ValueTabController<T>>
     with SingleTickerProviderStateMixin {
   late final ValueNotifier<T> _notifier;
 
@@ -79,11 +79,10 @@ class _ValueTabControllerState<T> extends State<ValueTabController<T>>
 
 class _ValueTabControllerScope extends InheritedWidget {
   const _ValueTabControllerScope({
-    Key? key,
     required this.controller,
     required this.enabled,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final TabController controller;
   final bool enabled;

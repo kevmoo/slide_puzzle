@@ -50,7 +50,7 @@ class PuzzleHomeState extends State
   final PuzzleAnimator puzzle;
 
   @override
-  final _AnimationNotifier animationNotifier = _AnimationNotifier();
+  final AnimationNotifier animationNotifier = AnimationNotifier();
 
   Duration _tickerTimeSinceLastEvent = Duration.zero;
   late Ticker _ticker;
@@ -170,7 +170,7 @@ class PuzzleHomeState extends State
   }
 }
 
-class _AnimationNotifier extends ChangeNotifier {
+class AnimationNotifier extends ChangeNotifier {
   void animate() {
     notifyListeners();
   }
@@ -182,7 +182,7 @@ Widget _updateConstraints(
   BoxConstraints constraints,
   Widget Function(bool small) builder,
 ) {
-  const _smallWidth = 580;
+  const smallWidth = 580;
 
   final constraintWidth = constraints.hasBoundedWidth
       ? constraints.maxWidth
@@ -192,7 +192,7 @@ Widget _updateConstraints(
       ? constraints.maxHeight
       : 1000.0;
 
-  return builder(constraintWidth < _smallWidth || constraintHeight < 690);
+  return builder(constraintWidth < smallWidth || constraintHeight < 690);
 }
 
 Widget _doBuild(BuildContext _, BoxConstraints constraints) =>
@@ -201,7 +201,7 @@ Widget _doBuild(BuildContext _, BoxConstraints constraints) =>
 Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
   values: themes,
   child: Consumer<SharedTheme>(
-    builder: (_, theme, __) => AnimatedContainer(
+    builder: (_, theme, _) => AnimatedContainer(
       duration: puzzleAnimationDuration,
       color: theme.puzzleThemeBackground,
       child: Center(
@@ -268,7 +268,7 @@ Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
                       right: 10,
                     ),
                     child: Consumer<PuzzleControls>(
-                      builder: (_, controls, __) =>
+                      builder: (_, controls, _) =>
                           Row(children: theme.bottomControls(controls)),
                     ),
                   ),

@@ -14,10 +14,8 @@ class PuzzleApp extends StatelessWidget {
   const PuzzleApp({this.columns = 4, this.rows = 4});
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Slide Puzzle',
-        home: _PuzzleHome(rows, columns),
-      );
+  Widget build(BuildContext context) =>
+      MaterialApp(title: 'Slide Puzzle', home: _PuzzleHome(rows, columns));
 }
 
 class _PuzzleHome extends StatefulWidget {

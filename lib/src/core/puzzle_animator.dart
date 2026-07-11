@@ -56,10 +56,15 @@ class PuzzleAnimator implements PuzzleProxy {
   PuzzleAnimator(int width, int height) : this._(Puzzle(width, height));
 
   PuzzleAnimator._(this._puzzle)
-      : _locations = List.generate(
-            _puzzle.length,
-            (i) => Body.raw(
-                (_puzzle.width - 1.0) / 2, (_puzzle.height - 1.0) / 2, 0, 0));
+    : _locations = List.generate(
+        _puzzle.length,
+        (i) => Body.raw(
+          (_puzzle.width - 1.0) / 2,
+          (_puzzle.height - 1.0) / 2,
+          0,
+          0,
+        ),
+      );
 
   void playRandom() {
     if (_puzzle.fitness == 0) {
@@ -160,11 +165,14 @@ class PuzzleAnimator implements PuzzleProxy {
       final target = _target(i);
       final body = _locations[i];
 
-      _stable = !body.animate(animationSeconds,
-              force: target - body.location,
-              drag: .9,
-              maxVelocity: 1.0,
-              snapTo: target) &&
+      _stable =
+          !body.animate(
+            animationSeconds,
+            force: target - body.location,
+            drag: .9,
+            maxVelocity: 1.0,
+            snapTo: target,
+          ) &&
           _stable;
     }
   }

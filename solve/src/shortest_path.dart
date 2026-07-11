@@ -18,8 +18,10 @@ Iterable<List<T>> shortestPaths<T>(
   int Function(T, T)? compare,
   int Function(T)? minDistanceToSolution,
 }) sync* {
-  final distances =
-      HashMap<T, LinkedValue<T>>(equals: equals, hashCode: hashCode);
+  final distances = HashMap<T, LinkedValue<T>>(
+    equals: equals,
+    hashCode: hashCode,
+  );
 
   equals ??= _defaultEquals;
   if (equals(start, target)) {
@@ -136,7 +138,8 @@ Iterable<List<T>> shortestPaths<T>(
 
         if (equals(edge, target)) {
           assert(
-              bestOption == null || bestOption.length > newPathToEdge.length);
+            bestOption == null || bestOption.length > newPathToEdge.length,
+          );
           bestOption = newPathToEdge.toList();
           bestOptionTime = watch.elapsed;
 
@@ -171,4 +174,4 @@ String _pct(int a, int b) => (100 * (a / b)).toStringAsFixed(1).padLeft(5);
 
 bool _defaultEquals(Object? a, Object? b) => a == b;
 
-int _defaultMinDistanceToSolution(a) => 1;
+int _defaultMinDistanceToSolution(Object? a) => 1;

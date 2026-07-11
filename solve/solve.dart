@@ -12,8 +12,10 @@ void main() {
     throw UnsupportedError('must be solvable!');
   }
 
-  final solvedConfig =
-      Puzzle.raw(puzzle.width, List.generate(puzzle.length, (i) => i));
+  final solvedConfig = Puzzle.raw(
+    puzzle.width,
+    List.generate(puzzle.length, (i) => i),
+  );
 
   var count = 0;
   late List<Puzzle> bestSolution;

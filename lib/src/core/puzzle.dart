@@ -142,8 +142,9 @@ abstract class Puzzle {
     final doRow = vertical == null || vertical == false;
     final doColumn = vertical == null || vertical;
 
-    final values =
-        Uint8List((doRow ? (width - 1) : 0) + (doColumn ? (height - 1) : 0));
+    final values = Uint8List(
+      (doRow ? (width - 1) : 0) + (doColumn ? (height - 1) : 0),
+    );
 
     var index = 0;
 
@@ -238,12 +239,14 @@ abstract class Puzzle {
 
   String _toString() {
     final grid = List<List<String>>.generate(
-        height,
-        (row) => List<String>.generate(
-            width, (col) => valueAt(col, row).toString()));
+      height,
+      (row) =>
+          List<String>.generate(width, (col) => valueAt(col, row).toString()),
+    );
 
-    final longestLength =
-        grid.expand((r) => r).fold(0, (int l, cell) => max(l, cell.length));
+    final longestLength = grid
+        .expand((r) => r)
+        .fold(0, (int l, cell) => max(l, cell.length));
 
     return grid
         .map((r) => r.map((v) => v.padLeft(longestLength)).join(' '))
@@ -252,9 +255,9 @@ abstract class Puzzle {
 }
 
 Uint8List _randomList(int width, int height) => _randomizeList(
-      width,
-      List<int>.generate(width * height, (i) => i, growable: false),
-    );
+  width,
+  List<int>.generate(width * height, (i) => i, growable: false),
+);
 
 Uint8List _randomizeList(int width, List<int> existing) {
   final copy = Uint8List.fromList(existing);
@@ -268,9 +271,10 @@ Uint8List _randomizeList(int width, List<int> existing) {
 void _validate(List<int> source) {
   for (var i = 0; i < source.length; i++) {
     requireArgument(
-        source.contains(i),
-        'source',
-        'Must contain each number from 0 to `length - 1` '
-            'once and only once.');
+      source.contains(i),
+      'source',
+      'Must contain each number from 0 to `length - 1` '
+          'once and only once.',
+    );
   }
 }

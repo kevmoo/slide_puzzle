@@ -23,17 +23,19 @@ void main() {
     for (final badValue in [
       double.nan,
       double.negativeInfinity,
-      double.infinity
+      double.infinity,
     ]) {
       expect(() => Body(velocity: Point(0, badValue)), _throwsAssertError);
       expect(() => Body(velocity: Point(badValue, 0)), _throwsAssertError);
       expect(() => Body(location: Point(0, badValue)), _throwsAssertError);
       expect(() => Body(location: Point(badValue, 0)), _throwsAssertError);
       expect(
-          () => Body(
-              location: Point(badValue, badValue),
-              velocity: Point(badValue, badValue)),
-          _throwsAssertError);
+        () => Body(
+          location: Point(badValue, badValue),
+          velocity: Point(badValue, badValue),
+        ),
+        _throwsAssertError,
+      );
     }
   });
 
@@ -55,24 +57,34 @@ void main() {
 
       expect(() => body.animate(1, maxVelocity: -1), _throwsAssertError);
       expect(
-          () => body.animate(1, maxVelocity: double.nan), _throwsAssertError);
-      expect(() => body.animate(1, maxVelocity: double.negativeInfinity),
-          _throwsAssertError);
+        () => body.animate(1, maxVelocity: double.nan),
+        _throwsAssertError,
+      );
+      expect(
+        () => body.animate(1, maxVelocity: double.negativeInfinity),
+        _throwsAssertError,
+      );
       expect(body.animate(1, maxVelocity: double.infinity), isFalse);
 
       for (final badValue in [
         double.nan,
         double.negativeInfinity,
-        double.infinity
+        double.infinity,
       ]) {
         expect(() => body.animate(badValue), _throwsAssertError);
         expect(() => body.animate(1, drag: badValue), _throwsAssertError);
-        expect(() => body.animate(1, force: Point(1, badValue)),
-            _throwsAssertError);
-        expect(() => body.animate(1, force: Point(badValue, 1)),
-            _throwsAssertError);
-        expect(() => body.animate(1, force: Point(badValue, badValue)),
-            _throwsAssertError);
+        expect(
+          () => body.animate(1, force: Point(1, badValue)),
+          _throwsAssertError,
+        );
+        expect(
+          () => body.animate(1, force: Point(badValue, 1)),
+          _throwsAssertError,
+        );
+        expect(
+          () => body.animate(1, force: Point(badValue, badValue)),
+          _throwsAssertError,
+        );
       }
     });
 
@@ -133,8 +145,11 @@ void main() {
         var lastLocation = body.location, lastVelocity = body.velocity;
         var loopCount = 0;
         while (body.animate(1, drag: 0.5)) {
-          expect(++loopCount, lessThan(20),
-              reason: 'drag + epsilon should stop things pretty quickly');
+          expect(
+            ++loopCount,
+            lessThan(20),
+            reason: 'drag + epsilon should stop things pretty quickly',
+          );
           expect(body.location.magnitude, greaterThan(lastLocation.magnitude));
           expect(body.velocity.magnitude, lessThan(lastVelocity.magnitude));
           lastLocation = body.location;
@@ -151,8 +166,9 @@ void main() {
 
       for (var i = 0; i < 10; i++) {
         expect(
-            body.animate(1, force: _point(1, 1), drag: 0.05, maxVelocity: 10),
-            isTrue);
+          body.animate(1, force: _point(1, 1), drag: 0.05, maxVelocity: 10),
+          isTrue,
+        );
         expect(body.location.x, greaterThan(0));
         expect(body.location.y, greaterThan(0));
         expect(body.velocity.x, greaterThan(0));
@@ -170,18 +186,32 @@ void main() {
       Point<double> force() => target - body.location;
 
       var count = 0;
-      while (body.animate(0.1,
-          force: force(), drag: 0.5, maxVelocity: 2, snapTo: target)) {
+      while (body.animate(
+        0.1,
+        force: force(),
+        drag: 0.5,
+        maxVelocity: 2,
+        snapTo: target,
+      )) {
         count++;
         expect(body.velocity.magnitude, lessThanOrEqualTo(2.0));
-        expect(count, lessThan(350),
-            reason: 'The system should settle down at ~341 iterations');
+        expect(
+          count,
+          lessThan(350),
+          reason: 'The system should settle down at ~341 iterations',
+        );
       }
 
-      expect(body.location, target,
-          reason: 'should snap to this exact location');
-      expect(body.velocity.magnitude, 0,
-          reason: 'velociy should "snap" to zero, too');
+      expect(
+        body.location,
+        target,
+        reason: 'should snap to this exact location',
+      );
+      expect(
+        body.velocity.magnitude,
+        0,
+        reason: 'velociy should "snap" to zero, too',
+      );
     });
   });
 }

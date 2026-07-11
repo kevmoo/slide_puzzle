@@ -27,14 +27,9 @@ class ThemePlaster extends SharedTheme {
 
   @override
   RoundedRectangleBorder puzzleBorder(bool small) => RoundedRectangleBorder(
-        side: const BorderSide(
-          color: Color.fromARGB(255, 103, 103, 105),
-          width: 8,
-        ),
-        borderRadius: BorderRadius.all(
-          Radius.circular(small ? 10 : 18),
-        ),
-      );
+    side: const BorderSide(color: Color.fromARGB(255, 103, 103, 105), width: 8),
+    borderRadius: BorderRadius.all(Radius.circular(small ? 10 : 18)),
+  );
 
   @override
   Widget tileButton(int i, PuzzleProxy puzzle, bool small) {
@@ -46,11 +41,7 @@ class ThemePlaster extends SharedTheme {
     if (i == puzzle.tileCount) {
       assert(puzzle.solved);
       return Center(
-        child: Icon(
-          Icons.thumb_up,
-          size: small ? 50 : 72,
-          color: _orangeIsh,
-        ),
+        child: Icon(Icons.thumb_up, size: small ? 50 : 72, color: _orangeIsh),
       );
     }
 

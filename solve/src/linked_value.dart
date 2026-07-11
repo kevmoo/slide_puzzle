@@ -27,7 +27,7 @@ class _LinkedThing<T> implements LinkedValue<T> {
   final int length;
 
   _LinkedThing(this._previous, this._value)
-      : length = 1 + (_previous?.length ?? 0);
+    : length = 1 + (_previous?.length ?? 0);
 
   @override
   LinkedValue<T> followedBy(T value) => _LinkedThing(this, value);
@@ -35,9 +35,11 @@ class _LinkedThing<T> implements LinkedValue<T> {
   @override
   List<T> toList() {
     final list = <T>[];
-    for (_LinkedThing<T>? previous = this;
-        previous != null;
-        previous = previous._previous) {
+    for (
+      _LinkedThing<T>? previous = this;
+      previous != null;
+      previous = previous._previous
+    ) {
       list.add(previous._value);
     }
 

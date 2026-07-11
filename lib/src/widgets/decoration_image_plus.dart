@@ -58,8 +58,8 @@ class DecorationImagePlus implements DecorationImage {
   ///
   /// The alignment aligns the given position in the image to the given position
   /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while
+  /// a [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
   /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
@@ -191,9 +191,9 @@ class DecorationImagePlus implements DecorationImage {
 /// To obtain a painter, call [DecorationImagePlus.createPainter].
 ///
 /// To paint, call [paint]. The `onChanged` callback passed to
-/// [DecorationImagePlus.createPainter] will be called if the image needs to paint
-/// again (e.g. because it is animated or because it had not yet loaded the
-/// first time the [paint] method was called).
+/// [DecorationImagePlus.createPainter] will be called if the image needs to
+/// paint again (e.g. because it is animated or because it had not yet loaded
+/// the first time the [paint] method was called).
 ///
 /// This object should be disposed using the [dispose] method when it is no
 /// longer needed.
@@ -218,8 +218,8 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   ///
   /// If the image needs to be painted again, e.g. because it is animated or
   /// because it had not yet been loaded the first time this method was called,
-  /// then the `onChanged` callback passed to [DecorationImagePlus.createPainter]
-  /// will be called.
+  /// then the `onChanged` callback passed to
+  /// [DecorationImagePlus.createPainter] will be called.
   @override
   void paint(
     Canvas canvas,
@@ -231,13 +231,15 @@ class DecorationImagePainterPlus implements DecorationImagePainter {
   }) {
     if (_details.matchTextDirection) {
       assert(() {
-        // We check this first so that the assert will fire immediately, not just
-        // when the image is ready.
+        // We check this first so that the assert will fire immediately, not
+        // just when the image is ready.
         if (configuration.textDirection == null) {
           throw FlutterError(
-            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
-            'When DecorationImagePainter.paint() was called, there was no text direction provided '
-            'in the ImageConfiguration object to match.\n'
+            'ImageDecoration.matchTextDirection can only be used when a '
+            'TextDirection is available.\n'
+            'When DecorationImagePainter.paint() was called, there was no '
+            'text direction provided in the ImageConfiguration object to '
+            'match.\n'
             'The DecorationImage was:\n'
             '  $_details\n'
             'The ImageConfiguration was:\n'

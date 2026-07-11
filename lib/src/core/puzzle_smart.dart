@@ -64,7 +64,7 @@ class _SliceList with ListMixin<int>, _SliceListMixin {
 
     final sharedShift =
         (_SliceListMixin._maxShift - (index % _SliceListMixin._valuesPerCell)) *
-            _SliceListMixin._bitsPerValue;
+        _SliceListMixin._bitsPerValue;
 
     final wipeout = _SliceListMixin._valueMask << sharedShift;
 
@@ -100,9 +100,9 @@ class _PuzzleSmart extends Puzzle with ListMixin<int>, _SliceListMixin {
   int get fitness => _fitnessCache ??= super.fitness;
 
   _PuzzleSmart(this.width, List<int> source)
-      : length = source.length,
-        _data = _create(source),
-        super._();
+    : length = source.length,
+      _data = _create(source),
+      super._();
 
   @override
   void operator []=(int index, int value) =>
@@ -124,7 +124,7 @@ class _PuzzleSmart extends Puzzle with ListMixin<int>, _SliceListMixin {
   String toString() => _toString();
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is _PuzzleSmart &&
         other.width == width &&
         other._data.length == _data.length) {

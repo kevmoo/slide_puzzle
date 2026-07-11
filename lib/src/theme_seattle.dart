@@ -25,9 +25,7 @@ class ThemeSeattle extends SharedTheme {
   @override
   RoundedRectangleBorder puzzleBorder(bool small) =>
       const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(1),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(1)),
       );
 
   @override
@@ -41,11 +39,12 @@ class ThemeSeattle extends SharedTheme {
     }
 
     final decorationImage = DecorationImagePlus(
-        puzzleWidth: puzzle.width,
-        puzzleHeight: puzzle.height,
-        pieceIndex: i,
-        fit: BoxFit.cover,
-        image: const AssetImage('asset/seattle.jpg'));
+      puzzleWidth: puzzle.width,
+      puzzleHeight: puzzle.height,
+      pieceIndex: i,
+      fit: BoxFit.cover,
+      image: const AssetImage('asset/seattle.jpg'),
+    );
 
     final correctPosition = puzzle.isCorrectPosition(i);
     final content = createInk(

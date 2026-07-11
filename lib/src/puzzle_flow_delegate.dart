@@ -10,12 +10,13 @@ class PuzzleFlowDelegate extends FlowDelegate {
   final PuzzleProxy _puzzleProxy;
 
   PuzzleFlowDelegate(this._tileSize, this._puzzleProxy, Listenable repaint)
-      : super(repaint: repaint);
+    : super(repaint: repaint);
 
   @override
   Size getSize(BoxConstraints constraints) => Size(
-      _tileSize.width * _puzzleProxy.width,
-      _tileSize.height * _puzzleProxy.height);
+    _tileSize.width * _puzzleProxy.width,
+    _tileSize.height * _puzzleProxy.height,
+  );
 
   @override
   BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) =>

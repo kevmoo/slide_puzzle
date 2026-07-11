@@ -20,7 +20,8 @@ void main() {
     // Verify that all 15 tile buttons are present on the board.
     expect(find.byType(ElevatedButton), findsNWidgets(tiles));
 
-    // Tap the first tile button and verify no exceptions occur after a frame pump.
+    // Tap the first tile button and verify no exceptions occur after a frame
+    // pump.
     await tester.tap(find.byType(ElevatedButton).first);
     await tester.pump();
 

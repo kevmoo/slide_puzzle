@@ -27,9 +27,7 @@ class ThemeSimple extends SharedTheme {
   RoundedRectangleBorder puzzleBorder(bool small) =>
       const RoundedRectangleBorder(
         side: BorderSide(color: Colors.black26, width: 1),
-        borderRadius: BorderRadius.all(
-          Radius.circular(4),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(4)),
       );
 
   @override
@@ -37,11 +35,7 @@ class ThemeSimple extends SharedTheme {
     if (i == puzzle.tileCount) {
       assert(puzzle.solved);
       return const Center(
-        child: Icon(
-          Icons.thumb_up,
-          size: 72,
-          color: _accentBlue,
-        ),
+        child: Icon(Icons.thumb_up, size: 72, color: _accentBlue),
       );
     }
 

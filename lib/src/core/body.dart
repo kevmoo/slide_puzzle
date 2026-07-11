@@ -18,10 +18,10 @@ class Body {
   Point<double> get location => _location;
 
   Body({Point<double> location = zeroPoint, Point<double> velocity = zeroPoint})
-      : assert(location.magnitude.isFinite),
-        _location = location,
-        assert(velocity.magnitude.isFinite),
-        _velocity = velocity;
+    : assert(location.magnitude.isFinite),
+      _location = location,
+      assert(velocity.magnitude.isFinite),
+      _velocity = velocity;
 
   factory Body.raw(double x, double y, double vx, double vy) =>
       Body(location: Point(x, y), velocity: Point(vx, vy));
@@ -36,13 +36,17 @@ class Body {
 
   /// [drag] must be greater than or equal to zero. It defines the percent of
   /// the previous velocity that is lost every second.
-  bool animate(double seconds,
-      {Point<double> force = zeroPoint,
-      double drag = 0,
-      double? maxVelocity,
-      Point<double>? snapTo}) {
-    assert(seconds.isFinite && seconds > 0,
-        'milliseconds must be finite and > 0 (was $seconds)');
+  bool animate(
+    double seconds, {
+    Point<double> force = zeroPoint,
+    double drag = 0,
+    double? maxVelocity,
+    Point<double>? snapTo,
+  }) {
+    assert(
+      seconds.isFinite && seconds > 0,
+      'milliseconds must be finite and > 0 (was $seconds)',
+    );
 
     assert(force.x.isFinite && force.y.isFinite, 'force must be finite');
 
@@ -54,8 +58,10 @@ class Body {
     final dragVelocity = _velocity * (1 - drag * seconds);
 
     if (_sameDirection(_velocity, dragVelocity)) {
-      assert(dragVelocity.magnitude <= _velocity.magnitude,
-          'Huh? $dragVelocity $_velocity');
+      assert(
+        dragVelocity.magnitude <= _velocity.magnitude,
+        'Huh? $dragVelocity $_velocity',
+      );
       _velocity = dragVelocity;
     } else {
       _velocity = zeroPoint;

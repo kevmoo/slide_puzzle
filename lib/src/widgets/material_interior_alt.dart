@@ -10,13 +10,13 @@ import '../flutter.dart';
 // TODO(kevmoo): file a feature request for this?
 class MaterialInterior extends ImplicitlyAnimatedWidget {
   const MaterialInterior({
-    Key? key,
+    super.key,
     required this.child,
     required this.shape,
     required this.color,
-    Curve curve = Curves.linear,
-    required Duration duration,
-  }) : super(key: key, curve: curve, duration: duration);
+    super.curve,
+    required super.duration,
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -33,21 +33,29 @@ class MaterialInterior extends ImplicitlyAnimatedWidget {
   final Color color;
 
   @override
-  _MaterialInteriorState createState() => _MaterialInteriorState();
+  MaterialInteriorState createState() => MaterialInteriorState();
 }
 
-class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
+class MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
   ShapeBorderTween? _border;
   ColorTween? _color;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _border = visitor(_border, widget.shape,
-            (value) => ShapeBorderTween(begin: value as ShapeBorder?))
-        as ShapeBorderTween?;
-    _color = visitor(
-            _color, widget.color, (value) => ColorTween(begin: value as Color?))
-        as ColorTween?;
+    _border =
+        visitor(
+              _border,
+              widget.shape,
+              (value) => ShapeBorderTween(begin: value as ShapeBorder?),
+            )
+            as ShapeBorderTween?;
+    _color =
+        visitor(
+              _color,
+              widget.color,
+              (value) => ColorTween(begin: value as Color?),
+            )
+            as ColorTween?;
   }
 
   @override
@@ -59,29 +67,22 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
         textDirection: Directionality.of(context),
       ),
       color: _color!.evaluate(animation)!,
-      child: _ShapeBorderPaint(
-        shape: shape,
-        child: widget.child,
-      ),
+      child: _ShapeBorderPaint(shape: shape, child: widget.child),
     );
   }
 }
 
 class _ShapeBorderPaint extends StatelessWidget {
-  const _ShapeBorderPaint({
-    required this.child,
-    required this.shape,
-  });
+  const _ShapeBorderPaint({required this.child, required this.shape});
 
   final Widget child;
   final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) => CustomPaint(
-        foregroundPainter:
-            _ShapeBorderPainter(shape, Directionality.of(context)),
-        child: child,
-      );
+    foregroundPainter: _ShapeBorderPainter(shape, Directionality.of(context)),
+    child: child,
+  );
 }
 
 class _ShapeBorderPainter extends CustomPainter {
