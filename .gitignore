@@ -28,6 +28,7 @@
 .flutter-plugins
 .flutter-plugins-dependencies
 /build/
+coverage/
 
 # Symbolication related
 app.*.symbols
