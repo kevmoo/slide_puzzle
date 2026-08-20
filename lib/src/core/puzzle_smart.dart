@@ -34,17 +34,18 @@ extension type const _SliceList(Uint32List _data) {
   }
 
   int indexOf(Object? value, [int start = 0, int length = 16]) {
-    if (value is int) {
-      for (var i = 0; i < _data.length; i++) {
-        final cellValue = _data[i];
-        for (var j = 0; j < _valuesPerCell; j++) {
-          final option = (cellValue >> ((_maxShift - j) << 2)) & _valueMask;
+    if (value is! int) {
+      return -1;
+    }
+    for (var i = 0; i < _data.length; i++) {
+      final cellValue = _data[i];
+      for (var j = 0; j < _valuesPerCell; j++) {
+        final option = (cellValue >> ((_maxShift - j) << 2)) & _valueMask;
 
-          if (value == option) {
-            final k = (i << 3) + j;
-            if (k < length && (k >= start)) {
-              return k;
-            }
+        if (value == option) {
+          final k = (i << 3) + j;
+          if (k < length && (k >= start)) {
+            return k;
           }
         }
       }

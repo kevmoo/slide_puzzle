@@ -83,41 +83,47 @@ class PuzzleAnimator implements PuzzleProxy {
     if (solved) {
       _controller.add(PuzzleEvent.noop);
       _shake(tileValue);
-      _lastBadClick = null;
-      _badClickCount = 0;
+      _clearBadClicks();
       return;
     }
 
     _controller.add(PuzzleEvent.click);
     if (!_clickValue(tileValue)) {
       _shake(tileValue);
-
-      // This is logic to allow a user to skip to the end – useful for testing
-      // click on 5 un-movable tiles in a row, but not the same tile twice
-      // in a row
-      if (tileValue != _lastBadClick) {
-        _badClickCount++;
-        if (_badClickCount >= 5) {
-          // Do the reset!
-          final newValues = List.generate(_puzzle.length, (i) {
-            if (i == _puzzle.tileCount) {
-              return _puzzle.tileCount - 1;
-            } else if (i == (_puzzle.tileCount - 1)) {
-              return _puzzle.tileCount;
-            }
-            return i;
-          });
-          _resetCore(source: newValues);
-          _clickCount = 999;
-        }
-      } else {
-        _badClickCount = 0;
-      }
-      _lastBadClick = tileValue;
+      _handleBadClick(tileValue);
     } else {
-      _lastBadClick = null;
+      _clearBadClicks();
+    }
+  }
+
+  void _clearBadClicks() {
+    _lastBadClick = null;
+    _badClickCount = 0;
+  }
+
+  void _handleBadClick(int tileValue) {
+    if (tileValue != _lastBadClick) {
+      _badClickCount++;
+      if (_badClickCount >= 5) {
+        _triggerEasterEggReset();
+      }
+    } else {
       _badClickCount = 0;
     }
+    _lastBadClick = tileValue;
+  }
+
+  void _triggerEasterEggReset() {
+    final newValues = List.generate(_puzzle.length, (i) {
+      if (i == _puzzle.tileCount) {
+        return _puzzle.tileCount - 1;
+      } else if (i == (_puzzle.tileCount - 1)) {
+        return _puzzle.tileCount;
+      }
+      return i;
+    });
+    _resetCore(source: newValues);
+    _clickCount = 999;
   }
 
   void _resetCore({List<int>? source}) {
