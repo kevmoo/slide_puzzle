@@ -36,10 +36,10 @@ class ValueTabController<T> extends StatefulWidget {
   }
 
   @override
-  ValueTabControllerState<T> createState() => ValueTabControllerState<T>();
+  State<ValueTabController<T>> createState() => _ValueTabControllerState<T>();
 }
 
-class ValueTabControllerState<T> extends State<ValueTabController<T>>
+class _ValueTabControllerState<T> extends State<ValueTabController<T>>
     with SingleTickerProviderStateMixin {
   late final ValueNotifier<T> _notifier;
 

@@ -33,10 +33,11 @@ class MaterialInterior extends ImplicitlyAnimatedWidget {
   final Color color;
 
   @override
-  MaterialInteriorState createState() => MaterialInteriorState();
+  AnimatedWidgetBaseState<MaterialInterior> createState() =>
+      _MaterialInteriorState();
 }
 
-class MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
+class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
   ShapeBorderTween? _border;
   ColorTween? _color;
 

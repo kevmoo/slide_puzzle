@@ -113,13 +113,14 @@ class DecorationImagePlus implements DecorationImage {
 
   final double scale = 1.0;
 
-  /// Creates a [DecorationImagePainterPlus] for this [DecorationImagePlus].
+  /// Creates a [DecorationImagePainter] for this [DecorationImagePlus].
   ///
   /// The `onChanged` argument must not be null. It will be called whenever the
   /// image needs to be repainted, e.g. because it is loading incrementally or
   /// because it is animated.
-  DecorationImagePainterPlus createPainter(VoidCallback onChanged) =>
-      DecorationImagePainterPlus._(this, onChanged);
+  @override
+  DecorationImagePainter createPainter(VoidCallback onChanged) =>
+      _DecorationImagePainterPlus._(this, onChanged);
 
   @override
   bool operator ==(Object other) {
@@ -197,8 +198,8 @@ class DecorationImagePlus implements DecorationImage {
 ///
 /// This object should be disposed using the [dispose] method when it is no
 /// longer needed.
-class DecorationImagePainterPlus implements DecorationImagePainter {
-  DecorationImagePainterPlus._(this._details, this._onChanged);
+class _DecorationImagePainterPlus implements DecorationImagePainter {
+  _DecorationImagePainterPlus._(this._details, this._onChanged);
 
   final DecorationImagePlus _details;
   final VoidCallback _onChanged;
