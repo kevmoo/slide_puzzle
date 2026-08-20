@@ -88,7 +88,7 @@ void main() {
     });
 
     test('linear conflicts calculated accurately on 5x5 board', () {
-      // Create a 5x5 board where tiles 0 and 1 in row 0 are inverted: [1, 0, 2, 3, 4, ...]
+      // Create a 5x5 board where tiles 0 and 1 in row 0 are inverted.
       final list = List<int>.generate(25, (i) => i);
       list[0] = 1;
       list[1] = 0;
