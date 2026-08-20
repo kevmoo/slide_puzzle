@@ -164,62 +164,49 @@ sealed class Puzzle {
   }
 
   void _computeStats() {
+    final (:incorrect, :deltaSumSq, :manhattan) = (width == 4)
+        ? _distanceMetrics4()
+        : _distanceMetricsGeneric();
+
+    final linearConflicts = (width == 4)
+        ? _linearConflicts4()
+        : _linearConflictsGeneric();
+
+    _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
+  }
+
+  ({int incorrect, int deltaSumSq, int manhattan}) _distanceMetrics4() {
+    var deltaSumSq = 0;
+    var incorrect = 0;
+    var manhattan = 0;
+    final openTile = length - 1;
+
+    for (var pos = 0; pos < length; pos++) {
+      final val = this[pos];
+      if (val != pos && val != openTile) {
+        incorrect++;
+        final correctCol = val & 3;
+        final correctRow = val >> 2;
+        final currentCol = pos & 3;
+        final currentRow = pos >> 2;
+
+        final colDelta = (correctCol - currentCol).abs();
+        final rowDelta = (correctRow - currentRow).abs();
+        final delta = colDelta + rowDelta;
+
+        deltaSumSq += delta * delta;
+        manhattan += delta;
+      }
+    }
+    return (incorrect: incorrect, deltaSumSq: deltaSumSq, manhattan: manhattan);
+  }
+
+  ({int incorrect, int deltaSumSq, int manhattan}) _distanceMetricsGeneric() {
     var deltaSumSq = 0;
     var incorrect = 0;
     var manhattan = 0;
     final openTile = length - 1;
     final w = width;
-    final h = height;
-
-    if (w == 4) {
-      for (var pos = 0; pos < length; pos++) {
-        final val = this[pos];
-        if (val != pos && val != openTile) {
-          incorrect++;
-          final correctCol = val & 3;
-          final correctRow = val >> 2;
-          final currentCol = pos & 3;
-          final currentRow = pos >> 2;
-
-          final colDelta = (correctCol - currentCol).abs();
-          final rowDelta = (correctRow - currentRow).abs();
-          final delta = colDelta + rowDelta;
-
-          deltaSumSq += delta * delta;
-          manhattan += delta;
-        }
-      }
-
-      var linearConflicts = 0;
-      for (var r = 0; r < 4; r++) {
-        var goalsMask = 0;
-        var goalsCount = 0;
-        final rowOffset = r << 2;
-        for (var c = 0; c < 4; c++) {
-          final val = this[c + rowOffset];
-          if (val != openTile && (val >> 2) == r) {
-            goalsMask |= (val & 3) << (goalsCount << 2);
-            goalsCount++;
-          }
-        }
-        linearConflicts += countRemovals(goalsMask, goalsCount);
-      }
-      for (var c = 0; c < 4; c++) {
-        var goalsMask = 0;
-        var goalsCount = 0;
-        for (var r = 0; r < 4; r++) {
-          final val = this[c + (r << 2)];
-          if (val != openTile && (val & 3) == c) {
-            goalsMask |= (val >> 2) << (goalsCount << 2);
-            goalsCount++;
-          }
-        }
-        linearConflicts += countRemovals(goalsMask, goalsCount);
-      }
-
-      _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
-      return;
-    }
 
     for (var pos = 0; pos < length; pos++) {
       final val = this[pos];
@@ -238,34 +225,33 @@ sealed class Puzzle {
         manhattan += delta;
       }
     }
+    return (incorrect: incorrect, deltaSumSq: deltaSumSq, manhattan: manhattan);
+  }
 
+  int _linearConflicts4() {
+    final openTile = length - 1;
+    var linearConflicts = 0;
+    for (var r = 0; r < 4; r++) {
+      linearConflicts += _rowConflictsCore4(r, openTile, (i) => this[i]);
+    }
+    for (var c = 0; c < 4; c++) {
+      linearConflicts += _colConflictsCore4(c, openTile, (i) => this[i]);
+    }
+    return linearConflicts;
+  }
+
+  int _linearConflictsGeneric() {
+    final openTile = length - 1;
+    final w = width;
+    final h = height;
     var linearConflicts = 0;
     for (var r = 0; r < h; r++) {
-      var goalsMask = 0;
-      var goalsCount = 0;
-      for (var c = 0; c < w; c++) {
-        final val = this[c + r * w];
-        if (val != openTile && val ~/ w == r) {
-          goalsMask |= (val % w) << (goalsCount << 2);
-          goalsCount++;
-        }
-      }
-      linearConflicts += countRemovals(goalsMask, goalsCount);
+      linearConflicts += _rowConflictsCore(w, r, w, openTile, (i) => this[i]);
     }
     for (var c = 0; c < w; c++) {
-      var goalsMask = 0;
-      var goalsCount = 0;
-      for (var r = 0; r < h; r++) {
-        final val = this[c + r * w];
-        if (val != openTile && val % w == c) {
-          goalsMask |= (val ~/ w) << (goalsCount << 2);
-          goalsCount++;
-        }
-      }
-      linearConflicts += countRemovals(goalsMask, goalsCount);
+      linearConflicts += _colConflictsCore(w, h, c, openTile, (i) => this[i]);
     }
-
-    _setStats(incorrect, deltaSumSq, manhattan, linearConflicts);
+    return linearConflicts;
   }
 
   Puzzle? clickRandom({bool? vertical}) {
@@ -288,21 +274,33 @@ sealed class Puzzle {
     var index = 0;
 
     if (doRow) {
-      for (var x = 0; x < width; x++) {
-        if (x != open.x) {
-          values[index++] = valueAt(x, open.y);
-        }
-      }
+      index = _fillRowClickable(values, index, open);
     }
     if (doColumn) {
-      for (var y = 0; y < height; y++) {
-        if (y != open.y) {
-          values[index++] = valueAt(open.x, y);
-        }
-      }
+      index = _fillColClickable(values, index, open);
     }
 
     return values;
+  }
+
+  int _fillRowClickable(Uint8List values, int startIdx, Point open) {
+    var idx = startIdx;
+    for (var x = 0; x < width; x++) {
+      if (x != open.x) {
+        values[idx++] = valueAt(x, open.y);
+      }
+    }
+    return idx;
+  }
+
+  int _fillColClickable(Uint8List values, int startIdx, Point open) {
+    var idx = startIdx;
+    for (var y = 0; y < height; y++) {
+      if (y != open.y) {
+        values[idx++] = valueAt(open.x, y);
+      }
+    }
+    return idx;
   }
 
   bool _movable(int tileValue) {
@@ -334,11 +332,63 @@ sealed class Puzzle {
     }
 
     final newStore = _copyData();
-    final lastCoord = openPosition();
-    final (deltaX, deltaY) = (lastCoord.x - target.x, lastCoord.y - target.y);
+    final stats = _computeClickDelta(
+      target: target,
+      getOldTile: (i) => this[i],
+      getNewTile: (i) => newStore[i],
+      performShift: () => _shift(newStore, target.x, target.y),
+    );
 
+    if (this is _PuzzleSimple) {
+      return _PuzzleSimple(
+        width,
+        newStore,
+        incorrect: stats.incorrect,
+        deltaSumSq: stats.deltaSumSq,
+        manhattan: stats.manhattan,
+        linearConflicts: stats.linearConflicts,
+      );
+    }
+    return _newWithValues(newStore);
+  }
+
+  ({int incorrect, int deltaSumSq, int manhattan, int linearConflicts})
+  _computeClickDelta({
+    required Point target,
+    required int Function(int index) getOldTile,
+    required int Function(int index) getNewTile,
+    required void Function() performShift,
+  }) {
+    final lastCoord = openPosition();
+    final (:incorrect, :deltaSumSq, :manhattan) = _calculateIncrementalDeltas(
+      target: target,
+      lastCoord: lastCoord,
+      getOldTile: getOldTile,
+    );
+
+    final linearConflicts = _computeLinearConflictDelta(
+      target: target,
+      lastCoord: lastCoord,
+      getOldTile: getOldTile,
+      getNewTile: getNewTile,
+      performShift: performShift,
+    );
+
+    return (
+      incorrect: incorrect,
+      deltaSumSq: deltaSumSq,
+      manhattan: manhattan,
+      linearConflicts: linearConflicts,
+    );
+  }
+
+  ({int incorrect, int deltaSumSq, int manhattan}) _calculateIncrementalDeltas({
+    required Point target,
+    required Point lastCoord,
+    required int Function(int index) getOldTile,
+  }) {
+    final (deltaX, deltaY) = (lastCoord.x - target.x, lastCoord.y - target.y);
     final w = width;
-    final h = height;
     final openTile = length - 1;
 
     var newIncorrect = _incorrect!;
@@ -351,130 +401,216 @@ sealed class Puzzle {
     var currY = target.y;
     while (currX != lastCoord.x || currY != lastCoord.y) {
       final oldPos = (w == 4) ? currX + (currY << 2) : currX + currY * w;
-      final val = this[oldPos];
+      final val = getOldTile(oldPos);
       if (val != openTile) {
-        final correctCol = (w == 4) ? val & 3 : val % w;
-        final correctRow = (w == 4) ? val >> 2 : val ~/ w;
-
-        final oldColDelta = (correctCol - currX).abs();
-        final oldRowDelta = (correctRow - currY).abs();
-        final oldDelta = oldColDelta + oldRowDelta;
-        final oldInc = (val != oldPos) ? 1 : 0;
-        final oldSq = oldInc * (oldDelta * oldDelta);
-        final oldMan = oldInc * oldDelta;
-
-        final newX = currX + stepX;
-        final newY = currY + stepY;
-        final newPos = (w == 4) ? newX + (newY << 2) : newX + newY * w;
-        final newColDelta = (correctCol - newX).abs();
-        final newRowDelta = (correctRow - newY).abs();
-        final newDelta = newColDelta + newRowDelta;
-        final newInc = (val != newPos) ? 1 : 0;
-        final newSq = newInc * (newDelta * newDelta);
-        final newMan = newInc * newDelta;
-
-        newIncorrect += newInc - oldInc;
-        newDeltaSumSq += newSq - oldSq;
-        newManhattan += newMan - oldMan;
+        final (deltaInc, deltaSq, deltaMan) = _tileDelta(
+          val: val,
+          oldPos: oldPos,
+          currX: currX,
+          currY: currY,
+          newX: currX + stepX,
+          newY: currY + stepY,
+          w: w,
+        );
+        newIncorrect += deltaInc;
+        newDeltaSumSq += deltaSq;
+        newManhattan += deltaMan;
       }
       currX += stepX;
       currY += stepY;
     }
+    return (
+      incorrect: newIncorrect,
+      deltaSumSq: newDeltaSumSq,
+      manhattan: newManhattan,
+    );
+  }
 
-    var newLinearConflicts = _linearConflicts!;
-    if (target.y == lastCoord.y) {
-      final r = target.y;
-      final oldRowConflicts = (w == 4)
-          ? _rowConflictsCore4(r, openTile, (i) => this[i])
-          : _rowConflictsCore(w, r, w, openTile, (i) => this[i]);
-      var oldColConflicts = 0;
-      final minC = (target.x < lastCoord.x) ? target.x : lastCoord.x;
-      final maxC = (target.x > lastCoord.x) ? target.x : lastCoord.x;
-      for (var c = minC; c <= maxC; c++) {
-        oldColConflicts += (w == 4)
-            ? _colConflictsCore4(c, openTile, (i) => this[i])
-            : _colConflictsCore(w, h, c, openTile, (i) => this[i]);
-      }
+  static (int, int, int) _tileDelta({
+    required int val,
+    required int oldPos,
+    required int currX,
+    required int currY,
+    required int newX,
+    required int newY,
+    required int w,
+  }) {
+    final correctCol = (w == 4) ? val & 3 : val % w;
+    final correctRow = (w == 4) ? val >> 2 : val ~/ w;
 
-      _shift(newStore, target.x, target.y);
+    final oldColDelta = (correctCol - currX).abs();
+    final oldRowDelta = (correctRow - currY).abs();
+    final oldDelta = oldColDelta + oldRowDelta;
+    final oldInc = (val != oldPos) ? 1 : 0;
+    final oldSq = oldInc * (oldDelta * oldDelta);
+    final oldMan = oldInc * oldDelta;
 
-      final newRowConflicts = (w == 4)
-          ? _rowConflictsCore4(r, openTile, (i) => newStore[i])
-          : _rowConflictsCore(w, r, w, openTile, (i) => newStore[i]);
-      var newColConflicts = 0;
-      for (var c = minC; c <= maxC; c++) {
-        newColConflicts += (w == 4)
-            ? _colConflictsCore4(c, openTile, (i) => newStore[i])
-            : _colConflictsCore(w, h, c, openTile, (i) => newStore[i]);
-      }
-      newLinearConflicts +=
-          (newRowConflicts - oldRowConflicts) +
-          (newColConflicts - oldColConflicts);
-    } else {
-      final c = target.x;
-      final oldColConflicts = (w == 4)
-          ? _colConflictsCore4(c, openTile, (i) => this[i])
-          : _colConflictsCore(w, h, c, openTile, (i) => this[i]);
-      var oldRowConflicts = 0;
-      final minR = (target.y < lastCoord.y) ? target.y : lastCoord.y;
-      final maxR = (target.y > lastCoord.y) ? target.y : lastCoord.y;
-      for (var r = minR; r <= maxR; r++) {
-        oldRowConflicts += (w == 4)
-            ? _rowConflictsCore4(r, openTile, (i) => this[i])
-            : _rowConflictsCore(w, r, w, openTile, (i) => this[i]);
-      }
+    final newPos = (w == 4) ? newX + (newY << 2) : newX + newY * w;
+    final newColDelta = (correctCol - newX).abs();
+    final newRowDelta = (correctRow - newY).abs();
+    final newDelta = newColDelta + newRowDelta;
+    final newInc = (val != newPos) ? 1 : 0;
+    final newSq = newInc * (newDelta * newDelta);
+    final newMan = newInc * newDelta;
 
-      _shift(newStore, target.x, target.y);
+    return (newInc - oldInc, newSq - oldSq, newMan - oldMan);
+  }
 
-      final newColConflicts = (w == 4)
-          ? _colConflictsCore4(c, openTile, (i) => newStore[i])
-          : _colConflictsCore(w, h, c, openTile, (i) => newStore[i]);
-      var newRowConflicts = 0;
-      for (var r = minR; r <= maxR; r++) {
-        newRowConflicts += (w == 4)
-            ? _rowConflictsCore4(r, openTile, (i) => newStore[i])
-            : _rowConflictsCore(w, r, w, openTile, (i) => newStore[i]);
-      }
-      newLinearConflicts +=
-          (newColConflicts - oldColConflicts) +
-          (newRowConflicts - oldRowConflicts);
+  int _computeLinearConflictDelta({
+    required Point target,
+    required Point lastCoord,
+    required int Function(int index) getOldTile,
+    required int Function(int index) getNewTile,
+    required void Function() performShift,
+  }) {
+    final openTile = length - 1;
+    final isHorizontal = target.y == lastCoord.y;
+    final fixedLine = isHorizontal ? target.y : target.x;
+    final (minPos, maxPos) = isHorizontal
+        ? ((target.x < lastCoord.x)
+              ? (target.x, lastCoord.x)
+              : (lastCoord.x, target.x))
+        : ((target.y < lastCoord.y)
+              ? (target.y, lastCoord.y)
+              : (lastCoord.y, target.y));
+
+    final oldLine = _lineConflicts(
+      isHorizontal,
+      fixedLine,
+      openTile,
+      getOldTile,
+    );
+    final oldCross = _sumCrossConflicts(
+      isHorizontal,
+      minPos,
+      maxPos,
+      openTile,
+      getOldTile,
+    );
+
+    performShift();
+
+    final newLine = _lineConflicts(
+      isHorizontal,
+      fixedLine,
+      openTile,
+      getNewTile,
+    );
+    final newCross = _sumCrossConflicts(
+      isHorizontal,
+      minPos,
+      maxPos,
+      openTile,
+      getNewTile,
+    );
+
+    return _linearConflicts! + (newLine - oldLine) + (newCross - oldCross);
+  }
+
+  int _lineConflicts(
+    bool isHorizontal,
+    int line,
+    int openTile,
+    int Function(int index) tileGetter,
+  ) {
+    if (isHorizontal) {
+      return (width == 4)
+          ? _rowConflictsCore4(line, openTile, tileGetter)
+          : _rowConflictsCore(width, line, width, openTile, tileGetter);
     }
+    return (width == 4)
+        ? _colConflictsCore4(line, openTile, tileGetter)
+        : _colConflictsCore(width, height, line, openTile, tileGetter);
+  }
 
-    if (this is _PuzzleSimple) {
-      return _PuzzleSimple(
-        width,
-        newStore,
-        incorrect: newIncorrect,
-        deltaSumSq: newDeltaSumSq,
-        manhattan: newManhattan,
-        linearConflicts: newLinearConflicts,
-      );
+  int _sumCrossConflicts(
+    bool isHorizontal,
+    int minPos,
+    int maxPos,
+    int openTile,
+    int Function(int index) tileGetter,
+  ) {
+    var total = 0;
+    for (var i = minPos; i <= maxPos; i++) {
+      if (isHorizontal) {
+        total += (width == 4)
+            ? _colConflictsCore4(i, openTile, tileGetter)
+            : _colConflictsCore(width, height, i, openTile, tileGetter);
+      } else {
+        total += (width == 4)
+            ? _rowConflictsCore4(i, openTile, tileGetter)
+            : _rowConflictsCore(width, i, width, openTile, tileGetter);
+      }
     }
-    return _newWithValues(newStore);
+    return total;
   }
 
   void _shift(List<int> source, int targetX, int targetY) {
     final lastCoord = openPosition();
-    final (deltaX, deltaY) = (lastCoord.x - targetX, lastCoord.y - targetY);
+    _shiftIndexed(
+      width,
+      lastCoord.x,
+      lastCoord.y,
+      targetX,
+      targetY,
+      (i) => source[i],
+      (i, v) => source[i] = v,
+    );
+  }
+
+  void _shiftIndexed(
+    int width,
+    int openX,
+    int openY,
+    int targetX,
+    int targetY,
+    int Function(int index) getAt,
+    void Function(int index, int val) setAt,
+  ) {
+    final (deltaX, deltaY) = (openX - targetX, openY - targetY);
 
     if ((deltaX.abs() + deltaY.abs()) > 1) {
       final (shiftPointX, shiftPointY) = (
         targetX + deltaX.sign,
         targetY + deltaY.sign,
       );
-      _shift(source, shiftPointX, shiftPointY);
-      _staticSwap(source, targetX, targetY, shiftPointX, shiftPointY);
+      _shiftIndexed(
+        width,
+        openX,
+        openY,
+        shiftPointX,
+        shiftPointY,
+        getAt,
+        setAt,
+      );
+      _swapIndexed(
+        width,
+        targetX,
+        targetY,
+        shiftPointX,
+        shiftPointY,
+        getAt,
+        setAt,
+      );
     } else {
-      _staticSwap(source, lastCoord.x, lastCoord.y, targetX, targetY);
+      _swapIndexed(width, openX, openY, targetX, targetY, getAt, setAt);
     }
   }
 
-  void _staticSwap(List<int> source, int ax, int ay, int bx, int by) {
+  void _swapIndexed(
+    int width,
+    int ax,
+    int ay,
+    int bx,
+    int by,
+    int Function(int index) getAt,
+    void Function(int index, int val) setAt,
+  ) {
     final aIndex = (width == 4) ? ax + (ay << 2) : ax + ay * width;
     final bIndex = (width == 4) ? bx + (by << 2) : bx + by * width;
-    final temp = source[aIndex];
-    source[aIndex] = source[bIndex];
-    source[bIndex] = temp;
+    final temp = getAt(aIndex);
+    setAt(aIndex, getAt(bIndex));
+    setAt(bIndex, temp);
   }
 
   static int _rowConflictsCore4(
@@ -612,27 +748,45 @@ Uint8List _randomizeList(
   final copy = Uint8List.fromList(existing);
   final rnd = random ?? _rnd;
   final height = (width == 4) ? existing.length >> 2 : existing.length ~/ width;
+  final isEasyMode = easy && width > 2 && height > 2;
+
   do {
-    if (easy && width > 2 && height > 2) {
-      final activeIndices = <int>[];
-      for (var r = 0; r < height - 1; r++) {
-        for (var c = 0; c < width - 1; c++) {
-          activeIndices.add(r * width + c);
-        }
-      }
-      final activeValues = activeIndices.map((i) => copy[i]).toList();
-      activeValues.shuffle(rnd);
-      for (var i = 0; i < activeIndices.length; i++) {
-        copy[activeIndices[i]] = activeValues[i];
-      }
+    if (isEasyMode) {
+      _shuffleInnerGrid(copy, width, height, rnd);
     } else {
       copy.shuffle(rnd);
     }
-  } while (!isSolvable(width, copy) ||
-      (easy && width > 2 && height > 2
-          ? copy[0] == 0 && copy[1] == 1 && copy[width] == width
-          : copy.any((v) => copy[v] == v || copy[v] == existing[v])));
+  } while (!_isValidShuffle(copy, existing, width, isEasyMode));
   return copy;
+}
+
+void _shuffleInnerGrid(Uint8List copy, int width, int height, Random rnd) {
+  final activeIndices = <int>[];
+  for (var r = 0; r < height - 1; r++) {
+    for (var c = 0; c < width - 1; c++) {
+      activeIndices.add(r * width + c);
+    }
+  }
+  final activeValues = activeIndices.map((i) => copy[i]).toList();
+  activeValues.shuffle(rnd);
+  for (var i = 0; i < activeIndices.length; i++) {
+    copy[activeIndices[i]] = activeValues[i];
+  }
+}
+
+bool _isValidShuffle(
+  Uint8List copy,
+  List<int> existing,
+  int width,
+  bool isEasyMode,
+) {
+  if (!isSolvable(width, copy)) {
+    return false;
+  }
+  if (isEasyMode) {
+    return !(copy[0] == 0 && copy[1] == 1 && copy[width] == width);
+  }
+  return !copy.any((v) => copy[v] == v || copy[v] == existing[v]);
 }
 
 void _validate(List<int> source) {

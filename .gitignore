@@ -24,6 +24,7 @@
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.deslop/
 .flutter-plugins
 .flutter-plugins-dependencies
 /build/

@@ -19,13 +19,13 @@ import 'themes.dart';
 import 'value_tab_controller.dart';
 import 'widgets/build_info_badge.dart';
 
-class PuzzleViewModel extends ChangeNotifier
+class _PuzzleViewModel extends ChangeNotifier
     implements AppState, PuzzleControls {
   @override
   final PuzzleAnimator puzzle;
 
   @override
-  final AnimationNotifier animationNotifier = AnimationNotifier();
+  final _AnimationNotifier animationNotifier = _AnimationNotifier();
 
   Duration _tickerTimeSinceLastEvent = Duration.zero;
   Ticker? _ticker;
@@ -43,7 +43,7 @@ class PuzzleViewModel extends ChangeNotifier
   bool _isHintMode = false;
   bool _isAutomatedMove = false;
 
-  PuzzleViewModel(this.puzzle) {
+  _PuzzleViewModel(this.puzzle) {
     _puzzleEventSubscription = puzzle.onEvent.listen(_onPuzzleEvent);
   }
 
@@ -294,17 +294,23 @@ class PuzzleViewModel extends ChangeNotifier
     }
 
     _tickerTimeSinceLastEvent += delta;
+    _tickAnimation(delta);
+    _tickAutoPlay();
+    _tickAutoSolver(delta);
+  }
+
+  void _tickAnimation(Duration delta) {
     puzzle.update(delta > _maxFrameDuration ? _maxFrameDuration : delta);
 
     if (!puzzle.stable) {
       animationNotifier.animate();
-    } else {
-      if (!_autoPlay && !_isSolving) {
-        _ticker?.stop();
-        _lastElapsed = Duration.zero;
-      }
+    } else if (!_autoPlay && !_isSolving) {
+      _ticker?.stop();
+      _lastElapsed = Duration.zero;
     }
+  }
 
+  void _tickAutoPlay() {
     if (_autoPlay &&
         _tickerTimeSinceLastEvent > const Duration(milliseconds: 200)) {
       puzzle.playRandom();
@@ -314,59 +320,63 @@ class PuzzleViewModel extends ChangeNotifier
       }
       notifyListeners();
     }
+  }
 
-    if (_isSolving &&
-        _solverSubscription == null &&
-        !_isHintMode &&
-        _solutionPath != null) {
-      _timeSinceLastMove += delta;
-      if (_timeSinceLastMove >= const Duration(milliseconds: 250)) {
-        _timeSinceLastMove = Duration.zero;
-        if (_solutionStepIndex < _solutionPath!.length - 1 && !puzzle.solved) {
-          final current = _solutionPath![_solutionStepIndex];
-          final next = _solutionPath![_solutionStepIndex + 1];
-          _solutionStepIndex++;
-          _performAutomatedMove(current, next);
-          if (puzzle.solved ||
-              _solutionStepIndex >= _solutionPath!.length - 1) {
-            _isSolving = false;
-            _solutionPath = null;
-          }
-          notifyListeners();
-        } else {
-          _isSolving = false;
-          _solutionPath = null;
-          notifyListeners();
-        }
-      }
+  void _tickAutoSolver(Duration delta) {
+    if (!_isSolving ||
+        _solverSubscription != null ||
+        _isHintMode ||
+        _solutionPath == null) {
+      return;
     }
+
+    _timeSinceLastMove += delta;
+    if (_timeSinceLastMove < const Duration(milliseconds: 250)) {
+      return;
+    }
+
+    _timeSinceLastMove = Duration.zero;
+    if (_solutionStepIndex < _solutionPath!.length - 1 && !puzzle.solved) {
+      final current = _solutionPath![_solutionStepIndex];
+      final next = _solutionPath![_solutionStepIndex + 1];
+      _solutionStepIndex++;
+      _performAutomatedMove(current, next);
+      if (puzzle.solved || _solutionStepIndex >= _solutionPath!.length - 1) {
+        _isSolving = false;
+        _solutionPath = null;
+      }
+    } else {
+      _isSolving = false;
+      _solutionPath = null;
+    }
+    notifyListeners();
   }
 }
 
 class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   final PuzzleAnimator puzzleAnimator;
-  late final PuzzleViewModel viewModel;
+  late final _PuzzleViewModel _viewModel;
 
   PuzzleHomeState(this.puzzleAnimator);
 
   @override
   void initState() {
     super.initState();
-    viewModel = PuzzleViewModel(puzzleAnimator);
-    viewModel.initTicker(this);
+    _viewModel = _PuzzleViewModel(puzzleAnimator);
+    _viewModel.initTicker(this);
   }
 
   @override
   void dispose() {
-    viewModel.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => MultiProvider(
     providers: [
-      ListenableProvider<AppState>.value(value: viewModel),
-      ListenableProvider<PuzzleControls>.value(value: viewModel),
+      ListenableProvider<AppState>.value(value: _viewModel),
+      ListenableProvider<PuzzleControls>.value(value: _viewModel),
     ],
     child: const Material(
       child: Stack(
@@ -385,7 +395,7 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   );
 }
 
-class AnimationNotifier extends ChangeNotifier {
+class _AnimationNotifier extends ChangeNotifier {
   void animate() {
     notifyListeners();
   }
