@@ -3,7 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:math' show Point;
-import 'package:flutter/material.dart';
+
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:slide_puzzle/src/core/puzzle_proxy.dart';
 import 'package:slide_puzzle/src/puzzle_flow_delegate.dart';

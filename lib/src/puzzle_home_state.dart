@@ -4,13 +4,14 @@
 
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
 import 'core/puzzle.dart';
 import 'core/puzzle_animator.dart';
 import 'core/puzzle_proxy.dart';
-import 'flutter.dart';
 import 'puzzle_controls.dart';
 import 'puzzle_flow_delegate.dart';
 import 'shared_theme.dart';
@@ -473,11 +474,10 @@ Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
                           appState.puzzle,
                           appState.animationNotifier,
                         ),
-                        children: List<Widget>.generate(
-                          appState.puzzle.length,
-                          (i) =>
-                              theme.tileButtonCore(i, appState.puzzle, small),
-                        ),
+                        children: [
+                          for (var i = 0; i < appState.puzzle.length; i++)
+                            theme.tileButtonCore(i, appState.puzzle, small),
+                        ],
                       ),
                     ),
                   ),

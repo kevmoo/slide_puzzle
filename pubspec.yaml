@@ -3,13 +3,14 @@ publish_to: none
 version: 1.0.0
 
 environment:
-  sdk: ^3.12.0
+  sdk: ^3.13.0
 
 dependencies:
   collection: ^1.19.1
   flutter:
     sdk: flutter
   http: ^1.2.0
+  material_ui: ^1.1.1
   provider: ^6.0.2
   url_launcher: ^6.3.0
 

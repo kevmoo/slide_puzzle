@@ -54,7 +54,7 @@ extension type const _SliceList(Uint32List _data) {
   }
 }
 
-final class _PuzzleSmart extends Puzzle with ListMixin<int> {
+final class _PuzzleSmart extends Puzzle {
   static const _bitsPerValue = 4;
   static const _maxShift = _valuesPerCell - 1;
 
@@ -68,9 +68,6 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
 
   @override
   final int length;
-
-  @override
-  set length(int value) => throw UnsupportedError('immutable, yo!');
 
   _PuzzleSmart(this.width, List<int> source)
     : length = source.length,
@@ -93,10 +90,6 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
   int operator [](int index) => _slice[index];
 
   @override
-  void operator []=(int index, int value) =>
-      throw UnsupportedError('immutable, yo!');
-
-  @override
   Point coordinatesOf(int value) {
     final index = indexOf(value);
     if (width == 4) {
@@ -111,11 +104,11 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
   }
 
   @override
-  int indexOf(Object? value, [int start = 0]) =>
+  int indexOf(int value, [int start = 0]) =>
       _slice.indexOf(value, start, length);
 
   @override
-  List<int> get _intView => this;
+  List<int> get _intView => _PuzzleSmartList(this);
 
   @override
   List<int> _copyData() => Uint32List.fromList(_data);
@@ -234,4 +227,23 @@ final class _PuzzleSmart extends Puzzle with ListMixin<int> {
     }
     return data;
   }
+}
+
+final class _PuzzleSmartList with ListMixin<int> {
+  final _PuzzleSmart _puzzle;
+
+  _PuzzleSmartList(this._puzzle);
+
+  @override
+  int get length => _puzzle.length;
+
+  @override
+  set length(int value) => throw UnsupportedError('immutable, yo!');
+
+  @override
+  int operator [](int index) => _puzzle[index];
+
+  @override
+  void operator []=(int index, int value) =>
+      throw UnsupportedError('immutable, yo!');
 }

@@ -2,8 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:slide_puzzle/main.dart';
 import 'package:slide_puzzle/src/app_state.dart';
@@ -297,12 +297,10 @@ void main() {
         await tester.pumpWidget(const PuzzleApp());
         await tester.pumpAndSettle();
 
-        final controls =
-            Provider.of<AppState>(
-                  tester.element(find.byIcon(Icons.refresh)),
-                  listen: false,
-                )
-                as PuzzleControls;
+        final controls = Provider.of<AppState>(
+          tester.element(find.byIcon(Icons.refresh)),
+          listen: false,
+        ) as PuzzleControls;
 
         expect(controls.clickCount, 0);
 
@@ -337,12 +335,10 @@ void main() {
       await tester.pumpWidget(const PuzzleApp());
       await tester.pumpAndSettle();
 
-      final controls =
-          Provider.of<AppState>(
-                tester.element(find.byIcon(Icons.refresh)),
-                listen: false,
-              )
-              as PuzzleControls;
+      final controls = Provider.of<AppState>(
+        tester.element(find.byIcon(Icons.refresh)),
+        listen: false,
+      ) as PuzzleControls;
 
       expect(controls.clickCount, 0);
 

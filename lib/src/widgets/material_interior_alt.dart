@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import '../flutter.dart';
+import 'package:material_ui/material_ui.dart';
 
 // Copied from
 // https://github.com/flutter/flutter/blob/f5b02e3c05ed1ab31e890add84fb56e35de2d392/packages/flutter/lib/src/material/material.dart#L593-L715
@@ -43,20 +43,16 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<MaterialInterior> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _border =
-        visitor(
-              _border,
-              widget.shape,
-              (value) => ShapeBorderTween(begin: value as ShapeBorder?),
-            )
-            as ShapeBorderTween?;
-    _color =
-        visitor(
-              _color,
-              widget.color,
-              (value) => ColorTween(begin: value as Color?),
-            )
-            as ColorTween?;
+    _border = visitor(
+      _border,
+      widget.shape,
+      (value) => ShapeBorderTween(begin: value as ShapeBorder?),
+    ) as ShapeBorderTween?;
+    _color = visitor(
+      _color,
+      widget.color,
+      (value) => ColorTween(begin: value as Color?),
+    ) as ColorTween?;
   }
 
   @override
