@@ -186,7 +186,6 @@ class DecorationImagePlus implements DecorationImage {
   @override
   double get opacity => 1.0;
 
-  @override
   ImageProvider? get placeholder => null;
 }
 
