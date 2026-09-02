@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.0
+  material_ui: ^1.1.1
   provider: ^6.0.2
   url_launcher: ^6.3.0
 
