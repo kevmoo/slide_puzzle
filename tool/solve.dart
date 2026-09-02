@@ -1,4 +1,5 @@
 import 'dart:math' show Random;
+
 import 'package:slide_puzzle/src/core/puzzle.dart';
 import 'package:slide_puzzle/src/solver/puzzle_solver.dart';
 
