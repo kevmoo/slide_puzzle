@@ -7,7 +7,7 @@
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show Image;
 
-import '../flutter.dart';
+import 'package:flutter/widgets.dart';
 
 // A model on top of DecorationImage that supports slicing up the source image
 // efficiently to draw it as tiles in the puzzle game
