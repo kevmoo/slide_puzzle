@@ -474,11 +474,10 @@ Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
                           appState.puzzle,
                           appState.animationNotifier,
                         ),
-                        children: List<Widget>.generate(
-                          appState.puzzle.length,
-                          (i) =>
-                              theme.tileButtonCore(i, appState.puzzle, small),
-                        ),
+                        children: [
+                          for (var i = 0; i < appState.puzzle.length; i++)
+                            theme.tileButtonCore(i, appState.puzzle, small),
+                        ],
                       ),
                     ),
                   ),
