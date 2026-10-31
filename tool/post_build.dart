@@ -34,8 +34,7 @@ Future<void> main(List<String> args) async {
   final displaySha = isClean ? shortSha : '$shortSha-dirty';
   final commitUrl = 'https://github.com/kevmoo/slide_puzzle/commit/$gitInfo';
 
-  final buildInfoFile = File.fromUri(stagingDir.uri.resolve('build_info.json'));
-  final assetsBuildInfoFile = File.fromUri(
+  final buildInfoFile = File.fromUri(
     stagingDir.uri.resolve('assets/build_info.json'),
   );
   final jsonContent =
@@ -47,11 +46,9 @@ Future<void> main(List<String> args) async {
 }
 ''';
 
+  buildInfoFile.parent.createSync(recursive: true);
   buildInfoFile.writeAsStringSync(jsonContent);
   print('Wrote build_info.json to ${buildInfoFile.path}');
-  assetsBuildInfoFile.parent.createSync(recursive: true);
-  assetsBuildInfoFile.writeAsStringSync(jsonContent);
-  print('Wrote build_info.json to ${assetsBuildInfoFile.path}');
 }
 
 String _getFlutterVersion() {
