@@ -12,31 +12,15 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
 
-  final files = stagingDir.listSync(recursive: true);
-  var depsFileFound = false;
-  for (final file in files) {
-    if (file is File && file.path.endsWith('.deps')) {
-      print('Deleting ${file.path}...');
-      file.deleteSync();
-      depsFileFound = true;
-    }
-  }
-
-  if (!depsFileFound) {
-    print('No .deps file found to delete.');
-  } else {
-    print('Cleanup complete.');
-  }
-
   final isClean = _isWorkingTreeClean();
   if (!isClean) {
     print('WARNING: Working tree is dirty. Generating build info anyway.');
   }
 
   final currentBranch = _runGit(['branch', '--show-current']);
-  if (currentBranch != 'master') {
+  if (currentBranch != 'main') {
     print(
-      'WARNING: Current branch is "$currentBranch" (expected "master"). '
+      'WARNING: Current branch is "$currentBranch" (expected "main"). '
       'Generating build info anyway.',
     );
   }
