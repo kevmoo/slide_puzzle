@@ -6,6 +6,46 @@ import 'dart:math' show Point;
 
 enum PuzzleEvent { click, random, reset, noop }
 
+sealed class PuzzleAction {
+  const PuzzleAction();
+}
+
+final class TileMovedAction extends PuzzleAction {
+  final int tileValue;
+  final int movedCount;
+  final int tileX;
+  final bool landedCorrect;
+  final bool solvedNow;
+
+  const TileMovedAction({
+    required this.tileValue,
+    required this.movedCount,
+    required this.tileX,
+    required this.landedCorrect,
+    required this.solvedNow,
+  });
+}
+
+final class TileBlockedAction extends PuzzleAction {
+  final int tileValue;
+  final int tileX;
+
+  const TileBlockedAction({required this.tileValue, required this.tileX});
+}
+
+final class RandomMoveAction extends PuzzleAction {
+  final int tileX;
+  final bool solvedNow;
+
+  const RandomMoveAction({required this.tileX, required this.solvedNow});
+}
+
+final class PuzzleResetAction extends PuzzleAction {
+  final bool easterEgg;
+
+  const PuzzleResetAction({required this.easterEgg});
+}
+
 abstract interface class PuzzleProxy {
   int get width;
 

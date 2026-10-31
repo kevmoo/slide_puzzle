@@ -16,6 +16,8 @@ import 'puzzle_controls.dart';
 import 'puzzle_flow_delegate.dart';
 import 'shared_theme.dart';
 import 'solver/puzzle_solver.dart';
+import 'sound/foley_sound.dart';
+import 'sound/puzzle_sound_controller.dart';
 import 'themes.dart';
 import 'value_tab_controller.dart';
 import 'widgets/build_info_badge.dart';
@@ -32,6 +34,8 @@ class _PuzzleViewModel extends ChangeNotifier
   Ticker? _ticker;
   late Duration _lastElapsed;
   late StreamSubscription<PuzzleEvent> _puzzleEventSubscription;
+  StreamSubscription<PuzzleAction>? _puzzleActionSubscription;
+  final PuzzleSoundController _sound;
 
   bool _autoPlay = false;
   bool _isSolving = false;
@@ -44,8 +48,16 @@ class _PuzzleViewModel extends ChangeNotifier
   bool _isHintMode = false;
   bool _isAutomatedMove = false;
 
-  _PuzzleViewModel(this.puzzle) {
+  _PuzzleViewModel(this.puzzle, {SoundEffectSink? soundSink})
+    : _sound = PuzzleSoundController(
+        sink: soundSink ?? createDefaultSoundSink(),
+        boardWidth: puzzle.width,
+      ) {
     _puzzleEventSubscription = puzzle.onEvent.listen(_onPuzzleEvent);
+    if (_sound.isSupported) {
+      _sound.syncTheme(themes.first.foleyTheme, playSwitchCue: false);
+      _puzzleActionSubscription = puzzle.onAction.listen(_onPuzzleAction);
+    }
   }
 
   void initTicker(TickerProvider vsync) {
@@ -81,6 +93,22 @@ class _PuzzleViewModel extends ChangeNotifier
   int? get lastSolveSteps => _lastSolveSteps;
 
   @override
+  bool get soundSupported => _sound.isSupported;
+
+  @override
+  bool get soundMuted => _sound.muted;
+
+  @override
+  void toggleSoundMuted() {
+    _sound.toggleMuted();
+    notifyListeners();
+  }
+
+  void onThemeSelected(SharedTheme theme) {
+    _sound.syncTheme(theme.foleyTheme, playSwitchCue: true);
+  }
+
+  @override
   void reset() {
     _cancelSolveCore(clearStats: true);
     puzzle.reset();
@@ -89,14 +117,18 @@ class _PuzzleViewModel extends ChangeNotifier
 
   void setAutoPlay(bool? newValue) {
     if (newValue != _autoPlay && newValue != null) {
-      _autoPlay = newValue && !puzzle.solved;
-      if (_autoPlay) {
-        if (_isSolving) {
-          _cancelSolveCore(clearStats: false);
+      final nextAutoPlay = newValue && !puzzle.solved;
+      if (nextAutoPlay != _autoPlay) {
+        _autoPlay = nextAutoPlay;
+        _sound.onAutoPlayChanged(enabled: _autoPlay);
+        if (_autoPlay) {
+          if (_isSolving) {
+            _cancelSolveCore(clearStats: false);
+          }
+          _ensureTicking();
         }
-        _ensureTicking();
+        notifyListeners();
       }
-      notifyListeners();
     }
   }
 
@@ -134,6 +166,7 @@ class _PuzzleViewModel extends ChangeNotifier
     }
     if (_isSolving) {
       _cancelSolveCore(clearStats: false);
+      _sound.onSolveCancelled();
       notifyListeners();
       return;
     }
@@ -147,6 +180,7 @@ class _PuzzleViewModel extends ChangeNotifier
     _timeSinceLastMove = Duration.zero;
     _lastSolveTime = null;
     _lastSolveSteps = null;
+    _sound.onSolveStarted();
     _ensureTicking();
     notifyListeners();
 
@@ -244,7 +278,23 @@ class _PuzzleViewModel extends ChangeNotifier
     animationNotifier.dispose();
     _ticker?.dispose();
     _puzzleEventSubscription.cancel();
+    _puzzleActionSubscription?.cancel();
     super.dispose();
+  }
+
+  void _onPuzzleAction(PuzzleAction action) {
+    final automatedKind = !_isAutomatedMove
+        ? AutomatedMoveKind.none
+        : (_isHintMode ? AutomatedMoveKind.hint : AutomatedMoveKind.autoSolve);
+    final totalSteps = (_solutionPath?.length ?? 1) - 1;
+    final solveProgress = totalSteps > 0
+        ? _solutionStepIndex / totalSteps
+        : 1.0;
+    _sound.onPuzzleAction(
+      action,
+      automatedKind: automatedKind,
+      solveProgress: solveProgress,
+    );
   }
 
   void _onPuzzleEvent(PuzzleEvent e) {
@@ -356,14 +406,15 @@ class _PuzzleViewModel extends ChangeNotifier
 
 class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
   final PuzzleAnimator puzzleAnimator;
+  final SoundEffectSink? soundSink;
   late final _PuzzleViewModel _viewModel;
 
-  PuzzleHomeState(this.puzzleAnimator);
+  PuzzleHomeState(this.puzzleAnimator, {this.soundSink});
 
   @override
   void initState() {
     super.initState();
-    _viewModel = _PuzzleViewModel(puzzleAnimator);
+    _viewModel = _PuzzleViewModel(puzzleAnimator, soundSink: soundSink);
     _viewModel.initTicker(this);
   }
 
@@ -379,17 +430,23 @@ class PuzzleHomeState extends State with SingleTickerProviderStateMixin {
       ListenableProvider<AppState>.value(value: _viewModel),
       ListenableProvider<PuzzleControls>.value(value: _viewModel),
     ],
-    child: const Material(
+    child: Material(
       child: Stack(
         children: <Widget>[
-          SizedBox.expand(
+          const SizedBox.expand(
             child: FittedBox(
               fit: BoxFit.cover,
               child: Image(image: AssetImage('asset/seattle.jpg')),
             ),
           ),
-          LayoutBuilder(builder: _doBuild),
-          Positioned(bottom: 8, right: 8, child: BuildInfoBadge()),
+          LayoutBuilder(
+            builder: (context, constraints) => _updateConstraints(
+              context,
+              constraints,
+              (small) => _doBuildCore(small, _viewModel.onThemeSelected),
+            ),
+          ),
+          const Positioned(bottom: 8, right: 8, child: BuildInfoBadge()),
         ],
       ),
     ),
@@ -422,88 +479,89 @@ Widget _updateConstraints(
   return builder(constraintWidth < smallWidth || constraintHeight < 690);
 }
 
-Widget _doBuild(BuildContext context, BoxConstraints constraints) =>
-    _updateConstraints(context, constraints, _doBuildCore);
-
-Widget _doBuildCore(bool small) => ValueTabController<SharedTheme>(
-  values: themes,
-  child: Consumer<SharedTheme>(
-    builder: (_, theme, _) => AnimatedContainer(
-      duration: puzzleAnimationDuration,
-      color: theme.puzzleThemeBackground,
-      child: Center(
-        child: theme.styledWrapper(
-          small,
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 580),
-            child: Consumer<AppState>(
-              builder: (context, appState, _) => Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.black26, width: 1),
-                      ),
-                    ),
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    child: TabBar(
-                      controller: ValueTabController.of(context),
-                      labelPadding: const EdgeInsets.fromLTRB(0, 20, 0, 12),
-                      labelColor: theme.puzzleAccentColor,
-                      indicatorColor: theme.puzzleAccentColor,
-                      indicatorWeight: 1.5,
-                      unselectedLabelColor: Colors.black.withValues(alpha: 0.6),
-                      tabs: themes
-                          .map(
-                            (st) => Text(
-                              st.name.toUpperCase(),
-                              style: const TextStyle(letterSpacing: 0.5),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: Flow(
-                        delegate: PuzzleFlowDelegate(
-                          small ? const Size(90, 90) : const Size(140, 140),
-                          appState.puzzle,
-                          appState.animationNotifier,
+Widget _doBuildCore(bool small, ValueChanged<SharedTheme> onThemeSelected) =>
+    ValueTabController<SharedTheme>(
+      values: themes,
+      onChanged: onThemeSelected,
+      child: Consumer<SharedTheme>(
+        builder: (_, theme, _) => AnimatedContainer(
+          duration: puzzleAnimationDuration,
+          color: theme.puzzleThemeBackground,
+          child: Center(
+            child: theme.styledWrapper(
+              small,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 580),
+                child: Consumer<AppState>(
+                  builder: (context, appState, _) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.black26, width: 1),
+                          ),
                         ),
-                        children: [
-                          for (var i = 0; i < appState.puzzle.length; i++)
-                            theme.tileButtonCore(i, appState.puzzle, small),
-                        ],
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        child: TabBar(
+                          controller: ValueTabController.of(context),
+                          labelPadding: const EdgeInsets.fromLTRB(0, 20, 0, 12),
+                          labelColor: theme.puzzleAccentColor,
+                          indicatorColor: theme.puzzleAccentColor,
+                          indicatorWeight: 1.5,
+                          unselectedLabelColor: Colors.black.withValues(
+                            alpha: 0.6,
+                          ),
+                          tabs: themes
+                              .map(
+                                (st) => Text(
+                                  st.name.toUpperCase(),
+                                  style: const TextStyle(letterSpacing: 0.5),
+                                ),
+                              )
+                              .toList(),
+                        ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: Colors.black26, width: 1),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Flow(
+                            delegate: PuzzleFlowDelegate(
+                              small ? const Size(90, 90) : const Size(140, 140),
+                              appState.puzzle,
+                              appState.animationNotifier,
+                            ),
+                            children: [
+                              for (var i = 0; i < appState.puzzle.length; i++)
+                                theme.tileButtonCore(i, appState.puzzle, small),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    padding: const EdgeInsets.only(
-                      left: 10,
-                      bottom: 6,
-                      top: 2,
-                      right: 10,
-                    ),
-                    child: Consumer<PuzzleControls>(
-                      builder: (_, controls, _) =>
-                          Row(children: theme.bottomControls(controls)),
-                    ),
+                      Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: Colors.black26, width: 1),
+                          ),
+                        ),
+                        padding: const EdgeInsets.only(
+                          left: 10,
+                          bottom: 6,
+                          top: 2,
+                          right: 10,
+                        ),
+                        child: Consumer<PuzzleControls>(
+                          builder: (_, controls, _) =>
+                              Row(children: theme.bottomControls(controls)),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  ),
-);
+    );

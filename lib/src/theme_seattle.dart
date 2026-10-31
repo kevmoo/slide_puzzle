@@ -8,6 +8,9 @@ final class ThemeSeattle extends SharedTheme {
   @override
   String get name => 'Seattle';
 
+  @override
+  FoleyTheme get foleyTheme => FoleyTheme.glass;
+
   const ThemeSeattle();
 
   @override

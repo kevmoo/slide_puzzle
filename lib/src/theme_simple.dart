@@ -10,6 +10,9 @@ final class ThemeSimple extends SharedTheme {
   @override
   String get name => 'Simple';
 
+  @override
+  FoleyTheme get foleyTheme => FoleyTheme.standard;
+
   const ThemeSimple();
 
   @override

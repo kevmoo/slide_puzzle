@@ -11,6 +11,7 @@ class ValueTabController<T> extends StatefulWidget {
     super.key,
     required this.child,
     required this.values,
+    this.onChanged,
   });
 
   /// The widget below this widget in the tree.
@@ -21,6 +22,8 @@ class ValueTabController<T> extends StatefulWidget {
   final Widget child;
 
   final List<T> values;
+
+  final ValueChanged<T>? onChanged;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -46,7 +49,11 @@ class _ValueTabControllerState<T> extends State<ValueTabController<T>>
   late final TabController _controller;
 
   void _onTabChanged() {
-    _notifier.value = widget.values[_controller.index];
+    final nextValue = widget.values[_controller.index];
+    if (_notifier.value != nextValue) {
+      _notifier.value = nextValue;
+      widget.onChanged?.call(nextValue);
+    }
   }
 
   @override
