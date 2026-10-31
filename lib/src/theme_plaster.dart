@@ -12,6 +12,9 @@ final class ThemePlaster extends SharedTheme {
   @override
   String get name => 'Plaster';
 
+  @override
+  FoleyTheme get foleyTheme => FoleyTheme.mechanical;
+
   const ThemePlaster();
 
   @override

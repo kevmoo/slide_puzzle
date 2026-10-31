@@ -30,4 +30,10 @@ abstract interface class PuzzleControls implements Listenable {
   Duration? get lastSolveTime;
 
   int? get lastSolveSteps;
+
+  bool get soundSupported;
+
+  bool get soundMuted;
+
+  void toggleSoundMuted();
 }

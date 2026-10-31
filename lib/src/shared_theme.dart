@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'core/puzzle_proxy.dart';
 import 'puzzle_controls.dart';
+import 'sound/foley_sound.dart';
 import 'widgets/decoration_image_plus.dart';
 import 'widgets/material_interior_alt.dart';
 
@@ -19,6 +20,8 @@ sealed class SharedTheme {
   const SharedTheme();
 
   String get name;
+
+  FoleyTheme get foleyTheme;
 
   Color get puzzleThemeBackground;
 
@@ -113,6 +116,15 @@ sealed class SharedTheme {
         ),
       ),
     ),
+    if (controls.soundSupported)
+      Tooltip(
+        message: controls.soundMuted ? 'Unmute sounds' : 'Mute sounds',
+        child: IconButton(
+          onPressed: controls.toggleSoundMuted,
+          color: puzzleAccentColor,
+          icon: Icon(controls.soundMuted ? Icons.volume_off : Icons.volume_up),
+        ),
+      ),
     if (controls.lastSolveSteps != null && controls.lastSolveTime != null) ...[
       Flexible(
         flex: 4,

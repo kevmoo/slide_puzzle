@@ -13,6 +13,9 @@ class PuzzleAnimator implements PuzzleProxy {
   final _rnd = Random();
   final List<Body> _locations;
   final _controller = StreamController<PuzzleEvent>(sync: true);
+  final _actionController = StreamController<PuzzleAction>.broadcast(
+    sync: true,
+  );
   bool _nextRandomVertical = true;
   Puzzle _puzzle;
   int _clickCount = 0;
@@ -45,6 +48,8 @@ class PuzzleAnimator implements PuzzleProxy {
   void reset() => _resetCore();
 
   Stream<PuzzleEvent> get onEvent => _controller.stream;
+
+  Stream<PuzzleAction> get onAction => _actionController.stream;
 
   @override
   bool isCorrectPosition(int value) => _puzzle.isCorrectPosition(value);
@@ -79,10 +84,16 @@ class PuzzleAnimator implements PuzzleProxy {
     if (_puzzle.fitness == 0) {
       return;
     }
+    final previousOpen = _puzzle.openPosition();
     _puzzle = _puzzle.clickRandom(vertical: _nextRandomVertical)!;
     _nextRandomVertical = !_nextRandomVertical;
     _clickCount++;
     _controller.add(PuzzleEvent.random);
+    if (_actionController.hasListener) {
+      _actionController.add(
+        RandomMoveAction(tileX: previousOpen.x, solvedNow: solved),
+      );
+    }
   }
 
   @override
@@ -91,15 +102,42 @@ class PuzzleAnimator implements PuzzleProxy {
       _controller.add(PuzzleEvent.noop);
       _shake(tileValue);
       _clearBadClicks();
+      if (_actionController.hasListener) {
+        final tileX = _puzzle.coordinatesOf(tileValue).x;
+        _actionController.add(
+          TileBlockedAction(tileValue: tileValue, tileX: tileX),
+        );
+      }
       return;
     }
 
+    final beforeCoord = _puzzle.coordinatesOf(tileValue);
+    final openBefore = _puzzle.openPosition();
     _controller.add(PuzzleEvent.click);
     if (!_clickValue(tileValue)) {
       _shake(tileValue);
-      _handleBadClick(tileValue);
+      if (!_handleBadClick(tileValue) && _actionController.hasListener) {
+        _actionController.add(
+          TileBlockedAction(tileValue: tileValue, tileX: beforeCoord.x),
+        );
+      }
     } else {
       _clearBadClicks();
+      if (_actionController.hasListener) {
+        final movedCount =
+            (openBefore.x - beforeCoord.x).abs() +
+            (openBefore.y - beforeCoord.y).abs();
+        final afterCoord = _puzzle.coordinatesOf(tileValue);
+        _actionController.add(
+          TileMovedAction(
+            tileValue: tileValue,
+            movedCount: movedCount,
+            tileX: afterCoord.x,
+            landedCorrect: _puzzle.isCorrectPosition(tileValue),
+            solvedNow: solved,
+          ),
+        );
+      }
     }
   }
 
@@ -108,16 +146,19 @@ class PuzzleAnimator implements PuzzleProxy {
     _badClickCount = 0;
   }
 
-  void _handleBadClick(int tileValue) {
+  bool _handleBadClick(int tileValue) {
+    var triggeredEasterEgg = false;
     if (tileValue != _lastBadClick) {
       _badClickCount++;
       if (_badClickCount >= 5) {
         _triggerEasterEggReset();
+        triggeredEasterEgg = true;
       }
     } else {
       _badClickCount = 0;
     }
     _lastBadClick = tileValue;
+    return triggeredEasterEgg;
   }
 
   void _triggerEasterEggReset() {
@@ -129,16 +170,19 @@ class PuzzleAnimator implements PuzzleProxy {
       }
       return i;
     });
-    _resetCore(source: newValues);
+    _resetCore(source: newValues, easterEgg: true);
     _clickCount = 999;
   }
 
-  void _resetCore({List<int>? source}) {
+  void _resetCore({List<int>? source, bool easterEgg = false}) {
     _puzzle = _puzzle.reset(source: source);
     _clickCount = 0;
     _lastBadClick = null;
     _badClickCount = 0;
     _controller.add(PuzzleEvent.reset);
+    if (_actionController.hasListener) {
+      _actionController.add(PuzzleResetAction(easterEgg: easterEgg));
+    }
   }
 
   bool _clickValue(int value) {
