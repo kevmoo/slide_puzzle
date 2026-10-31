@@ -55,7 +55,14 @@ class PuzzleAnimator implements PuzzleProxy {
   int? _lastBadClick;
   int _badClickCount = 0;
 
-  PuzzleAnimator(int width, int height) : this._(Puzzle(width, height));
+  PuzzleAnimator([int width = 4, int height = 4])
+    : this._(
+        (width == 4 && height == 4)
+            ? Puzzle.fourByFour()
+            : Puzzle(width, height),
+      );
+
+  PuzzleAnimator.fourByFour() : this._(Puzzle.fourByFour());
 
   PuzzleAnimator._(this._puzzle)
     : _locations = List.generate(

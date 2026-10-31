@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
 class VersionInfo {
   final String flutterVersion;
@@ -25,18 +23,6 @@ class VersionInfo {
   );
 
   static Future<VersionInfo?> load() async {
-    if (kIsWeb) {
-      try {
-        final response = await http.get(Uri.parse('build_info.json'));
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body) as Map<String, dynamic>;
-          return VersionInfo.fromJson(data);
-        }
-      } catch (_) {
-        // Fall back to asset check or null if HTTP request fails
-      }
-    }
-
     try {
       final content = await rootBundle.loadString('build_info.json');
       final data = jsonDecode(content) as Map<String, dynamic>;

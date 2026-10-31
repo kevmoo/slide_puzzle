@@ -60,6 +60,11 @@ sealed class Puzzle {
   factory Puzzle(int width, int height, {Random? random, bool easy = false}) =>
       Puzzle.raw(width, _randomList(width, height, random: random, easy: easy));
 
+  factory Puzzle.fourByFour({Random? random, bool easy = false}) =>
+      _PuzzleSmart(4, _randomList(4, 4, random: random, easy: easy));
+
+  Puzzle solvedConfig() => _newWithValues(_identityBytes(length));
+
   factory Puzzle.parse(String input) {
     final rows = LineSplitter.split(input).map((line) {
       final splits = line.trim().split(_spacesRegexp);
@@ -727,6 +732,14 @@ sealed class Puzzle {
   }
 }
 
+Uint8List _identityBytes(int length) {
+  final list = Uint8List(length);
+  for (var i = 0; i < length; i++) {
+    list[i] = i;
+  }
+  return list;
+}
+
 Uint8List _randomList(
   int width,
   int height, {
@@ -734,7 +747,7 @@ Uint8List _randomList(
   bool easy = false,
 }) => _randomizeList(
   width,
-  List<int>.generate(width * height, (i) => i, growable: false),
+  _identityBytes(width * height),
   random: random,
   easy: easy,
 );
