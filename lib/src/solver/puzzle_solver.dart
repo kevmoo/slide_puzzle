@@ -19,8 +19,7 @@ class SolveResult {
 
 class PuzzleSolver {
   /// Returns the target solved configuration for a given puzzle width & length.
-  static Puzzle solvedConfigFor(Puzzle puzzle) =>
-      Puzzle.raw(puzzle.width, List.generate(puzzle.length, (i) => i));
+  static Puzzle solvedConfigFor(Puzzle puzzle) => puzzle.solvedConfig();
 
   /// Helper functions encapsulated cleanly from tool/solve.dart
   static Iterable<Puzzle> allMovable(Puzzle entry) => entry.allMovable();

@@ -10,21 +10,16 @@ import 'src/puzzle_home_state.dart';
 void main() => runApp(const PuzzleApp());
 
 class PuzzleApp extends StatelessWidget {
-  final int rows, columns;
-
-  const PuzzleApp({this.columns = 4, this.rows = 4});
+  const PuzzleApp();
 
   @override
   Widget build(BuildContext context) =>
-      MaterialApp(title: 'Slide Puzzle', home: _PuzzleHome(rows, columns));
+      const MaterialApp(title: 'Slide Puzzle', home: _PuzzleHome());
 }
 
 class _PuzzleHome extends StatefulWidget {
-  final int _rows, _columns;
-
-  const _PuzzleHome(this._rows, this._columns);
+  const _PuzzleHome();
 
   @override
-  PuzzleHomeState createState() =>
-      PuzzleHomeState(PuzzleAnimator(_columns, _rows));
+  PuzzleHomeState createState() => PuzzleHomeState(PuzzleAnimator.fourByFour());
 }
